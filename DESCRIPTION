@@ -17,7 +17,6 @@ Depends:
     R (>= 4.2),
     tidyverse,
     logger,
-    R6,
     data.table,
     brms
 Suggests: 
