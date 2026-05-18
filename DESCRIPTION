@@ -4,7 +4,7 @@ Version: 0.1.0
 Authors@R: 
     person("Edward", "Owusu Manu", email = "edward.manu@statsghana.gov.gh", 
            role = c("aut", "cre"))
-Description: The DemogAnr package is an all-in-one demographic modeling tool that integrates an R-based Bayesian framework to model fertility, mortality, migration, and run population projections.
+Description: The 'DemogAnr' package is an all-in-one demographic modeling tool that integrates an R-based Bayesian framework to model fertility, mortality, migration, and run population projections.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -12,8 +12,7 @@ RoxygenNote: 7.3.3
 Imports: 
     dplyr,
     stats,
-    tidyr,
-    cmdstanr
+    tidyr
 Depends: 
     R (>= 4.2),
     tidyverse,
@@ -24,8 +23,8 @@ Depends:
 Suggests: 
     rmarkdown,
     knitr,
+    cmdstanr,
     testthat (>= 3.0.0)
-VignetteBuilder: knitr
 LazyData: true
 Biarch: true
 Config/testthat/edition: 3

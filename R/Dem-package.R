@@ -6,7 +6,6 @@
 #' @import tidyverse
 #' @import logger
 #' @import R6
-#' @importFrom cmdstanr install_cmdstan
 #' @importFrom data.table .BY
 #' @importFrom data.table .EACHI
 #' @importFrom data.table .GRP

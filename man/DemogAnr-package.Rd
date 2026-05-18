@@ -6,7 +6,7 @@
 \alias{DemogAnr-package}
 \title{DemogAnr: Demographic Analysis}
 \description{
-The DemogAnr package is an all-in-one demographic modeling tool that integrates an R-based Bayesian framework to model fertility, mortality, migration, and run population projections.
+The 'DemogAnr' package is an all-in-one demographic modeling tool that integrates an R-based Bayesian framework to model fertility, mortality, migration, and run population projections.
 }
 \author{
 \strong{Maintainer}: Edward Owusu Manu \email{edward.manu@statsghana.gov.gh}
