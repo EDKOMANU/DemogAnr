@@ -23,7 +23,6 @@ Depends:
 Suggests: 
     rmarkdown,
     knitr,
-    cmdstanr,
     testthat (>= 3.0.0)
 LazyData: true
 Biarch: true

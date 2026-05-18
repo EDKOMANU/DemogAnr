@@ -5,7 +5,6 @@
 #' @import brms
 #' @import tidyverse
 #' @import logger
-#' @import R6
 #' @importFrom data.table .BY
 #' @importFrom data.table .EACHI
 #' @importFrom data.table .GRP
