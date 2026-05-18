@@ -3,24 +3,14 @@
 \docType{data}
 \name{standards}
 \alias{standards}
-\title{Example Dataset: standards}
+\title{standards}
 \format{
-A data frame with 24 rows and 5 columns:
-\describe{
-\item{Age}{Age groups expressed as single ages}
-\item{GeneralUN}{the Gerneral UN survival rates}
-\item{African}{African survival rates}
-\item{GeneralUN_logit}{General UN logit-transformed probabilities}
-\item{African_logit}{African logit-transformed probabilities}
-}
-}
-\source{
-UN Population Division
+A vector or data frame
 }
 \usage{
 standards
 }
 \description{
-A dataset containing standard life table probabilities and logits.
+standards
 }
 \keyword{datasets}

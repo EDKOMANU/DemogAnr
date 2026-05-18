@@ -3,22 +3,14 @@
 \docType{data}
 \name{middle_coef}
 \alias{middle_coef}
-\title{Karup-king coefficeints: middle_coef}
+\title{middle_coef}
 \format{
-A numeric matrix with 5 rows and 3 columns:
-\describe{
-\item{Column 1}{First set of coefficients.}
-\item{Column 2}{Second set of coefficients.}
-\item{Column 3}{Third set of coefficients.}
-}
-}
-\source{
-Karup-king coefficients for age splitting
+A data frame or list
 }
 \usage{
 middle_coef
 }
 \description{
-These datasets contain coefficients for demographic computations.
+middle_coef
 }
 \keyword{datasets}

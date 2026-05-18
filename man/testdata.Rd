@@ -3,29 +3,14 @@
 \docType{data}
 \name{testdata}
 \alias{testdata}
-\title{Example Dataset: testdata for population projections}
+\title{testdata}
 \format{
-A tibble with 1,224 rows and 10 variables:
-\describe{
-\item{region}{Character. Name of the region.}
-\item{district}{Character. Name of the district.}
-\item{year}{Numeric. Year of the data.}
-\item{age_group}{Character. Age group category.}
-\item{sex}{Character. Sex (Male/Female).}
-\item{population}{Numeric. Total population count.}
-\item{births}{Numeric. Number of births recorded.}
-\item{deaths}{Numeric. Number of deaths recorded.}
-\item{in_migration}{Numeric. Number of people migrating into the district.}
-\item{out_migration}{Numeric. Number of people migrating out of the district.}
-}
-}
-\source{
-Generated data
+A data frame
 }
 \usage{
 testdata
 }
 \description{
-Test dataset used for demonstration.
+testdata
 }
 \keyword{datasets}

@@ -3,40 +3,17 @@
 \docType{data}
 \name{data}
 \alias{data}
-\title{testdata for karup-king age splitting}
+\title{data}
 \format{
-A tibble with 16 rows and 16 columns:
-\describe{
-\item{age_col}{Character. Age group categories, e.g., \code{0-4}, \code{5-9}, etc.}
-\item{2021}{Numeric.  population count for the year 2021.}
-\item{2022}{Numeric.  population count for the year 2022.}
-\item{2023}{Numeric.  population count for the year 2023.}
-\item{2024}{Numeric.  population count for the year 2024.}
-\item{2025}{Numeric.  population count for the year 2025.}
-\item{2026}{Numeric.  population count for the year 2026.}
-\item{2027}{Numeric.  population count for the year 2027.}
-\item{2028}{Numeric.  population count for the year 2028.}
-\item{2029}{Numeric.  population count for the year 2029.}
-\item{2030}{Numeric.  population count for the year 2030.}
-\item{2031}{Numeric.  population count for the year 2031.}
-\item{2032}{Numeric.  population count for the year 2032.}
-\item{2033}{Numeric.  population count for the year 2033.}
-\item{2034}{Numeric.  population count for the year 2034.}
-\item{2035}{Numeric.  population count for the year 2035.}
-}
+A data frame
 }
 \source{
-Generated data for karup-king
+Simulated or collected data
 }
 \usage{
-data(data)
+data
 }
 \description{
-This dataset contains  population counts for different age groups from 2021 to 2035.
-The data is structured with age groups as categories and population estimates for each year.
-}
-\examples{
-data(data)
-head(data)
+data
 }
 \keyword{datasets}

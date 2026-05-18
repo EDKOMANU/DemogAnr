@@ -2,6 +2,10 @@
 "_PACKAGE"
 
 ## usethis namespace: start
+#' @import brms
+#' @import tidyverse
+#' @import logger
+#' @import R6
 #' @importFrom cmdstanr install_cmdstan
 #' @importFrom data.table .BY
 #' @importFrom data.table .EACHI
@@ -12,8 +16,10 @@
 #' @importFrom data.table .SD
 #' @importFrom data.table :=
 #' @importFrom data.table data.table
+#' @importFrom stats approx
 #' @importFrom stats median
 #' @importFrom stats quantile
 #' @importFrom stats rnorm
+#' @importFrom stats spline
 ## usethis namespace: end
 NULL

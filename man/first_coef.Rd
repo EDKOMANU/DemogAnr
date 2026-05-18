@@ -3,22 +3,14 @@
 \docType{data}
 \name{first_coef}
 \alias{first_coef}
-\title{Karup-king coefficeints: first_coef}
+\title{first_coef}
 \format{
-A numeric matrix with 5 rows and 3 columns:
-\describe{
-\item{Column 1}{First set of coefficients.}
-\item{Column 2}{Second set of coefficients.}
-\item{Column 3}{Third set of coefficients.}
-}
-}
-\source{
-Karup-king coefficients for age splitting
+A data frame or list
 }
 \usage{
 first_coef
 }
 \description{
-These datasets contain coefficients for demographic computations.
+first_coef
 }
 \keyword{datasets}

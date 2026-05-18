@@ -3,22 +3,14 @@
 \docType{data}
 \name{last_coef}
 \alias{last_coef}
-\title{Karup-king coefficeints: last_coef}
+\title{last_coef}
 \format{
-A numeric matrix with 5 rows and 3 columns:
-\describe{
-\item{Column 1}{First set of coefficients.}
-\item{Column 2}{Second set of coefficients.}
-\item{Column 3}{Third set of coefficients.}
-}
-}
-\source{
-Karup-king coefficients for age splitting
+A data frame or list
 }
 \usage{
 last_coef
 }
 \description{
-These datasets contain coefficients for demographic computations.
+last_coef
 }
 \keyword{datasets}
