@@ -5,6 +5,7 @@
 #' @param age_col Column name for age in the data frame.
 #' @param standard Standard to use ("African" or "GeneralUN").
 #' @param standards_data Standards dataset (default: included "standards").
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console.
 #' @return A list containing the model, coefficients, and modified data with predicted nqx.
 #' @importFrom stats lm predict coef
 #'
@@ -35,7 +36,7 @@
 #' Newell, C. (1988). \emph{Methods and Models in Demography}. (Chapter 10: Model Life Tables).
 #'
 #' @export
-brass_logit <- function(data, qx_col, age_col, standard, standards_data = NULL) {
+brass_logit <- function(data, qx_col, age_col, standard, standards_data = NULL, verbose = FALSE) {
   # Load the internal standards dataset if not provided
   if (is.null(standards_data)) {
     standards
@@ -64,8 +65,17 @@ brass_logit <- function(data, qx_col, age_col, standard, standards_data = NULL) 
   # Logit transformation of observed qx (only where qx is not NA)
   logit_qx <- ifelse(!is.na(qx), 0.5*log(qx / (1 - qx)), NA)
 
+  if (verbose) {
+    message(sprintf("Fitting Brass Relational Logit Model using standard: '%s'...", standard))
+    message(sprintf("  Number of observed age groups: %d (with %d non-NA values)", nrow(data), sum(!is.na(logit_qx))))
+  }
+
   # Fit the model using non-NA values
   lm_fit <- lm(logit_qx ~ standard_logits, subset = !is.na(logit_qx))
+
+  if (verbose) {
+    message(sprintf("  Coefficients: Alpha (Intercept) = %.4f, Beta (Slope) = %.4f", coef(lm_fit)[1], coef(lm_fit)[2]))
+  }
 
   # Predict logits for all ages
   predicted_logits <- predict(lm_fit, newdata = data.frame(standard_logits = standard_logits))

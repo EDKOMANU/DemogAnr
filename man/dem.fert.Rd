@@ -10,7 +10,8 @@ dem.fert(
   age_col = NULL,
   population_col,
   women_col = NULL,
-  births_col
+  births_col,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ Options: "CBR", "GFR", "ASFR", "TFR". Use "all" to calculate all metrics.}
 \item{women_col}{The column name for number of women (used for "GFR", "ASFR", and "TFR").}
 
 \item{births_col}{The column name for live births.}
+
+\item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
 A list of named outputs for the requested fertility calculations and the modified dataframe with ASFR.

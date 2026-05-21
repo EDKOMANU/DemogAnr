@@ -22,6 +22,8 @@
 #' @param num_samples Integer. Number of simulation samples (default: 2000).
 #' @param random_seed Integer. Random seed for reproducibility (default: 42).
 #'
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during projection.
+#'
 #' @return A data frame containing the projected population summary statistics for each region,
 #' including the 25th percentile (lower), mean, median, and 75th percentile (higher).
 #'
@@ -42,17 +44,21 @@
 #' Raftery, A. E., Li, N., Sevcikova, H., Osthus, D., & Ševčíková, H. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. (For the stochastic/probabilistic baseline logic).
 #'
 #' @export
+#' @importFrom stats rnorm median
 
 project_population <- function(
     data, future_year, base_year,
     region_var = "region", subregion_var = "subregion",
     base_pop_var = "base_pop", TFR_var = "TFR",
     death_rate_var = "death_rate", net_migration_var = "net_migration",
-    num_samples = 2000, random_seed = 42
+    num_samples = 2000, random_seed = 42, verbose = FALSE
 ) {
   set.seed(random_seed)
 
   num_years <- future_year - base_year
+  if (verbose) {
+    message(sprintf("Starting population projection for %d regions from %d to %d...", nrow(data), base_year, future_year))
+  }
   # List to store simulation results for each region per year.
   # We will append data frames with columns: region, subregion, year, median_population
   results_list <- list()
@@ -61,9 +67,13 @@ project_population <- function(
     row_data <- data[i, ]
     region <- as.character(row_data[[region_var]])
     subregion <- as.character(row_data[[subregion_var]])
-
+    
     # starting population is provided in the data
     current_pop <- as.numeric(row_data[[base_pop_var]])
+    
+    if (verbose) {
+      message(sprintf("  Projecting region: %s (subregion: %s) with base pop: %.0f", region, subregion, current_pop))
+    }
 
     # Other parameters that are assumed constant across years in this model
     TFR <- as.numeric(row_data[[TFR_var]])

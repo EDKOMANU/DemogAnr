@@ -30,6 +30,8 @@
 #'
 #'
 
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during computation.
+#'
 #' @references
 #' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 3: The Life Table, specifically empirical formulas for nax).
 #'
@@ -40,11 +42,21 @@ lifetable <- function(data,
                            age = "Age",
                            nMx = NULL,
                            pop = NULL,
-                           Dx = NULL
+                           Dx = NULL,
+                           verbose = FALSE
                            ) {
   # Check if required columns are present
   if (is.null(nMx) && (is.null(pop) || is.null(Dx))) {
     stop("If nMx is not provided, both pop and Dx must be specified.")
+  }
+
+  if (verbose) {
+    message("Computing complete life table...")
+    if (is.null(nMx)) {
+      message("  nMx not provided; computing from deaths and population.")
+    } else {
+      message("  Using observed nMx values.")
+    }
   }
 
   # Extract columns

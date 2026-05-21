@@ -10,7 +10,8 @@ karup_king(
   pops = "population",
   first_coef = first_coef,
   middle_coef = middle_coef,
-  last_coef = last_coef
+  last_coef = last_coef,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -57,6 +58,8 @@ karup_king(
 }\if{html}{\out{</div>}}
 
 Overflow ages refer to ages that fall outside the range of the initial grouped data. These are removed to ensure the resulting data frame contains only ages that are relevant and within the specified age group boundaries.}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during interpolation.}
 }
 \value{
 A data frame with single-year ages and corresponding population estimates for each specified population column.

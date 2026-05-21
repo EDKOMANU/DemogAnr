@@ -4,7 +4,14 @@
 \alias{brass_logit}
 \title{Brass Logit Model}
 \usage{
-brass_logit(data, qx_col, age_col, standard, standards_data = NULL)
+brass_logit(
+  data,
+  qx_col,
+  age_col,
+  standard,
+  standards_data = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame containing the observed probabilities (nqx) and ages.}
@@ -16,6 +23,8 @@ brass_logit(data, qx_col, age_col, standard, standards_data = NULL)
 \item{standard}{Standard to use ("African" or "GeneralUN").}
 
 \item{standards_data}{Standards dataset (default: included "standards").}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console.}
 }
 \value{
 A list containing the model, coefficients, and modified data with predicted nqx.

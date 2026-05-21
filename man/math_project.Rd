@@ -13,7 +13,8 @@ math_project(
   target_times,
   method = c("linear", "exponential", "geometric", "constant_share", "shift_share",
     "share_of_growth"),
-  parent_totals_cols = NULL
+  parent_totals_cols = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ If NULL, assumes a single national parent group.}
 
 \item{parent_totals_cols}{Character vector. Optional. Column names in \code{data} containing the pre-calculated
 projected totals for the parent group at \code{target_times}. Must match the length of \code{target_times}.}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during projection.}
 }
 \value{
 A dataframe appending the projected columns to the original data.

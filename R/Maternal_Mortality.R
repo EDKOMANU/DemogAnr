@@ -6,6 +6,7 @@
 #' @param deaths_col The column name for maternal deaths.
 #' @param births_col The column name for live births.
 #' @param pop_women The column containing the number of women in the reporductive age
+#' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
 #' @return A list with Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).
 #' @examples
@@ -24,17 +25,28 @@
 #' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
 #'
 #' @export
-dem.mmr <- function(data, deaths_col, births_col, pop_women) {
+dem.mmr <- function(data, deaths_col, births_col, pop_women, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
   if (!all(c(deaths_col, births_col, pop_women) %in% colnames(data))) stop("Specified columns not found in the dataframe.")
 
+  if (verbose) {
+    message("dem.mmr: Starting maternal mortality calculations...")
+    message("dem.mmr: Using columns - Deaths: '", deaths_col, "', Births: '", births_col, "', Women: '", pop_women, "'")
+  }
+
   # Calculate Maternal Mortality Rate (MMR)
+  if (verbose) message("dem.mmr: Calculating Maternal Mortality Rate (MMR)...")
   data$mm_rate <- (data[[deaths_col]] / data[[pop_women]]) * 100000
   mm_rate <- (sum(data[[deaths_col]]) / sum(data[[pop_women]])) * 100000
+  if (verbose) message("dem.mmr: Overall MMR Rate per 100,000 women: ", round(mm_rate, 4))
+
   # Calculate Maternal Mortality Ratio (MMR)
+  if (verbose) message("dem.mmr: Calculating Maternal Mortality Ratio (MMR)...")
   data$mm_ratio <- (data[[deaths_col]] / data[[births_col]]) * 100000
   mm_ratio <- sum(data[[deaths_col]]) / sum(data[[births_col]]) * 100000
+  if (verbose) message("dem.mmr: Overall MMR Ratio per 100,000 live births: ", round(mm_ratio, 4))
+
   results <- list(MMR = mm_rate, MMR_Ratio = mm_ratio)
 
   out <- list(results = results, modified_data = data)

@@ -90,17 +90,21 @@
 #' last_coef = last_coef
 #' )
 #'
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during interpolation.
+#'
 #' @references
 #' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Appendix C: Interpolation and Graduation).
 #'
 #' Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. US Bureau of the Census.
 #'
 #' @export
-
-
-
 karup_king<- function(df, age_col = "age_group", pops = "population",
-                      first_coef=first_coef, middle_coef = middle_coef, last_coef = last_coef) {
+                      first_coef=first_coef, middle_coef = middle_coef, last_coef = last_coef,
+                      verbose = FALSE) {
+  if (verbose) {
+    message(sprintf("Running Karup-King interpolation on %d age groups...", nrow(df)))
+  }
+
   # Split the specified age column into start and end ages
   df <- df |>
     tidyr::separate(col = {{age_col}}, into = c("start_age", "end_age"),

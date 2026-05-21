@@ -15,7 +15,8 @@ project_population(
   death_rate_var = "death_rate",
   net_migration_var = "net_migration",
   num_samples = 2000,
-  random_seed = 42
+  random_seed = 42,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ project_population(
 \item{num_samples}{Integer. Number of simulation samples (default: 2000).}
 
 \item{random_seed}{Integer. Random seed for reproducibility (default: 42).}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during projection.}
 }
 \value{
 A data frame containing the projected population summary statistics for each region,

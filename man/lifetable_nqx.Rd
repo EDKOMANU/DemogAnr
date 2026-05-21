@@ -4,7 +4,7 @@
 \alias{lifetable_nqx}
 \title{Compute Life Table Using Age and nqx}
 \usage{
-lifetable_nqx(data, age, nqx, l0 = 1e+05)
+lifetable_nqx(data, age, nqx, l0 = 1e+05, verbose = FALSE)
 }
 \arguments{
 \item{data}{A data frame containing age and nqx columns.}
@@ -14,6 +14,8 @@ lifetable_nqx(data, age, nqx, l0 = 1e+05)
 \item{nqx}{A string specifying the column name for probabilities of dying (\code{nqx}).}
 
 \item{l0}{Initial population at age 0 (default = 100,000).}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during computation.}
 }
 \value{
 A data frame with the computed life table, including:

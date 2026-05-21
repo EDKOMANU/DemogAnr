@@ -30,17 +30,23 @@
 #' life_table <- lifetable_nqx(data, age = "age", nqx = "nqx")
 #' print(life_table)
 #'
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during computation.
+#'
 #' @references
 #' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 3: The Life Table, specifically empirical formulas for nax).
 #'
 #' Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Robert E. Krieger Publishing Company.
 #'
 #' @export
-lifetable_nqx <- function(data, age, nqx, l0 = 100000) {
+lifetable_nqx <- function(data, age, nqx, l0 = 100000, verbose = FALSE) {
   # Validate input
   if (!is.data.frame(data)) stop("Input must be a data frame.")
   if (!age %in% colnames(data) || !nqx %in% colnames(data)) {
     stop("Specified columns for age and nqx must exist in the data frame.")
+  }
+
+  if (verbose) {
+    message("Computing life table from nqx probabilities...")
   }
 
   # Extract age and nqx

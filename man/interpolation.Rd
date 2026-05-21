@@ -10,7 +10,8 @@ interpolation(
   x_new,
   data = NULL,
   y_cols = NULL,
-  method = c("auto", "linear", "quadratic", "lagrange", "spline")
+  method = c("auto", "linear", "quadratic", "lagrange", "spline"),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ interpolation(
 
 \item{method}{Character. Interpolation method: \code{"auto"}, \code{"linear"}, \code{"quadratic"}, \code{"lagrange"}, or \code{"spline"}.
 Default is \code{"auto"} (chooses the best method based on the number of points).}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during interpolation.}
 }
 \value{
 If vectors \code{x} and \code{y} are provided, returns a named numeric vector of interpolated values.

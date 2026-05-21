@@ -4,7 +4,7 @@
 \alias{dem.mmr}
 \title{Calculate Maternal Mortality Metrics}
 \usage{
-dem.mmr(data, deaths_col, births_col, pop_women)
+dem.mmr(data, deaths_col, births_col, pop_women, verbose = FALSE)
 }
 \arguments{
 \item{data}{A dataframe containing demographic data.}
@@ -14,6 +14,8 @@ dem.mmr(data, deaths_col, births_col, pop_women)
 \item{births_col}{The column name for live births.}
 
 \item{pop_women}{The column containing the number of women in the reporductive age}
+
+\item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
 A list with Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).

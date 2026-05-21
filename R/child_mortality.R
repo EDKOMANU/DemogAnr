@@ -10,6 +10,7 @@
 #' @param type The type of mortality calculation to perform:
 #'             "neonatal", "infant", "child", or "under5".
 #' @param age_in_months (Optional) The column name for age in months for neonatal mortality.
+#' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A numeric value representing the mortality rate per 1,000 live births.
 #' @examples
 #' demo_data <- data.frame(
@@ -29,7 +30,7 @@
 #' @export
 dm.chm <- function(data, age_col, live_births, deaths_col,
                                              type = c("neonatal", "infant", "child", "under5"),
-                                             age_in_months = NULL) {
+                                             age_in_months = NULL, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
 
@@ -39,6 +40,10 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
 
   # Match type argument
   type <- match.arg(type)
+
+  if (verbose) {
+    message("dm.chm: Starting child mortality calculations for type: '", type, "'")
+  }
 
   # Additional validation for neonatal mortality
   if (type == "neonatal" && is.null(age_in_months)) {
@@ -51,15 +56,19 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   # Filter data based on mortality type
   if (type == "neonatal") {
     # Neonatal: Age in months should be <= 1 month
+    if (verbose) message("dm.chm: Filtering for neonatal age (age_in_months <= 1)...")
     data_filtered <- data[data[[age_in_months]] <= 1, ]
   } else if (type == "infant") {
     # Infant: Age in years should be < 1
+    if (verbose) message("dm.chm: Filtering for infant age (age < 1)...")
     data_filtered <- data[data[[age_col]] < 1, ]
   } else if (type == "child") {
     # Child: Age in years should be between 1 and 4
+    if (verbose) message("dm.chm: Filtering for child age (1 <= age < 5)...")
     data_filtered <- data[data[[age_col]] >= 1 & data[[age_col]] < 5, ]
   } else if (type == "under5") {
     # Under-5: Age in years should be < 5
+    if (verbose) message("dm.chm: Filtering for under-5 age (age < 5)...")
     data_filtered <- data[data[[age_col]] < 5, ]
   }
 
@@ -68,15 +77,28 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
     stop("No data available for the specified mortality type.")
   }
 
+  if (verbose) {
+    message("dm.chm: Found ", nrow(data_filtered), " matching records in filtered data.")
+  }
+
   # Calculate the mortality rate
   total_deaths <- sum(data_filtered[[deaths_col]])
   total_population <- sum(data_filtered[[live_births]])
+
+  if (verbose) {
+    message("dm.chm: Total deaths in filtered data: ", total_deaths)
+    message("dm.chm: Total population/births in filtered data: ", total_population)
+  }
 
   if (total_population == 0) {
     stop("Total population for the specified mortality type is zero. Calculation cannot proceed.")
   }
 
   mortality_rate <- (total_deaths / total_population) * 1000
+
+  if (verbose) {
+    message("dm.chm: Calculated mortality rate per 1,000: ", round(mortality_rate, 4))
+  }
 
   class(mortality_rate) <- c("dem_chm", "numeric")
   attr(mortality_rate, "type") <- type

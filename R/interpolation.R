@@ -30,10 +30,13 @@
 #' x_new <- c(2.5, 3.5)
 #' interpolation(x = c(1, 2), data = data, y_cols = c("y1", "y2"), x_new = x_new, method = "spline")
 #'
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during interpolation.
+#'
 #' @export
 interpolation <- function(x, y, x_new,
                                 data = NULL, y_cols = NULL,
-                                method = c("auto", "linear", "quadratic", "lagrange", "spline")) {
+                                method = c("auto", "linear", "quadratic", "lagrange", "spline"),
+                                verbose = FALSE) {
   method <- match.arg(method)  # Ensure method is valid
 
   # Validate input
@@ -49,6 +52,12 @@ interpolation <- function(x, y, x_new,
 
   if (!is.numeric(x) || !is.numeric(x_new)) stop("x and x_new must be numeric")
   if (any(duplicated(x))) stop("x contains duplicate values, which is not allowed")
+
+  if (verbose) {
+    message(sprintf("Smart interpolation initialized (mode: '%s', method: '%s').", mode, method))
+    message(sprintf("  Number of input points: %d", length(x)))
+    message(sprintf("  Number of new points to interpolate: %d", length(x_new)))
+  }
 
   # Warn if extrapolating
   if (any(x_new < min(x)) || any(x_new > max(x))) {

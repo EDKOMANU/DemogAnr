@@ -10,7 +10,8 @@ dm.chm(
   live_births,
   deaths_col,
   type = c("neonatal", "infant", "child", "under5"),
-  age_in_months = NULL
+  age_in_months = NULL,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ dm.chm(
 "neonatal", "infant", "child", or "under5".}
 
 \item{age_in_months}{(Optional) The column name for age in months for neonatal mortality.}
+
+\item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
 A numeric value representing the mortality rate per 1,000 live births.

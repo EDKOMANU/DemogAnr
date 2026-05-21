@@ -13,6 +13,7 @@
 #' @param method Character. The projection method.
 #' @param parent_totals_cols Character vector. Optional. Column names in `data` containing the pre-calculated
 #'        projected totals for the parent group at `target_times`. Must match the length of `target_times`.
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during projection.
 #'
 #' @return A dataframe appending the projected columns to the original data.
 #' @references
@@ -27,10 +28,14 @@ math_project <- function(data, sub_group_col, parent_group_col = NULL,
                                  pop_cols, time_vals, target_times,
                                  method = c("linear", "exponential", "geometric",
                                             "constant_share", "shift_share", "share_of_growth"),
-                                 parent_totals_cols = NULL) {
+                                 parent_totals_cols = NULL, verbose = FALSE) {
 
   method <- match.arg(method)
   is_share_method <- method %in% c("constant_share", "shift_share", "share_of_growth")
+
+  if (verbose) {
+    message(sprintf("Starting hierarchical subnational population projection using method: '%s'", method))
+  }
 
   # 1. Input Validation
   if (length(pop_cols) != 2 || length(time_vals) != 2) stop("pop_cols and time_vals must be length 2.")
@@ -68,6 +73,10 @@ math_project <- function(data, sub_group_col, parent_group_col = NULL,
   data_split <- split(data, data[[parent_group_col]])
 
   processed_list <- lapply(data_split, function(grp_data) {
+    if (verbose) {
+      grp_name <- unique(grp_data[[parent_group_col]])[1]
+      message(sprintf("  Processing parent group: %s (%d sub-groups)", grp_name, nrow(grp_data)))
+    }
 
     P0 <- grp_data[[pop_cols[1]]]
     Pn <- grp_data[[pop_cols[2]]]

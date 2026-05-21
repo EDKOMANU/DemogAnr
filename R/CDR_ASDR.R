@@ -8,6 +8,7 @@
 #' @param age_col The column name for age groups (used for "ASDR").
 #' @param population_col The column name for total population.
 #' @param deaths_col The column name for total deaths.
+#' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
 #' @return A list of named outputs for the requested death rate calculations.
 #' @examples
@@ -26,7 +27,7 @@
 #' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
 #'
 #' @export
-dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col) {
+dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
   if (is.character(type) && type == "all") type <- c("CDR", "ASDR")
@@ -34,20 +35,28 @@ dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col) {
   if (!all(c(population_col, deaths_col) %in% colnames(data))) stop("Specified columns not found in the dataframe.")
   if (any(type == "ASDR") && is.null(age_col)) stop("'age_col' must be specified for ASDR.")
 
+  if (verbose) {
+    message("dem.cdr: Starting death rate calculations for type(s): ", paste(type, collapse = ", "))
+  }
+
   # Initialize result list
   results <- list()
 
   # Calculate CDR
   if ("CDR" %in% type) {
+    if (verbose) message("dem.cdr: Calculating Crude Death Rate (CDR)...")
     cdr <- (sum(data[[deaths_col]]) / sum(data[[population_col]])) * 1000
     results$CDR <- cdr
+    if (verbose) message("dem.cdr: CDR calculated successfully: ", round(cdr, 4))
   }
 
   # Calculate ASDR
   if ("ASDR" %in% type) {
+    if (verbose) message("dem.cdr: Calculating Age-Specific Death Rate (ASDR)...")
     asdr <- (data[[deaths_col]] / data[[population_col]]) * 1000
     data$ASDR <- asdr  # Add ASDR to the dataframe
     results$ASDR <- asdr
+    if (verbose) message("dem.cdr: ASDR calculated successfully for ", length(asdr), " age groups.")
   }
 
   out <- list(results = results, modified_data = data)

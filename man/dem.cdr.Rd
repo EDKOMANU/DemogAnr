@@ -4,7 +4,14 @@
 \alias{dem.cdr}
 \title{Calculate CDR and ASDR}
 \usage{
-dem.cdr(data, type, age_col = NULL, population_col, deaths_col)
+dem.cdr(
+  data,
+  type,
+  age_col = NULL,
+  population_col,
+  deaths_col,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame containing demographic data.}
@@ -17,6 +24,8 @@ Options: "CDR", "ASDR". Use "all" to calculate both.}
 \item{population_col}{The column name for total population.}
 
 \item{deaths_col}{The column name for total deaths.}
+
+\item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
 A list of named outputs for the requested death rate calculations.

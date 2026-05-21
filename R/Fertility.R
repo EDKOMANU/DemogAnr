@@ -10,6 +10,7 @@
 #' @param population_col The column name for total population.
 #' @param women_col The column name for number of women (used for "GFR", "ASFR", and "TFR").
 #' @param births_col The column name for live births.
+#' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A list of named outputs for the requested fertility calculations and the modified dataframe with ASFR.
 #' @examples
 #' demo_data <- data.frame(
@@ -33,7 +34,7 @@
 #' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
 #'
 #' @export
-dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NULL, births_col) {
+dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NULL, births_col, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
   if (is.character(type) && type == "all") type <- c("CBR", "GFR", "ASFR", "TFR")
@@ -42,24 +43,35 @@ dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NUL
   if (any(type %in% c("GFR", "ASFR", "TFR")) && is.null(women_col)) stop("'women_col' must be specified for GFR, ASFR, or TFR.")
   if (any(type %in% c("ASFR", "TFR")) && is.null(age_col)) stop("'age_col' must be specified for ASFR or TFR.")
 
+  if (verbose) {
+    message("dem.fert: Starting fertility calculations for type(s): ", paste(type, collapse = ", "))
+  }
+
   # Initialize result list
   results <- list()
 
   # Calculate metrics based on type
   if ("CBR" %in% type) {
+    if (verbose) message("dem.fert: Calculating Crude Birth Rate (CBR)...")
     cbr <- (sum(data[[births_col]]) / sum(data[[population_col]])) * 1000
     results$CBR <- cbr
+    if (verbose) message("dem.fert: CBR calculated successfully: ", round(cbr, 4))
   }
   if ("GFR" %in% type) {
+    if (verbose) message("dem.fert: Calculating General Fertility Rate (GFR)...")
     gfr <- (sum(data[[births_col]]) / sum(data[[women_col]])) * 1000
     results$GFR <- gfr
+    if (verbose) message("dem.fert: GFR calculated successfully: ", round(gfr, 4))
   }
   if ("ASFR" %in% type || "TFR" %in% type) {
+    if (verbose) message("dem.fert: Calculating Age-Specific Fertility Rate (ASFR)...")
     asfr <- (data[[births_col]] / data[[women_col]]) * 1000
     data$ASFR <- asfr  # Add ASFR to the dataframe
     results$ASFR <- asfr
+    if (verbose) message("dem.fert: ASFR calculated for ", length(asfr), " age groups.")
   }
   if ("TFR" %in% type) {
+    if (verbose) message("dem.fert: Calculating Total Fertility Rate (TFR)...")
     # TFR is the sum of ASFRs, assuming age intervals of 5 years
     if (!"ASFR" %in% names(results)) {
       asfr <- (data[[births_col]] / data[[women_col]]) * 1000
@@ -67,6 +79,7 @@ dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NUL
     }
     tfr <- sum(results$ASFR, na.rm = TRUE) * 5 / 1000
     results$TFR <- tfr
+    if (verbose) message("dem.fert: TFR calculated successfully: ", round(tfr, 4))
   }
 
   out <- list(results = results, modified_data = data)
