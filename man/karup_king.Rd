@@ -105,3 +105,8 @@ last_coef = last_coef
 )
 
 }
+\references{
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Appendix C: Interpolation and Graduation).
+
+Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. US Bureau of the Census.
+}

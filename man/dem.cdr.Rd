@@ -33,3 +33,10 @@ data <- data.frame(
 dem.cdr(data, type = "all", age_col = "age",
                     population_col = "population", deaths_col = "deaths")
 }
+\references{
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+
+Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+}

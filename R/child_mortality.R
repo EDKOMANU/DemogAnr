@@ -21,6 +21,11 @@
 #'                                  live_births = "population",
 #'                                  deaths_col = "deaths",
 #'                                  type = "under5")
+#' @references
+#' Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Pergamon Press.
+#'
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography}. (Chapter 1, distinguishing rates vs. probabilities).
+#'
 #' @export
 dm.chm <- function(data, age_col, live_births, deaths_col,
                                              type = c("neonatal", "infant", "child", "under5"),
@@ -73,9 +78,15 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
 
   mortality_rate <- (total_deaths / total_population) * 1000
 
-  # Output result
-  cat(sprintf("The %s mortality rate is: %.2f per 1,000 live births\n", type, mortality_rate))
-
+  class(mortality_rate) <- c("dem_chm", "numeric")
+  attr(mortality_rate, "type") <- type
   return(mortality_rate)
+}
+
+#' @export
+print.dem_chm <- function(x, ...) {
+  type <- attr(x, "type")
+  cat(sprintf("The %s mortality rate is: %.2f per 1,000 live births\n", type, as.numeric(x)))
+  invisible(x)
 }
 #consustency in the naming of the functions

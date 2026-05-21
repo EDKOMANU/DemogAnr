@@ -25,6 +25,13 @@
 #' # Calculate all metrics
 #' dem.fert(demo_data, type = "all", age_col = "age",
 #'                     population_col = "population", women_col = "women", births_col = "live_births")
+#' @references
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#'
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#'
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#'
 #' @export
 dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NULL, births_col) {
   # Validate inputs
@@ -42,21 +49,15 @@ dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NUL
   if ("CBR" %in% type) {
     cbr <- (sum(data[[births_col]]) / sum(data[[population_col]])) * 1000
     results$CBR <- cbr
-    cat("Crude Birth Rate (CBR):\n")
-    print(cbr)
   }
   if ("GFR" %in% type) {
     gfr <- (sum(data[[births_col]]) / sum(data[[women_col]])) * 1000
     results$GFR <- gfr
-    cat("General Fertility Rate (GFR):\n")
-    print(gfr)
   }
   if ("ASFR" %in% type || "TFR" %in% type) {
     asfr <- (data[[births_col]] / data[[women_col]]) * 1000
     data$ASFR <- asfr  # Add ASFR to the dataframe
     results$ASFR <- asfr
-    cat("Age-Specific Fertility Rate (ASFR):\n")
-    print(asfr)
   }
   if ("TFR" %in% type) {
     # TFR is the sum of ASFRs, assuming age intervals of 5 years
@@ -66,9 +67,30 @@ dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NUL
     }
     tfr <- sum(results$ASFR, na.rm = TRUE) * 5 / 1000
     results$TFR <- tfr
-    cat("Total Fertility Rate (TFR):\n")
-    print(tfr)
   }
 
-  return(list(results = results, modified_data = data))
+  out <- list(results = results, modified_data = data)
+  class(out) <- "dem_fert"
+  return(out)
+}
+
+#' @export
+print.dem_fert <- function(x, ...) {
+  if ("CBR" %in% names(x$results)) {
+    cat("Crude Birth Rate (CBR):\n")
+    print(x$results$CBR)
+  }
+  if ("GFR" %in% names(x$results)) {
+    cat("General Fertility Rate (GFR):\n")
+    print(x$results$GFR)
+  }
+  if ("ASFR" %in% names(x$results)) {
+    cat("Age-Specific Fertility Rate (ASFR):\n")
+    print(x$results$ASFR)
+  }
+  if ("TFR" %in% names(x$results)) {
+    cat("Total Fertility Rate (TFR):\n")
+    print(x$results$TFR)
+  }
+  invisible(x)
 }

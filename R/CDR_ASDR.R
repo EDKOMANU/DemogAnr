@@ -18,6 +18,13 @@
 #' )
 #' dem.cdr(data, type = "all", age_col = "age",
 #'                     population_col = "population", deaths_col = "deaths")
+#' @references
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#'
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#'
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#'
 #' @export
 dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col) {
   # Validate inputs
@@ -34,8 +41,6 @@ dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col) {
   if ("CDR" %in% type) {
     cdr <- (sum(data[[deaths_col]]) / sum(data[[population_col]])) * 1000
     results$CDR <- cdr
-    cat("Crude Death Rate (CDR):\n")
-    print(cdr)
   }
 
   # Calculate ASDR
@@ -43,11 +48,24 @@ dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col) {
     asdr <- (data[[deaths_col]] / data[[population_col]]) * 1000
     data$ASDR <- asdr  # Add ASDR to the dataframe
     results$ASDR <- asdr
-    cat("Age-Specific Death Rate (ASDR):\n")
-    print(asdr)
   }
 
-  return(list(results = results, modified_data = data))
+  out <- list(results = results, modified_data = data)
+  class(out) <- "dem_cdr"
+  return(out)
+}
+
+#' @export
+print.dem_cdr <- function(x, ...) {
+  if ("CDR" %in% names(x$results)) {
+    cat("Crude Death Rate (CDR):\n")
+    print(x$results$CDR)
+  }
+  if ("ASDR" %in% names(x$results)) {
+    cat("Age-Specific Death Rate (ASDR):\n")
+    print(x$results$ASDR)
+  }
+  invisible(x)
 }
 
 

@@ -42,3 +42,10 @@ A dataframe appending the projected columns to the original data.
 Projects lower-level geographies (e.g., Districts) while constraining them
 to higher-level control totals (e.g., Regions or National) provided within the dataset.
 }
+\references{
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography}. (Chapter 20: Population Projections - for shift-share and subnational methods).
+
+Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford University Press. (Chapter 11: Population Projections).
+
+Raftery, A. E., Li, N., Sevcikova, H., Osthus, D., & Ševčíková, H. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. (For the stochastic/probabilistic logic).
+}

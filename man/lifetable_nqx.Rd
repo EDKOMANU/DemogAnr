@@ -43,3 +43,8 @@ life_table <- lifetable_nqx(data, age = "age", nqx = "nqx")
 print(life_table)
 
 }
+\references{
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 3: The Life Table, specifically empirical formulas for nax).
+
+Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Robert E. Krieger Publishing Company.
+}

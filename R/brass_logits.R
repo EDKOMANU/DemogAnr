@@ -27,6 +27,13 @@
 #'
 #' lifetable_nqx(lifetable, age="age", nqx = "predicted_qx")
 
+#' @references
+#' Brass, W. (1971). On the scale of mortality. \emph{Biological Aspects of Demography}, 69-110. London: Taylor & Francis.
+#'
+#' Moultrie, T., Dorrington, R., Hill, A., Hill, K., Timæus, I., & Zaba, B. (2013). \emph{Tools for Demographic Estimation}. Paris: International Union for the Scientific Study of Population (IUSSP). (Section: Relational Logit Models).
+#'
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. (Chapter 10: Model Life Tables).
+#'
 #' @export
 brass_logit <- function(data, qx_col, age_col, standard, standards_data = NULL) {
   # Load the internal standards dataset if not provided

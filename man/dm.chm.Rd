@@ -45,3 +45,8 @@ dm.chm(demo_data,age_col = "age",
                                  deaths_col = "deaths",
                                  type = "under5")
 }
+\references{
+Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Pergamon Press.
+
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography}. (Chapter 1, distinguishing rates vs. probabilities).
+}

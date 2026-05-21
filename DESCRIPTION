@@ -4,7 +4,18 @@ Version: 0.1.0
 Authors@R: 
     person("Edward", "Owusu Manu", email = "edward.manu@statsghana.gov.gh", 
            role = c("aut", "cre"))
-Description: The 'DemogAnr' package is an all-in-one demographic modeling tool that integrates an R-based Bayesian framework to model fertility, mortality, migration, and run population projections.
+Description: Tool for demographic modeling and analysis, integrating a Bayesian
+    framework alongside classic demographic methods. Provides utilities for
+    disaggregating population data using Karup-King interpolation, fitting Brass
+    relational logit models, calculating fertility and mortality metrics, and
+    performing hierarchical subnational population projections. Relational life
+    table estimation and interpolation methods are described in Brass (1975)
+    "Methods for Estimating Fertility and Mortality from Limited and Defective
+    Data" <https://pdf.usaid.gov/pdf_docs/PNAAD097.pdf>, Preston et al. (2001,
+    ISBN:978-0631226161) "Demography: Measuring and Modeling Population
+    Processes", Siegel and Swanson (2004, ISBN:978-0126419559) "The Methods and
+    Materials of Demography", and Raftery et al. (2012) "Bayesian probabilistic
+    population projections for all countries" <doi:10.1073/pnas.1211452109>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

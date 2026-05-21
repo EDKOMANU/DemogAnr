@@ -30,6 +30,11 @@
 #'
 #'
 
+#' @references
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 3: The Life Table, specifically empirical formulas for nax).
+#'
+#' Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Robert E. Krieger Publishing Company.
+#'
 #' @export
 lifetable <- function(data,
                            age = "Age",

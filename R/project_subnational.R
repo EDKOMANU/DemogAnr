@@ -15,6 +15,13 @@
 #'        projected totals for the parent group at `target_times`. Must match the length of `target_times`.
 #'
 #' @return A dataframe appending the projected columns to the original data.
+#' @references
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography}. (Chapter 20: Population Projections - for shift-share and subnational methods).
+#'
+#' Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford University Press. (Chapter 11: Population Projections).
+#'
+#' Raftery, A. E., Li, N., Sevcikova, H., Osthus, D., & Ševčíková, H. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. (For the stochastic/probabilistic logic).
+#'
 #' @export
 math_project <- function(data, sub_group_col, parent_group_col = NULL,
                                  pop_cols, time_vals, target_times,

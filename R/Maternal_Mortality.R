@@ -16,6 +16,13 @@
 #'   women =c(20000, 22000, 32000)
 #' )
 #' dem.mmr(demo_data, deaths_col = "maternal_deaths", births_col = "live_births", pop_women = "women")
+#' @references
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#'
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#'
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#'
 #' @export
 dem.mmr <- function(data, deaths_col, births_col, pop_women) {
   # Validate inputs
@@ -30,12 +37,19 @@ dem.mmr <- function(data, deaths_col, births_col, pop_women) {
   mm_ratio <- sum(data[[deaths_col]]) / sum(data[[births_col]]) * 100000
   results <- list(MMR = mm_rate, MMR_Ratio = mm_ratio)
 
+  out <- list(results = results, modified_data = data)
+  class(out) <- "dem_mmr"
+  return(out)
+}
+
+#' @export
+print.dem_mmr <- function(x, ...) {
   cat("Maternal Mortality Rate (MMR)  per 100,000 women:\n")
-  print(mm_rate)
-
-  cat("Maternal Mortality Ratio (MMR)  per 100,000 live births:\n")
-  print(mm_ratio)
-  print(data)
-
+  print(x$results$MMR)
+  cat("\nMaternal Mortality Ratio (MMR)  per 100,000 live births:\n")
+  print(x$results$MMR_Ratio)
+  cat("\nModified Data:\n")
+  print(x$modified_data)
+  invisible(x)
 }
 
