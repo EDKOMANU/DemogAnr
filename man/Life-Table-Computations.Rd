@@ -5,7 +5,14 @@
 \alias{lifetable}
 \title{lifetable}
 \usage{
-lifetable(data, age = "Age", nMx = NULL, pop = NULL, Dx = NULL)
+lifetable(
+  data,
+  age = "Age",
+  nMx = NULL,
+  pop = NULL,
+  Dx = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{data}{A data frame containing age-specific mortality probabilities.}
@@ -17,6 +24,8 @@ lifetable(data, age = "Age", nMx = NULL, pop = NULL, Dx = NULL)
 \item{pop}{Numeric vector (optional): total population in each age group. Used to compute \code{nMx} if not given.}
 
 \item{Dx}{Numeric vector (optional): deaths occurred in each age group. Used to compute \code{nMx} if not given.}
+
+\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during computation.}
 }
 \value{
 A list containing:
