@@ -11,8 +11,7 @@ Description: Tool for demographic modeling and analysis, combining stochastic
     metrics, building life tables, and performing hierarchical subnational
     population projections. Relational life table estimation and interpolation
     methods are described in Brass (1975) "Methods for Estimating Fertility and
-    Mortality from Limited and Defective Data"
-    <https://pdf.usaid.gov/pdf_docs/PNAAD097.pdf>, Preston et al. (2001,
+    Mortality from Limited and Defective Data", Preston et al. (2001,
     ISBN:978-0631226161) "Demography: Measuring and Modeling Population
     Processes", Siegel and Swanson (2004, ISBN:978-0126419559) "The Methods and
     Materials of Demography", and Raftery et al. (2012) "Bayesian probabilistic
