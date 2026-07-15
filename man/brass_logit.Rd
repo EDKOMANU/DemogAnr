@@ -76,7 +76,7 @@ model$data
 \references{
 Brass, W. (1971). On the scale of mortality. In W. Brass (Ed.), \emph{Biological Aspects of Demography} (pp. 69-110). London: Taylor & Francis.
 
-Brass, W. (1975). \emph{Methods for Estimating Fertility and Mortality from Limited and Defective Data}. Chapel Hill: Carolina Population Center, University of North Carolina. \url{https://pdf.usaid.gov/pdf_docs/PNAAD097.pdf}
+Brass, W. (1975). \emph{Methods for Estimating Fertility and Mortality from Limited and Defective Data}. Chapel Hill: Carolina Population Center, University of North Carolina.
 
 Moultrie, T., Dorrington, R., Hill, A., Hill, K., Timaeus, I., & Zaba, B. (Eds.). (2013). \emph{Tools for Demographic Estimation}. Paris: International Union for the Scientific Study of Population (IUSSP). \url{https://demographicestimation.iussp.org/}
 
