@@ -45,34 +45,41 @@ project_population(
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during projection.}
 }
 \value{
-A data frame containing the projected population summary statistics for each region,
-including the 25th percentile (lower), mean, median, and 75th percentile (higher).
+A data frame with one row per region, subregion, and year,
+containing the summary statistics of the simulated population trajectories:
+\code{lower} (25th percentile), \code{median}, \code{mean}, and \code{upper} (75th percentile).
 }
 \description{
-This function projects population trajectories for multiple administrative regions but the output is the median of the trajectories.
+This function projects population trajectories for multiple
+administrative regions using a simple stochastic (simulation-based)
+exponential growth model, inspired by the probabilistic projection
+literature (e.g. Raftery et al. 2012), but without a full Bayesian model.
 
-Project Population for Multiple Regions Using a Bayesian-Inspired Simulation Approach
-
-This function projects population trajectories for multiple administrative regions
-using a Bayesian-inspired simulation approach (without full Bayesian integration).
-The function takes a data frame with demographic and migration parameters and
-simulates multiple projection scenarios based on randomly drawn coefficients
-from prior distributions and an exponential growth model.
+For each region, \code{num_samples} growth-rate trajectories are simulated. The
+annual growth rate of each trajectory is the sum of a random baseline, a
+fertility effect (increasing in TFR), a mortality effect (decreasing in the
+death rate), a migration effect (with the sign of net migration), and
+random noise. Each trajectory is propagated independently through all
+years, so that uncertainty accumulates over the projection horizon, and the
+results are summarised per region and year.
 }
 \examples{
-project_population(region2000 ,base_year = 2000,
-TFR_var = "TFR",base_pop_var = "base_pop",
-region_var = "Country", death_rate_var = "death_rate",
-net_migration_var = "net_migration",,
-subregion_var = "Region", future_year = 2009,
-num_samples = 5000)
+data(region2000)
+proj <- project_population(region2000,
+  base_year = 2000, future_year = 2009,
+  TFR_var = "TFR", base_pop_var = "base_pop",
+  region_var = "Country", death_rate_var = "death_rate",
+  net_migration_var = "net_migration",
+  subregion_var = "Region",
+  num_samples = 1000
+)
+head(proj)
 
-#######
 }
 \references{
-Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography}. (Chapter 20: Population Projections - for shift-share and subnational methods).
+Raftery, A. E., Li, N., Sevcikova, H., Gerland, P., & Heilig, G. K. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. \doi{10.1073/pnas.1211452109} (Inspiration for the stochastic/probabilistic projection logic.)
 
-Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford University Press. (Chapter 11: Population Projections).
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 6: Population Projections.)
 
-Raftery, A. E., Li, N., Sevcikova, H., Osthus, D., & Ševčíková, H. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. (For the stochastic/probabilistic baseline logic).
+Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford: Oxford University Press. ISBN 978-0198752639. (Chapter on population projections.)
 }

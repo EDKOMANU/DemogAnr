@@ -3,14 +3,23 @@
 \docType{data}
 \name{gphc2010}
 \alias{gphc2010}
-\title{gphc2010}
+\title{Ghana 2010 Population and Housing Census mortality data}
 \format{
-A data frame
+A data frame with 21 rows and 3 variables:
+\describe{
+\item{Age}{Numeric. Lower bound of the age group (0, 1, 5, 10, ...).}
+\item{Pop}{Numeric. Population in the age group.}
+\item{Deaths}{Numeric. Deaths in the age group.}
+}
+}
+\source{
+Ghana Statistical Service, 2010 Population and Housing Census.
 }
 \usage{
 gphc2010
 }
 \description{
-gphc2010
+Population and deaths by age group from the Ghana 2010 Population and
+Housing Census, used to demonstrate \code{\link[=lifetable]{lifetable()}}.
 }
 \keyword{datasets}

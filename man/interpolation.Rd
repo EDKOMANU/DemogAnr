@@ -26,7 +26,10 @@ interpolation(
 \item{y_cols}{Character vector of column names in \code{data} containing y-values.}
 
 \item{method}{Character. Interpolation method: \code{"auto"}, \code{"linear"}, \code{"quadratic"}, \code{"lagrange"}, or \code{"spline"}.
-Default is \code{"auto"} (chooses the best method based on the number of points).}
+Default is \code{"auto"}: linear for 2 points, quadratic for 3, and a natural
+cubic spline for more than 3 points. High-degree Lagrange polynomials are
+numerically unstable for many points (Runge phenomenon), so \code{"lagrange"} is
+only used when requested explicitly.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during interpolation.}
 }
@@ -54,4 +57,11 @@ data <- data.frame(
 x_new <- c(2.5, 3.5)
 interpolation(x = c(1, 2), data = data, y_cols = c("y1", "y2"), x_new = x_new, method = "spline")
 
+}
+\references{
+Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. Washington, DC: US Bureau of the Census. (Appendix C: Interpolation and graduation.)
+
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Appendix C: Selected General Methods.)
+
+Press, W. H., Teukolsky, S. A., Vetterling, W. T., & Flannery, B. P. (2007). \emph{Numerical Recipes: The Art of Scientific Computing} (3rd ed.). Cambridge: Cambridge University Press. ISBN 978-0521880688. (Chapter 3: Interpolation and Extrapolation.)
 }

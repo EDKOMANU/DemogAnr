@@ -9,11 +9,14 @@ lifetable_nqx(data, age, nqx, l0 = 1e+05, verbose = FALSE)
 \arguments{
 \item{data}{A data frame containing age and nqx columns.}
 
-\item{age}{A string specifying the column name for age groups.}
+\item{age}{A string specifying the column name for age groups (lower bounds,
+e.g. 0, 1, 5, 10, ...). Ages must be strictly increasing.}
 
-\item{nqx}{A string specifying the column name for probabilities of dying (\code{nqx}).}
+\item{nqx}{A string specifying the column name for the probabilities of dying
+between age \code{x} and \code{x+n} (\code{nqx}). The last value should be
+1 (open-ended group).}
 
-\item{l0}{Initial population at age 0 (default = 100,000).}
+\item{l0}{Radix of the life table; survivors at age 0 (default = 100,000).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during computation.}
 }
@@ -21,6 +24,7 @@ lifetable_nqx(data, age, nqx, l0 = 1e+05, verbose = FALSE)
 A data frame with the computed life table, including:
 \describe{
 \item{\code{Age}}{Age groups.}
+\item{\code{n}}{Width of each age interval (\code{Inf} for the last, open-ended group).}
 \item{\code{nqx}}{Probability of dying between age \code{x} and \code{x+n}.}
 \item{\code{lx}}{Number of survivors at the beginning of each age group.}
 \item{\code{dx}}{Number of deaths within each age group.}
@@ -31,8 +35,19 @@ A data frame with the computed life table, including:
 }
 \description{
 This function computes a life table from a data frame containing age groups and
-probabilities of dying (\code{nqx}). It calculates key life table components
-such as \code{lx}, \code{dx}, \code{Lx}, \code{Tx}, and \code{ex}.
+age-interval probabilities of dying (\code{nqx}). It calculates key life table
+components such as \code{lx}, \code{dx}, \code{Lx}, \code{Tx}, and \code{ex}.
+}
+\details{
+Interval widths \eqn{n} are derived from the age column (e.g. ages 0, 1, 5,
+10, ... give widths 1, 4, 5, ...). Person-years lived in each closed
+interval are approximated as \eqn{{}_nL_x = n(l_x - d_x/2)}, i.e. deaths are
+assumed to occur at the midpoint of the interval. For the open-ended last
+age group, person-years are approximated with the classical rule of thumb
+\eqn{L_{x+} = l_x \log_{10}(l_x)} (equivalent to
+\eqn{e_x \approx \log_{10} l_x}), which is used when no death rate for the
+open interval is available. If death rates are available, \code{\link[=lifetable]{lifetable()}}
+provides a more precise treatment of the open interval.
 }
 \examples{
 # Example data
@@ -46,7 +61,7 @@ print(life_table)
 
 }
 \references{
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 3: The Life Table, specifically empirical formulas for nax).
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 3: The Life Table and Single Decrement Processes.)
 
-Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Robert E. Krieger Publishing Company.
+Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Malabar, FL: Robert E. Krieger Publishing.
 }

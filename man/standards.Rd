@@ -3,14 +3,27 @@
 \docType{data}
 \name{standards}
 \alias{standards}
-\title{standards}
+\title{Brass standard life tables}
 \format{
-A vector or data frame
+A data frame with 24 rows and 5 variables:
+\describe{
+\item{Age}{Numeric. Exact age x.}
+\item{GeneralUN}{Numeric. l(x) of the General UN standard.}
+\item{GeneralUN_logit}{Numeric. Brass logit of the General UN standard.}
+\item{African}{Numeric. l(x) of the African standard.}
+\item{African_logit}{Numeric. Brass logit of the African standard.}
+}
+}
+\source{
+Brass, W. (1971). On the scale of mortality. In \emph{Biological
+Aspects of Demography}. London: Taylor & Francis. United Nations model
+life table publications.
 }
 \usage{
 standards
 }
 \description{
-standards
+Survivorship values \eqn{l(x)} (radix 1) and their Brass logits for the
+African and General United Nations standards, used by \code{\link[=brass_logit]{brass_logit()}}.
 }
 \keyword{datasets}

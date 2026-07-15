@@ -8,108 +8,70 @@ karup_king(
   df,
   age_col = "age_group",
   pops = "population",
-  first_coef = first_coef,
-  middle_coef = middle_coef,
-  last_coef = last_coef,
+  first_coef = NULL,
+  middle_coef = NULL,
+  last_coef = NULL,
   verbose = FALSE
 )
 }
 \arguments{
 \item{df}{A data frame containing grouped population data.}
 
-\item{age_col}{A string specifying the column in \code{df} that contains age group data (e.g., "15-19").}
+\item{age_col}{A string specifying the column in \code{df} that contains age group
+labels in the form "start-end" (e.g., "15-19"). Open-ended groups (e.g.
+"85+") are not supported and should be excluded or closed before calling.}
 
 \item{pops}{A string or vector of strings specifying one or more columns in \code{df} that contain population data.}
 
-\item{first_coef}{A matrix of coefficients for splitting the first age group. Each row corresponds to a single-year age within the group, and columns represent neighbouring group weights. Defaults to:
+\item{first_coef}{A 5x3 matrix of coefficients for splitting the first age
+group. Defaults to the packaged Karup-King multipliers (\link{first_coef}).}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{first_coef <- matrix(
-  c(0.344, -0.208, 0.064,   # Year 1 (e.g., age 15 in 15-19)
-    0.248, -0.056, 0.008,   # Year 2 (age 16)
-    0.176, 0.048, -0.024,   # Year 3 (age 17)
-    0.128, 0.104, -0.032,   # Year 4 (age 18)
-    0.104, 0.112, -0.016),  # Year 5 (age 19)
-  nrow = 5, byrow = TRUE
-)
-}\if{html}{\out{</div>}}}
+\item{middle_coef}{A 5x3 matrix of coefficients for splitting middle age
+groups. Defaults to the packaged Karup-King multipliers (\link{middle_coef}).}
 
-\item{middle_coef}{A matrix of coefficients for splitting middle age groups. Each row corresponds to a single-year age within the group, and columns represent neighbouring group weights. Defaults to:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{middle_coef <- matrix(
-  c(0.064, 0.152, -0.016,   # Year 1 (e.g., age 20 in 20-24)
-    0.008, 0.224, -0.032,   # Year 2 (age 21)
-    -0.024, 0.248, -0.024,   # Year 3 (age 22)
-    -0.032, 0.224, 0.008,   # Year 4 (age 23)
-    -0.016, 0.152, 0.064),  # Year 5 (age 24)
-  nrow = 5, byrow = TRUE
-)
-}\if{html}{\out{</div>}}}
-
-\item{last_coef}{A matrix of coefficients for splitting the last age group. Each row corresponds to a single-year age within the group, and columns represent neighbouring group weights. Defaults to:
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{last_coef <- matrix(
-  c(-0.016, 0.112, 0.104,   # Year 1 (e.g., age 35 in 35-39)
-    -0.032, 0.104, 0.128,   # Year 2 (age 36)
-    -0.024, 0.048, 0.176,   # Year 3 (age 37)
-    0.008, -0.056, 0.248,   # Year 4 (age 38)
-    0.064, -0.208, 0.344),  # Year 5 (age 39)
-  nrow = 5, byrow = TRUE
-)
-}\if{html}{\out{</div>}}
-
-Overflow ages refer to ages that fall outside the range of the initial grouped data. These are removed to ensure the resulting data frame contains only ages that are relevant and within the specified age group boundaries.}
+\item{last_coef}{A 5x3 matrix of coefficients for splitting the last age
+group. Defaults to the packaged Karup-King multipliers (\link{last_coef}).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during interpolation.}
 }
 \value{
-A data frame with single-year ages and corresponding population estimates for each specified population column.
+A data frame with single-year ages and corresponding population
+estimates for each specified population column. Ages beyond the range of
+the input age groups (overflow ages) are removed.
 }
 \description{
-This function takes grouped population data (e.g., 5-year age groups) and distributes the population into single-year age groups using a coefficient-based interpolation approach. The user can specify the column containing age groups, one or more population columns, and coefficient matrices for edge and middle groups.
+This function takes grouped population data (e.g., 5-year age groups) and
+distributes the population into single-year age groups using the Karup-King
+third-difference osculatory interpolation coefficients. The user can specify
+the column containing age groups, one or more population columns, and
+(optionally) custom coefficient matrices for the first, middle, and last
+groups.
+}
+\details{
+Each coefficient matrix has 5 rows (one per single year within the 5-year
+group) and 3 columns (weights applied to the neighbouring 5-year groups).
+The defaults are the standard Karup-King multipliers (Siegel & Swanson 2004,
+Appendix C): \link{first_coef} for the first group (columns: current, next,
+next+1), \link{middle_coef} for interior groups (columns: previous, current,
+next), and \link{last_coef} for the last group (columns: previous-1, previous,
+current).
 }
 \examples{
+data(data)
+head(data)
 
+# Split the 5-year age groups into single years for the 2021 population,
+# using the packaged Karup-King coefficients:
+single <- karup_king(df = data, age_col = "age_col", pops = "2021")
+head(single)
 
-#first_coef <- matrix(
-#c(0.344, -0.208, 0.064,   # Year 1 (e.g., age 15 in 15-19)
-# 0.248, -0.056, 0.008,   # Year 2 (age 16)
-# 0.176, 0.048, -0.024,   # Year 3 (age 17)
-#  0.128, 0.104, -0.032,   # Year 4 (age 18)
-# 0.104, 0.112, -0.016),  # Year 5 (age 19)
-# nrow = 5, byrow = TRUE)
-#Coefficients for MIDDLE groups (columns: [previous, current, next])
-#middle_coef <- matrix(
-# c(0.064, 0.152, -0.016,   # Year 1 (e.g., age 20 in 20-24)
-#   0.008, 0.224, -0.032,   # Year 2 (age 21)
-#   -0.024, 0.248, -0.024,   # Year 3 (age 22)
-#   -0.032, 0.224, 0.008,   # Year 4 (age 23)
-#   -0.016, 0.152, 0.064),  # Year 5 (age 24)
-# nrow = 5, byrow = TRUE
-#)
-# Coefficients for LAST group (columns: [previous-1, previous, current])
-#last_coef <- matrix(
- #c(-0.016, 0.112, 0.104,   # Year 1 (e.g., age 35 in 35-39)
-  # -0.032, 0.104, 0.128,   # Year 2 (age 36)
-  #-0.024, 0.048, 0.176,   # Year 3 (age 37)
-  # 0.008, -0.056, 0.248,   # Year 4 (age 38)
-  # 0.064, -0.208, 0.344),  # Year 5 (age 39)
- #nrow = 5, byrow = TRUE
- #)
-# ------------------------------
-# STEP 2: Prepare Sample Data
-# ------------------------------
-
-karup_king(df = data,
-age_col = "age_col",
-pops = c("2021","2022","2023","2024","2025","2026","2027"),
-first_coef = first_coef,
-middle_coef = middle_coef,
-last_coef = last_coef
-)
+# Population totals are (approximately) preserved:
+sum(data[["2021"]])
+sum(single[["2021"]])
 
 }
 \references{
-Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Appendix C: Interpolation and Graduation).
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Appendix C: Karup-King osculatory interpolation multipliers.)
 
-Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. US Bureau of the Census.
+Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. Washington, DC: US Bureau of the Census. (Appendix C: Interpolation and graduation.)
 }

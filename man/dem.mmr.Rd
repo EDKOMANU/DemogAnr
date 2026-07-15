@@ -13,15 +13,20 @@ dem.mmr(data, deaths_col, births_col, pop_women, verbose = FALSE)
 
 \item{births_col}{The column name for live births.}
 
-\item{pop_women}{The column containing the number of women in the reporductive age}
+\item{pop_women}{The column containing the number of women of reproductive age.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
-A list with Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).
+An object of class \code{dem_mmr}: a list with \code{results} (the maternal
+mortality rate \code{MMR} per 100,000 women, and the maternal mortality ratio
+\code{MMR_Ratio} per 100,000 live births) and \code{modified_data} (the input data
+with per-row \code{mm_rate} and \code{mm_ratio} columns).
 }
 \description{
-This function calculates the Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).
+This function calculates the maternal mortality rate (maternal deaths per
+100,000 women of reproductive age) and the maternal mortality ratio
+(maternal deaths per 100,000 live births).
 }
 \examples{
 demo_data <- data.frame(
@@ -33,9 +38,9 @@ demo_data <- data.frame(
 dem.mmr(demo_data, deaths_col = "maternal_deaths", births_col = "live_births", pop_women = "women")
 }
 \references{
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+World Health Organization (1992). \emph{International Statistical Classification of Diseases and Related Health Problems, 10th Revision (ICD-10)}. Geneva: World Health Organization. (Definitions of maternal death and maternal mortality measures.)
 
-Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161.
 
-Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on health demography and maternal mortality.)
 }

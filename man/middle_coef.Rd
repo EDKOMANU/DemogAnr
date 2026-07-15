@@ -3,14 +3,21 @@
 \docType{data}
 \name{middle_coef}
 \alias{middle_coef}
-\title{middle_coef}
+\title{Karup-King coefficients for middle age groups}
 \format{
-A data frame or list
+A 5 x 3 data frame of numeric coefficients.
+}
+\source{
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods
+and Materials of Demography} (2nd ed.), Appendix C.
 }
 \usage{
 middle_coef
 }
 \description{
-middle_coef
+The standard Karup-King third-difference osculatory interpolation
+multipliers used to split \emph{interior} 5-year age groups into single years.
+Rows are the five single-year ages within the group; columns are the
+weights applied to the previous, current, and next 5-year groups.
 }
 \keyword{datasets}

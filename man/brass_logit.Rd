@@ -2,7 +2,7 @@
 % Please edit documentation in R/brass_logits.R
 \name{brass_logit}
 \alias{brass_logit}
-\title{Brass Logit Model}
+\title{Brass Relational Logit Model}
 \usage{
 brass_logit(
   data,
@@ -14,47 +14,71 @@ brass_logit(
 )
 }
 \arguments{
-\item{data}{A data frame containing the observed probabilities (nqx) and ages.}
+\item{data}{A data frame containing the observed cumulative probabilities
+of dying \eqn{q(x)} and ages.}
 
-\item{qx_col}{Column name for nqx in the data frame.}
+\item{qx_col}{Column name for the cumulative probability of dying
+\eqn{q(x) = 1 - l(x)} in the data frame. May contain \code{NA} for ages to be
+estimated.}
 
 \item{age_col}{Column name for age in the data frame.}
 
 \item{standard}{Standard to use ("African" or "GeneralUN").}
 
-\item{standards_data}{Standards dataset (default: included "standards").}
+\item{standards_data}{Standards dataset (default: included \link{standards}).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console.}
 }
 \value{
-A list containing the model, coefficients, and modified data with predicted nqx.
+A list containing the fitted model (\code{model}), the alpha/beta
+\code{coefficients}, and \code{data}: the input data with a \code{predicted_qx} column of
+smoothed/completed cumulative probabilities and a \code{predicted_lx} column of
+the implied survivorship \eqn{l(x) = 1 - q(x)}.
 }
 \description{
-Brass Logit Model
+Fits the Brass relational logit model to an observed series of \emph{cumulative}
+probabilities of dying \eqn{q(x) = 1 - l(x)/l(0)} using a standard life
+table. The observed logits are regressed on the logits of the standard, and
+the fitted relationship (alpha, beta) is used to predict a complete,
+smoothed series of \eqn{q(x)}, including for ages where the observed value
+is missing (\code{NA}).
+}
+\details{
+The Brass logit of a survivorship value is
+\eqn{Y(x) = 0.5 \log\{(1 - l(x))/l(x)\} = 0.5 \log\{q(x)/(1 - q(x))\}},
+and predicted probabilities are recovered with the inverse transform
+\eqn{q(x) = \exp(2Y)/(1 + \exp(2Y))}.
+
+Note that the input must be cumulative probabilities of dying by age
+\eqn{x} (i.e. \eqn{1 - l(x)}), which increase with age, and not the
+age-interval probabilities \eqn{{}_nq_x}. Values of exactly 0 or 1 (for
+example \eqn{q(0) = 0}) are excluded from the fit.
 }
 \examples{
+# Observed cumulative probabilities of dying q(x) = 1 - l(x),
+# with gaps (NA) to be filled by the model:
 observed_data <- data.frame(
-  age = c(0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50),
-  qx = c(0.1, 0.05, 0.02, NA, 0.005, NA, 0.002, 0.0015, NA, 0.0008, 0.0006, 0.0005)
+  age = c(1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50),
+  qx = c(0.10, 0.15, NA, 0.19, 0.21, NA, 0.26, 0.30, NA, 0.38, 0.44)
 )
 
-model<-brass_logit(
+model <- brass_logit(
   data = observed_data,
   qx_col = "qx",
   age_col = "age",
   standard = "African"
 )
 
-lifetable <- model$data
+model$coefficients
+model$data
 
-lifetable
-
-lifetable_nqx(lifetable, age="age", nqx = "predicted_qx")
 }
 \references{
-Brass, W. (1971). On the scale of mortality. \emph{Biological Aspects of Demography}, 69-110. London: Taylor & Francis.
+Brass, W. (1971). On the scale of mortality. In W. Brass (Ed.), \emph{Biological Aspects of Demography} (pp. 69-110). London: Taylor & Francis.
 
-Moultrie, T., Dorrington, R., Hill, A., Hill, K., Timæus, I., & Zaba, B. (2013). \emph{Tools for Demographic Estimation}. Paris: International Union for the Scientific Study of Population (IUSSP). (Section: Relational Logit Models).
+Brass, W. (1975). \emph{Methods for Estimating Fertility and Mortality from Limited and Defective Data}. Chapel Hill: Carolina Population Center, University of North Carolina. \url{https://pdf.usaid.gov/pdf_docs/PNAAD097.pdf}
 
-Newell, C. (1988). \emph{Methods and Models in Demography}. (Chapter 10: Model Life Tables).
+Moultrie, T., Dorrington, R., Hill, A., Hill, K., Timaeus, I., & Zaba, B. (Eds.). (2013). \emph{Tools for Demographic Estimation}. Paris: International Union for the Scientific Study of Population (IUSSP). \url{https://demographicestimation.iussp.org/}
+
+Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapter on model life tables.)
 }

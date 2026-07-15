@@ -3,14 +3,31 @@
 \docType{data}
 \name{testdata}
 \alias{testdata}
-\title{testdata}
+\title{District-level demographic test data}
 \format{
-A data frame
+A data frame with 1224 rows and 10 variables:
+\describe{
+\item{region}{Character. Region name.}
+\item{district}{Character. District name.}
+\item{year}{Numeric. Calendar year.}
+\item{age_group}{Character. Age group label.}
+\item{sex}{Character. "Male" or "Female".}
+\item{population}{Numeric. Population count.}
+\item{births}{Numeric. Live births.}
+\item{deaths}{Numeric. Deaths.}
+\item{in_migration}{Numeric. In-migrants.}
+\item{out_migration}{Numeric. Out-migrants.}
+}
+}
+\source{
+Simulated data.
 }
 \usage{
 testdata
 }
 \description{
-testdata
+Simulated district-level demographic panel data (population, births,
+deaths, migration) by age group and sex, for testing subnational
+projection workflows such as \code{\link[=math_project]{math_project()}}.
 }
 \keyword{datasets}

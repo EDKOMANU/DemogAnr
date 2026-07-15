@@ -9,7 +9,11 @@
 #' @param data Optional dataframe containing y-values to interpolate.
 #' @param y_cols Character vector of column names in `data` containing y-values.
 #' @param method Character. Interpolation method: `"auto"`, `"linear"`, `"quadratic"`, `"lagrange"`, or `"spline"`.
-#' Default is `"auto"` (chooses the best method based on the number of points).
+#' Default is `"auto"`: linear for 2 points, quadratic for 3, and a natural
+#' cubic spline for more than 3 points. High-degree Lagrange polynomials are
+#' numerically unstable for many points (Runge phenomenon), so `"lagrange"` is
+#' only used when requested explicitly.
+#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during interpolation.
 #'
 #' @return If vectors `x` and `y` are provided, returns a named numeric vector of interpolated values.
 #' If a dataframe is provided, returns the original dataframe with additional interpolated columns.
@@ -30,7 +34,12 @@
 #' x_new <- c(2.5, 3.5)
 #' interpolation(x = c(1, 2), data = data, y_cols = c("y1", "y2"), x_new = x_new, method = "spline")
 #'
-#' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during interpolation.
+#' @references
+#' Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. Washington, DC: US Bureau of the Census. (Appendix C: Interpolation and graduation.)
+#'
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Appendix C: Selected General Methods.)
+#'
+#' Press, W. H., Teukolsky, S. A., Vetterling, W. T., & Flannery, B. P. (2007). \emph{Numerical Recipes: The Art of Scientific Computing} (3rd ed.). Cambridge: Cambridge University Press. ISBN 978-0521880688. (Chapter 3: Interpolation and Extrapolation.)
 #'
 #' @export
 interpolation <- function(x, y, x_new,
@@ -52,6 +61,8 @@ interpolation <- function(x, y, x_new,
 
   if (!is.numeric(x) || !is.numeric(x_new)) stop("x and x_new must be numeric")
   if (any(duplicated(x))) stop("x contains duplicate values, which is not allowed")
+  if (method == "quadratic" && length(x) != 3) stop("Quadratic interpolation requires exactly 3 points.")
+  if (length(x) < 2) stop("At least 2 points are required for interpolation.")
 
   if (verbose) {
     message(sprintf("Smart interpolation initialized (mode: '%s', method: '%s').", mode, method))
@@ -101,9 +112,9 @@ interpolation <- function(x, y, x_new,
       return(quadratic_interpolate(x_points[1], x_points[2], x_points[3],
                                    y_points[1], y_points[2], y_points[3],
                                    x_val))
-    } else if (method == "lagrange" || (method == "auto" && n_points > 3)) {
+    } else if (method == "lagrange") {
       return(lagrange_interpolate(x_points, y_points, x_val))
-    } else if (method == "spline") {
+    } else if (method == "spline" || (method == "auto" && n_points > 3)) {
       return(spline(x_points, y_points, xout = x_val, method = "natural")$y)
     }
   }

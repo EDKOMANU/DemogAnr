@@ -19,7 +19,8 @@ dm.chm(
 
 \item{age_col}{The column name representing the age (in years or months for neonates).}
 
-\item{live_births}{The column name representing the population at each age.}
+\item{live_births}{The column name for the denominator at each age
+(live births, or mid-year population if births are unavailable).}
 
 \item{deaths_col}{The column name representing deaths at each age.}
 
@@ -35,7 +36,17 @@ A numeric value representing the mortality rate per 1,000 live births.
 }
 \description{
 This function calculates child mortality metrics (neonatal, infant, child, under-5)
-based on single-age data. It requires columns for age, population, and deaths.
+based on single-age data. It requires columns for age, denominator (live
+births or population), and deaths.
+}
+\details{
+The result is expressed per 1,000 of the supplied denominator. If the
+denominator is live births (as is conventional for neonatal and infant
+mortality), the result is a rate per 1,000 live births. If a mid-year
+population is supplied instead (often the only option for the child and
+under-5 groups from census data), the result is a death \emph{rate} per 1,000
+population, which is not identical to the cohort probability of dying
+(e.g. 5q0) reported by survey programmes such as the DHS.
 }
 \examples{
 demo_data <- data.frame(
@@ -49,7 +60,7 @@ dm.chm(demo_data,age_col = "age",
                                  type = "under5")
 }
 \references{
-Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Pergamon Press.
+Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Sydney: Pergamon Press.
 
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography}. (Chapter 1, distinguishing rates vs. probabilities).
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapters 1-2: rates versus probabilities of dying.)
 }

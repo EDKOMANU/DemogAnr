@@ -20,17 +20,17 @@
 #' dem.cdr(data, type = "all", age_col = "age",
 #'                     population_col = "population", deaths_col = "deaths")
 #' @references
-#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 2: Age-Specific Rates and Probabilities.)
 #'
-#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press.
 #'
-#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on mortality measures.)
 #'
 #' @export
 dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
-  if (is.character(type) && type == "all") type <- c("CDR", "ASDR")
+  if (identical(type, "all")) type <- c("CDR", "ASDR")
   if (!all(type %in% c("CDR", "ASDR"))) stop("Invalid 'type'. Choose from 'CDR' or 'ASDR'.")
   if (!all(c(population_col, deaths_col) %in% colnames(data))) stop("Specified columns not found in the dataframe.")
   if (any(type == "ASDR") && is.null(age_col)) stop("'age_col' must be specified for ASDR.")

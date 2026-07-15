@@ -3,14 +3,26 @@
 \docType{data}
 \name{region2000}
 \alias{region2000}
-\title{region2000}
+\title{Regional projection parameters, Ghana 2000}
 \format{
-A data frame
+A data frame with 16 rows and 6 variables:
+\describe{
+\item{Country}{Character. Country name.}
+\item{Region}{Character. Region name.}
+\item{base_pop}{Numeric. Base-year population.}
+\item{TFR}{Numeric. Total fertility rate.}
+\item{death_rate}{Numeric. Crude death rate.}
+\item{net_migration}{Numeric. Net migration (persons).}
+}
+}
+\source{
+Derived from Ghana Statistical Service census publications.
 }
 \usage{
 region2000
 }
 \description{
-region2000
+Base-year demographic parameters for the regions of Ghana in 2000, used to
+demonstrate \code{\link[=project_population]{project_population()}}.
 }
 \keyword{datasets}

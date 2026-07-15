@@ -3,17 +3,37 @@
 \docType{data}
 \name{data}
 \alias{data}
-\title{data}
+\title{Grouped population data by 5-year age groups}
 \format{
-A data frame
+A data frame with 16 rows (age groups) and 16 variables:
+\describe{
+\item{2021}{Numeric. Population in the age group in 2021.}
+\item{2022}{Numeric. Population in the age group in 2022.}
+\item{2023}{Numeric. Population in the age group in 2023.}
+\item{2024}{Numeric. Population in the age group in 2024.}
+\item{2025}{Numeric. Population in the age group in 2025.}
+\item{2026}{Numeric. Population in the age group in 2026.}
+\item{2027}{Numeric. Population in the age group in 2027.}
+\item{2028}{Numeric. Population in the age group in 2028.}
+\item{2029}{Numeric. Population in the age group in 2029.}
+\item{2030}{Numeric. Population in the age group in 2030.}
+\item{2031}{Numeric. Population in the age group in 2031.}
+\item{2032}{Numeric. Population in the age group in 2032.}
+\item{2033}{Numeric. Population in the age group in 2033.}
+\item{2034}{Numeric. Population in the age group in 2034.}
+\item{2035}{Numeric. Population in the age group in 2035.}
+\item{age_col}{Character. The 5-year age group, e.g. "0-4", "5-9", ..., "75-79".}
+}
 }
 \source{
-Simulated or collected data
+Simulated data based on population structures from the Ghana
+Statistical Service.
 }
 \usage{
 data
 }
 \description{
-data
+Example population counts in 5-year age groups (0-4 to 75-79) for the years
+2021 to 2035, used to demonstrate \code{\link[=karup_king]{karup_king()}}.
 }
 \keyword{datasets}

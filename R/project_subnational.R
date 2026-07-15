@@ -16,12 +16,27 @@
 #' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during projection.
 #'
 #' @return A dataframe appending the projected columns to the original data.
+#' @examples
+#' districts <- data.frame(
+#'   Region = c("A", "A", "B", "B"),
+#'   District = c("A1", "A2", "B1", "B2"),
+#'   pop2010 = c(10000, 20000, 15000, 5000),
+#'   pop2020 = c(12000, 26000, 16500, 5500)
+#' )
+#'
+#' # Exponential extrapolation of each district
+#' math_project(districts,
+#'   sub_group_col = "District", parent_group_col = "Region",
+#'   pop_cols = c("pop2010", "pop2020"), time_vals = c(2010, 2020),
+#'   target_times = c(2025, 2030), method = "exponential"
+#' )
+#'
 #' @references
-#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography}. (Chapter 20: Population Projections - for shift-share and subnational methods).
+#' Smith, S. K., Tayman, J., & Swanson, D. A. (2013). \emph{A Practitioner's Guide to State and Local Population Projections}. Dordrecht: Springer. \doi{10.1007/978-94-007-7551-0} (Trend extrapolation, constant-share, shift-share, and share-of-growth methods.)
 #'
-#' Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford University Press. (Chapter 11: Population Projections).
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on population projections.)
 #'
-#' Raftery, A. E., Li, N., Sevcikova, H., Osthus, D., & Ševčíková, H. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. (For the stochastic/probabilistic logic).
+#' Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford: Oxford University Press. ISBN 978-0198752639. (Chapter on population projections.)
 #'
 #' @export
 math_project <- function(data, sub_group_col, parent_group_col = NULL,

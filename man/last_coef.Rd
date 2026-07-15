@@ -3,14 +3,21 @@
 \docType{data}
 \name{last_coef}
 \alias{last_coef}
-\title{last_coef}
+\title{Karup-King coefficients for the last age group}
 \format{
-A data frame or list
+A 5 x 3 data frame of numeric coefficients.
+}
+\source{
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods
+and Materials of Demography} (2nd ed.), Appendix C.
 }
 \usage{
 last_coef
 }
 \description{
-last_coef
+The standard Karup-King third-difference osculatory interpolation
+multipliers used to split the \emph{last} 5-year age group into single years.
+Rows are the five single-year ages within the group; columns are the
+weights applied to the antepenultimate, penultimate, and last 5-year groups.
 }
 \keyword{datasets}

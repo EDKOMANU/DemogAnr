@@ -11,6 +11,7 @@ dem.fert(
   population_col,
   women_col = NULL,
   births_col,
+  age_interval = 5,
   verbose = FALSE
 )
 }
@@ -27,6 +28,9 @@ Options: "CBR", "GFR", "ASFR", "TFR". Use "all" to calculate all metrics.}
 \item{women_col}{The column name for number of women (used for "GFR", "ASFR", and "TFR").}
 
 \item{births_col}{The column name for live births.}
+
+\item{age_interval}{Width (in years) of the age groups, used to compute TFR
+from the ASFRs (default 5, for standard 5-year age groups).}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
@@ -52,9 +56,9 @@ dem.fert(demo_data, type = "all", age_col = "age",
                     population_col = "population", women_col = "women", births_col = "live_births")
 }
 \references{
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 5: Fertility and Reproduction.)
 
-Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press.
 
-Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on fertility measures.)
 }

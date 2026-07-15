@@ -2,20 +2,11 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import brms
-#' @import tidyverse
-#' @import logger
-#' @importFrom data.table .BY
-#' @importFrom data.table .EACHI
-#' @importFrom data.table .GRP
-#' @importFrom data.table .I
-#' @importFrom data.table .N
-#' @importFrom data.table .NGRP
-#' @importFrom data.table .SD
-#' @importFrom data.table :=
-#' @importFrom data.table data.table
 #' @importFrom stats approx
+#' @importFrom stats coef
+#' @importFrom stats lm
 #' @importFrom stats median
+#' @importFrom stats predict
 #' @importFrom stats quantile
 #' @importFrom stats rnorm
 #' @importFrom stats spline

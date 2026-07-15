@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^CRAN-SUBMISSION$
 ^cran-comments\.md$
+^\.git$
+^\.gitignore$
+^.*\.Rhistory$

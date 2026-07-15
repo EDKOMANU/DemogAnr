@@ -10,6 +10,8 @@
 #' @param population_col The column name for total population.
 #' @param women_col The column name for number of women (used for "GFR", "ASFR", and "TFR").
 #' @param births_col The column name for live births.
+#' @param age_interval Width (in years) of the age groups, used to compute TFR
+#'   from the ASFRs (default 5, for standard 5-year age groups).
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A list of named outputs for the requested fertility calculations and the modified dataframe with ASFR.
 #' @examples
@@ -27,17 +29,17 @@
 #' dem.fert(demo_data, type = "all", age_col = "age",
 #'                     population_col = "population", women_col = "women", births_col = "live_births")
 #' @references
-#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 5: Fertility and Reproduction.)
 #'
-#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press.
 #'
-#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on fertility measures.)
 #'
 #' @export
-dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NULL, births_col, verbose = FALSE) {
+dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NULL, births_col, age_interval = 5, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
-  if (is.character(type) && type == "all") type <- c("CBR", "GFR", "ASFR", "TFR")
+  if (identical(type, "all")) type <- c("CBR", "GFR", "ASFR", "TFR")
   if (!all(type %in% c("CBR", "GFR", "ASFR", "TFR"))) stop("Invalid 'type'. Choose from 'CBR', 'GFR', 'ASFR', or 'TFR'.")
   if (!all(c(population_col, births_col) %in% colnames(data))) stop("Specified columns not found in the dataframe.")
   if (any(type %in% c("GFR", "ASFR", "TFR")) && is.null(women_col)) stop("'women_col' must be specified for GFR, ASFR, or TFR.")
@@ -72,12 +74,12 @@ dem.fert <- function(data, type, age_col = NULL, population_col, women_col = NUL
   }
   if ("TFR" %in% type) {
     if (verbose) message("dem.fert: Calculating Total Fertility Rate (TFR)...")
-    # TFR is the sum of ASFRs, assuming age intervals of 5 years
+    # TFR is the sum of ASFRs times the width of the age groups
     if (!"ASFR" %in% names(results)) {
       asfr <- (data[[births_col]] / data[[women_col]]) * 1000
       results$ASFR <- asfr
     }
-    tfr <- sum(results$ASFR, na.rm = TRUE) * 5 / 1000
+    tfr <- sum(results$ASFR, na.rm = TRUE) * age_interval / 1000
     results$TFR <- tfr
     if (verbose) message("dem.fert: TFR calculated successfully: ", round(tfr, 4))
   }

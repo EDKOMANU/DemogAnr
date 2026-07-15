@@ -1,14 +1,19 @@
 #' Calculate Maternal Mortality Metrics
 #'
-#' This function calculates the Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).
+#' This function calculates the maternal mortality rate (maternal deaths per
+#' 100,000 women of reproductive age) and the maternal mortality ratio
+#' (maternal deaths per 100,000 live births).
 #'
 #' @param data A dataframe containing demographic data.
 #' @param deaths_col The column name for maternal deaths.
 #' @param births_col The column name for live births.
-#' @param pop_women The column containing the number of women in the reporductive age
+#' @param pop_women The column containing the number of women of reproductive age.
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
-#' @return A list with Maternal Mortality Rate (MMR) and Maternal Mortality Ratio (MMR).
+#' @return An object of class `dem_mmr`: a list with `results` (the maternal
+#'   mortality rate `MMR` per 100,000 women, and the maternal mortality ratio
+#'   `MMR_Ratio` per 100,000 live births) and `modified_data` (the input data
+#'   with per-row `mm_rate` and `mm_ratio` columns).
 #' @examples
 #' demo_data <- data.frame(
 #'   age=c("15-24", "25-34", "35-44"),
@@ -18,11 +23,11 @@
 #' )
 #' dem.mmr(demo_data, deaths_col = "maternal_deaths", births_col = "live_births", pop_women = "women")
 #' @references
-#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapters 2 and 5)
+#' World Health Organization (1992). \emph{International Statistical Classification of Diseases and Related Health Problems, 10th Revision (ICD-10)}. Geneva: World Health Organization. (Definitions of maternal death and maternal mortality measures.)
 #'
-#' Newell, C. (1988). \emph{Methods and Models in Demography}. New York: Guilford Press. (Chapters 4 and 6)
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161.
 #'
-#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). Emerald Group Publishing. (Chapters 14 for Maternal Mortality)
+#' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on health demography and maternal mortality.)
 #'
 #' @export
 dem.mmr <- function(data, deaths_col, births_col, pop_women, verbose = FALSE) {
