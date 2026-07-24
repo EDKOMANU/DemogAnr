@@ -12,8 +12,11 @@
   four Coale-Demeny model families (North, South, East, West), returns q(x) for
   x = 1, 2, 3, 5, 10, 15, 20 with reference periods and dates. Reproduces the
   Manual X Panama (1976) worked example to the published precision.
-* New `standardize()`: direct and indirect age standardization of rates,
-  including the standardized mortality ratio (SMR).
+* New `standardize()`: compares two populations by age standardization
+  following Preston et al. (2001, Chapter 2), using the average of the two age
+  compositions as the default standard and reporting the crude and
+  age-standardized rates plus the comparative mortality ratio (CMR). Reproduces
+  their Box 2.1 (Sweden vs Kazakhstan) exactly.
 * New `decompose_rates()`: Kitagawa decomposition of a difference between two
   crude rates into rate and age-composition components.
 * New `decompose_LE()`: Arriaga decomposition of a difference in life

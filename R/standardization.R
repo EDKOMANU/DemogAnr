@@ -1,141 +1,134 @@
-#' Age Standardization of Rates (direct and indirect)
+#' Age Standardization: Comparing Two Populations
 #'
-#' Computes age-standardized rates to make crude rates comparable across
-#' populations with different age structures, using either the direct or the
-#' indirect method (Preston, Heuveline and Guillot 2001, Chapter 2).
+#' Removes the effect of differing age structures when comparing the crude
+#' rates of two populations, following Preston, Heuveline and Guillot (2001,
+#' Chapter 2). Each population's age-specific rates are re-weighted by a common
+#' standard age distribution -- by default the average of the two populations'
+#' age compositions, their recommended choice for a two-population comparison.
 #'
 #' @details
-#' \strong{Direct standardization} applies the study population's age-specific
-#' rates to a standard age distribution:
-#' \deqn{ASR = \sum_a w_a M_a, \qquad w_a = N^{std}_a / \sum_a N^{std}_a,}
-#' where \eqn{M_a} are the study rates and \eqn{N^{std}_a} the standard
-#' population. It requires `rate_col` and `std_pop_col`.
+#' For populations 1 and 2 with age-specific rates \eqn{M^1_i, M^2_i} and age
+#' compositions \eqn{C^1_i = N^1_i / \sum N^1_i} and \eqn{C^2_i}, the crude rate
+#' of each is \eqn{CDR = \sum_i C_i M_i}. The age-standardized crude rate applies
+#' a common standard composition \eqn{C^s_i}:
+#' \deqn{ASCDR = \sum_i M_i \, C^s_i .}
+#' By default \eqn{C^s_i = (C^1_i + C^2_i)/2}; set `standard` to `"first"` or
+#' `"second"` to use one population's composition, or supply an external
+#' standard with `std_pop_col`. The function also reports the comparative
+#' mortality ratio \eqn{CMR = \sum_i N^1_i M^1_i / \sum_i N^1_i M^2_i}
+#' (population 1's deaths relative to those expected under population 2's rates).
 #'
-#' \strong{Indirect standardization} applies a standard schedule of rates to the
-#' study population's age distribution. It yields the standardized mortality
-#' ratio
-#' \deqn{SMR = D / \sum_a N_a M^{std}_a}
-#' (observed deaths over expected deaths) and, when a standard population is
-#' also supplied, an indirectly standardized rate \eqn{SMR \times CDR^{std}}. It
-#' requires `pop_col`, `deaths_col` and `std_rate_col`.
+#' With the average standard, the difference between the two age-standardized
+#' rates equals the rate component of the Kitagawa decomposition
+#' ([decompose_rates()]) of the same difference.
 #'
 #' @param data A data frame with one row per age group.
 #' @param age_col Column name for age groups.
-#' @param method `"direct"` (default) or `"indirect"`.
-#' @param rate_col Column of study age-specific rates (direct method).
-#' @param pop_col Column of study population by age (indirect method).
-#' @param deaths_col Column of study deaths by age (indirect method).
-#' @param std_pop_col Column of standard population by age (direct method, and
-#'   optional for indirect to obtain the indirectly standardized rate).
-#' @param std_rate_col Column of standard age-specific rates (indirect method).
-#' @param per Scaling of the returned rate (default 1000).
-#' @param verbose Logical; if `TRUE`, prints progress messages.
+#' @param rate1_col,rate2_col Columns of age-specific rates for populations 1 and 2.
+#' @param pop1_col,pop2_col Columns of population counts (or proportions) for
+#'   populations 1 and 2.
+#' @param standard How to choose the standard age distribution: `"average"`
+#'   (default), `"first"`, or `"second"`. Ignored if `std_pop_col` is supplied.
+#' @param std_pop_col Optional column of an external standard population by age;
+#'   overrides `standard`.
+#' @param labels Length-2 character vector naming the two populations.
+#' @param per Scaling of the returned rates (default 1000).
 #'
-#' @return An object of class `dem_std`: a list with the standardized rate (and,
-#'   for the indirect method, the `SMR`), the crude rate, and a per-age
-#'   `table`.
+#' @return An object of class `dem_std`: a list with the crude rates (`crude`),
+#'   the age-standardized rates (`standardized`), their `ratio`, the comparative
+#'   mortality ratio (`CMR`), and a per-age `table`.
 #'
 #' @examples
-#' pop <- data.frame(
-#'   age      = c("0-14","15-44","45-64","65+"),
-#'   rate     = c(0.002, 0.001, 0.008, 0.060),   # study age-specific rates
-#'   std_pop  = c(250000, 400000, 250000, 100000)
+#' # Preston et al. (2001) Box 2.1: Sweden vs Kazakhstan, females, 1992
+#' box21 <- data.frame(
+#'   age = c("0","1-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
+#'           "40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79",
+#'           "80-84","85+"),
+#'   pop_Sw = c(0.0136,0.0524,0.0559,0.0548,0.0604,0.0655,0.0709,0.0641,0.0654,
+#'              0.0703,0.0730,0.0552,0.0481,0.0493,0.0512,0.0508,0.0420,0.0321,
+#'              0.0251),
+#'   pop_K  = c(0.0200,0.0868,0.1011,0.0929,0.0828,0.0716,0.0843,0.0842,0.0704,
+#'              0.0561,0.0327,0.0579,0.0347,0.0430,0.0295,0.0178,0.0172,0.0102,
+#'              0.0068),
+#'   m_Sw = c(0.00467,0.00008,0.00013,0.00014,0.00023,0.00030,0.00032,0.00050,
+#'            0.00069,0.00117,0.00201,0.00305,0.00461,0.00759,0.01226,0.02026,
+#'            0.03664,0.06815,0.15729),
+#'   m_K  = c(0.02137,0.00162,0.00045,0.00037,0.00078,0.00108,0.00103,0.00132,
+#'            0.00182,0.00288,0.00430,0.00571,0.01082,0.01392,0.02679,0.03998,
+#'            0.05469,0.10159,0.18030)
 #' )
-#' standardize(pop, age_col = "age", method = "direct",
-#'             rate_col = "rate", std_pop_col = "std_pop")
+#' standardize(box21, age_col = "age",
+#'             rate1_col = "m_Sw", rate2_col = "m_K",
+#'             pop1_col = "pop_Sw", pop2_col = "pop_K",
+#'             labels = c("Sweden", "Kazakhstan"))
 #'
 #' @references
-#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 2: Age-standardization.)
+#' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 2; Box 2.1.)
 #'
 #' @export
-standardize <- function(data, age_col, method = c("direct", "indirect"),
-                        rate_col = NULL, pop_col = NULL, deaths_col = NULL,
-                        std_pop_col = NULL, std_rate_col = NULL,
-                        per = 1000, verbose = FALSE) {
-  method <- match.arg(method)
+standardize <- function(data, age_col, rate1_col, rate2_col,
+                        pop1_col, pop2_col,
+                        standard = c("average", "first", "second"),
+                        std_pop_col = NULL, labels = c("1", "2"), per = 1000) {
+  standard <- match.arg(standard)
   if (!is.data.frame(data)) stop("'data' must be a data frame.")
-  if (!(age_col %in% names(data))) stop("age_col not found in 'data'.")
-  age <- data[[age_col]]
-
-  if (method == "direct") {
-    if (is.null(rate_col) || is.null(std_pop_col)) {
-      stop("Direct standardization requires rate_col and std_pop_col.")
-    }
-    Mx <- as.numeric(data[[rate_col]])
-    Ns <- as.numeric(data[[std_pop_col]])
-    w <- Ns / sum(Ns)
-    asr <- sum(w * Mx) * per
-    crude_std <- sum(w * Mx) * per # crude rate of the standard under study rates
-    if (verbose) message(sprintf("Direct age-standardized rate: %.4f per %d", asr, per))
-    tbl <- data.frame(age = age, rate = Mx, std_pop = Ns, weight = w,
-                      contribution = w * Mx * per)
-    out <- list(method = "direct", standardized_rate = asr,
-                crude_rate = asr, per = per, table = tbl)
-  } else {
-    if (is.null(pop_col) || is.null(deaths_col) || is.null(std_rate_col)) {
-      stop("Indirect standardization requires pop_col, deaths_col and std_rate_col.")
-    }
-    Nx <- as.numeric(data[[pop_col]])
-    Dx <- as.numeric(data[[deaths_col]])
-    Ms <- as.numeric(data[[std_rate_col]])
-    observed <- sum(Dx)
-    expected <- sum(Nx * Ms)
-    smr <- observed / expected
-    crude_obs <- observed / sum(Nx) * per
-    is_rate <- NA_real_
-    if (!is.null(std_pop_col)) {
-      Ns <- as.numeric(data[[std_pop_col]])
-      cdr_std <- sum(Ns * Ms) / sum(Ns) * per
-      is_rate <- smr * cdr_std
-    }
-    if (verbose) message(sprintf("SMR = %.4f (observed %.0f / expected %.1f)",
-                                 smr, observed, expected))
-    tbl <- data.frame(age = age, pop = Nx, deaths = Dx, std_rate = Ms,
-                      expected_deaths = Nx * Ms)
-    out <- list(method = "indirect", SMR = smr,
-                standardized_rate = is_rate, crude_rate = crude_obs,
-                observed_deaths = observed, expected_deaths = expected,
-                per = per, table = tbl)
+  for (nm in c(age_col, rate1_col, rate2_col, pop1_col, pop2_col)) {
+    if (!(nm %in% names(data))) stop("Column not found in 'data': ", nm)
   }
+  age <- data[[age_col]]
+  M1 <- as.numeric(data[[rate1_col]]); M2 <- as.numeric(data[[rate2_col]])
+  N1 <- as.numeric(data[[pop1_col]]);  N2 <- as.numeric(data[[pop2_col]])
+  c1 <- N1 / sum(N1); c2 <- N2 / sum(N2)
+
+  cs <- if (!is.null(std_pop_col)) {
+    Ns <- as.numeric(data[[std_pop_col]]); Ns / sum(Ns)
+  } else if (standard == "first") {
+    c1
+  } else if (standard == "second") {
+    c2
+  } else {
+    (c1 + c2) / 2
+  }
+
+  cdr1 <- sum(c1 * M1) * per; cdr2 <- sum(c2 * M2) * per
+  ascdr1 <- sum(M1 * cs) * per; ascdr2 <- sum(M2 * cs) * per
+  cmr <- sum(N1 * M1) / sum(N1 * M2)
+
+  out <- list(
+    labels = labels, per = per,
+    standard = if (!is.null(std_pop_col)) "external" else standard,
+    crude = stats::setNames(c(cdr1, cdr2), labels),
+    standardized = stats::setNames(c(ascdr1, ascdr2), labels),
+    ratio = ascdr1 / ascdr2,
+    CMR = cmr,
+    table = data.frame(age = age, C1 = c1, C2 = c2, Cstd = cs,
+                       M1 = M1, M2 = M2,
+                       M1Cstd = M1 * cs * per, M2Cstd = M2 * cs * per)
+  )
   class(out) <- "dem_std"
   out
 }
 
 #' @export
 print.dem_std <- function(x, ...) {
+  cat(sprintf("Age standardization: %s (1) vs %s (2)\n",
+              x$labels[1], x$labels[2]))
+  cat(sprintf("Standard age distribution: %s\n\n", x$standard))
   tb <- x$table
-  if (x$method == "direct") {
-    cat("Direct age standardization\n\n")
-    disp <- data.frame(
-      age = as.character(tb$age),
-      rate = round(tb$rate, 6),
-      std_pop = format(round(tb$std_pop), big.mark = ",", trim = TRUE, scientific = FALSE),
-      weight = round(tb$weight, 4),
-      contribution = round(tb$contribution, 4),
-      stringsAsFactors = FALSE
-    )
-    print(disp, row.names = FALSE)
-    cat(sprintf("\n  Age-standardized rate: %.4f per %d\n",
-                x$standardized_rate, x$per))
-  } else {
-    cat("Indirect age standardization\n\n")
-    disp <- data.frame(
-      age = as.character(tb$age),
-      pop = format(round(tb$pop), big.mark = ",", trim = TRUE, scientific = FALSE),
-      deaths = format(round(tb$deaths), big.mark = ",", trim = TRUE, scientific = FALSE),
-      std_rate = round(tb$std_rate, 6),
-      expected_deaths = round(tb$expected_deaths, 1),
-      stringsAsFactors = FALSE
-    )
-    print(disp, row.names = FALSE)
-    cat(sprintf("\n  SMR: %.4f (observed %.0f / expected %.1f)\n",
-                x$SMR, x$observed_deaths, x$expected_deaths))
-    if (!is.na(x$standardized_rate)) {
-      cat(sprintf("  Indirectly standardized rate: %.4f per %d\n",
-                  x$standardized_rate, x$per))
-    }
-    cat(sprintf("  Crude rate (observed): %.4f per %d\n", x$crude_rate, x$per))
-  }
+  disp <- data.frame(
+    age = as.character(tb$age),
+    C1 = round(tb$C1, 4), C2 = round(tb$C2, 4), Cstd = round(tb$Cstd, 4),
+    M1 = round(tb$M1, 5), M2 = round(tb$M2, 5),
+    M1Cstd = round(tb$M1Cstd, 4), M2Cstd = round(tb$M2Cstd, 4),
+    stringsAsFactors = FALSE
+  )
+  print(disp, row.names = FALSE)
+  cat(sprintf("\n  Crude rate:            (1) %.2f   (2) %.2f   per %d\n",
+              x$crude[1], x$crude[2], x$per))
+  cat(sprintf("  Age-standardized rate: (1) %.2f   (2) %.2f   per %d\n",
+              x$standardized[1], x$standardized[2], x$per))
+  cat(sprintf("  Ratio of standardized rates (1/2): %.3f\n", x$ratio))
+  cat(sprintf("  Comparative mortality ratio (CMR, 1 vs 2): %.3f\n", x$CMR))
   invisible(x)
 }
 

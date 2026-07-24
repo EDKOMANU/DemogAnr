@@ -2,19 +2,19 @@
 % Please edit documentation in R/standardization.R
 \name{standardize}
 \alias{standardize}
-\title{Age Standardization of Rates (direct and indirect)}
+\title{Age Standardization: Comparing Two Populations}
 \usage{
 standardize(
   data,
   age_col,
-  method = c("direct", "indirect"),
-  rate_col = NULL,
-  pop_col = NULL,
-  deaths_col = NULL,
+  rate1_col,
+  rate2_col,
+  pop1_col,
+  pop2_col,
+  standard = c("average", "first", "second"),
   std_pop_col = NULL,
-  std_rate_col = NULL,
-  per = 1000,
-  verbose = FALSE
+  labels = c("1", "2"),
+  per = 1000
 )
 }
 \arguments{
@@ -22,58 +22,74 @@ standardize(
 
 \item{age_col}{Column name for age groups.}
 
-\item{method}{\code{"direct"} (default) or \code{"indirect"}.}
+\item{rate1_col, rate2_col}{Columns of age-specific rates for populations 1 and 2.}
 
-\item{rate_col}{Column of study age-specific rates (direct method).}
+\item{pop1_col, pop2_col}{Columns of population counts (or proportions) for
+populations 1 and 2.}
 
-\item{pop_col}{Column of study population by age (indirect method).}
+\item{standard}{How to choose the standard age distribution: \code{"average"}
+(default), \code{"first"}, or \code{"second"}. Ignored if \code{std_pop_col} is supplied.}
 
-\item{deaths_col}{Column of study deaths by age (indirect method).}
+\item{std_pop_col}{Optional column of an external standard population by age;
+overrides \code{standard}.}
 
-\item{std_pop_col}{Column of standard population by age (direct method, and
-optional for indirect to obtain the indirectly standardized rate).}
+\item{labels}{Length-2 character vector naming the two populations.}
 
-\item{std_rate_col}{Column of standard age-specific rates (indirect method).}
-
-\item{per}{Scaling of the returned rate (default 1000).}
-
-\item{verbose}{Logical; if \code{TRUE}, prints progress messages.}
+\item{per}{Scaling of the returned rates (default 1000).}
 }
 \value{
-An object of class \code{dem_std}: a list with the standardized rate (and,
-for the indirect method, the \code{SMR}), the crude rate, and a per-age
-\code{table}.
+An object of class \code{dem_std}: a list with the crude rates (\code{crude}),
+the age-standardized rates (\code{standardized}), their \code{ratio}, the comparative
+mortality ratio (\code{CMR}), and a per-age \code{table}.
 }
 \description{
-Computes age-standardized rates to make crude rates comparable across
-populations with different age structures, using either the direct or the
-indirect method (Preston, Heuveline and Guillot 2001, Chapter 2).
+Removes the effect of differing age structures when comparing the crude
+rates of two populations, following Preston, Heuveline and Guillot (2001,
+Chapter 2). Each population's age-specific rates are re-weighted by a common
+standard age distribution -- by default the average of the two populations'
+age compositions, their recommended choice for a two-population comparison.
 }
 \details{
-\strong{Direct standardization} applies the study population's age-specific
-rates to a standard age distribution:
-\deqn{ASR = \sum_a w_a M_a, \qquad w_a = N^{std}_a / \sum_a N^{std}_a,}
-where \eqn{M_a} are the study rates and \eqn{N^{std}_a} the standard
-population. It requires \code{rate_col} and \code{std_pop_col}.
+For populations 1 and 2 with age-specific rates \eqn{M^1_i, M^2_i} and age
+compositions \eqn{C^1_i = N^1_i / \sum N^1_i} and \eqn{C^2_i}, the crude rate
+of each is \eqn{CDR = \sum_i C_i M_i}. The age-standardized crude rate applies
+a common standard composition \eqn{C^s_i}:
+\deqn{ASCDR = \sum_i M_i \, C^s_i .}
+By default \eqn{C^s_i = (C^1_i + C^2_i)/2}; set \code{standard} to \code{"first"} or
+\code{"second"} to use one population's composition, or supply an external
+standard with \code{std_pop_col}. The function also reports the comparative
+mortality ratio \eqn{CMR = \sum_i N^1_i M^1_i / \sum_i N^1_i M^2_i}
+(population 1's deaths relative to those expected under population 2's rates).
 
-\strong{Indirect standardization} applies a standard schedule of rates to the
-study population's age distribution. It yields the standardized mortality
-ratio
-\deqn{SMR = D / \sum_a N_a M^{std}_a}
-(observed deaths over expected deaths) and, when a standard population is
-also supplied, an indirectly standardized rate \eqn{SMR \times CDR^{std}}. It
-requires \code{pop_col}, \code{deaths_col} and \code{std_rate_col}.
+With the average standard, the difference between the two age-standardized
+rates equals the rate component of the Kitagawa decomposition
+(\code{\link[=decompose_rates]{decompose_rates()}}) of the same difference.
 }
 \examples{
-pop <- data.frame(
-  age      = c("0-14","15-44","45-64","65+"),
-  rate     = c(0.002, 0.001, 0.008, 0.060),   # study age-specific rates
-  std_pop  = c(250000, 400000, 250000, 100000)
+# Preston et al. (2001) Box 2.1: Sweden vs Kazakhstan, females, 1992
+box21 <- data.frame(
+  age = c("0","1-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
+          "40-44","45-49","50-54","55-59","60-64","65-69","70-74","75-79",
+          "80-84","85+"),
+  pop_Sw = c(0.0136,0.0524,0.0559,0.0548,0.0604,0.0655,0.0709,0.0641,0.0654,
+             0.0703,0.0730,0.0552,0.0481,0.0493,0.0512,0.0508,0.0420,0.0321,
+             0.0251),
+  pop_K  = c(0.0200,0.0868,0.1011,0.0929,0.0828,0.0716,0.0843,0.0842,0.0704,
+             0.0561,0.0327,0.0579,0.0347,0.0430,0.0295,0.0178,0.0172,0.0102,
+             0.0068),
+  m_Sw = c(0.00467,0.00008,0.00013,0.00014,0.00023,0.00030,0.00032,0.00050,
+           0.00069,0.00117,0.00201,0.00305,0.00461,0.00759,0.01226,0.02026,
+           0.03664,0.06815,0.15729),
+  m_K  = c(0.02137,0.00162,0.00045,0.00037,0.00078,0.00108,0.00103,0.00132,
+           0.00182,0.00288,0.00430,0.00571,0.01082,0.01392,0.02679,0.03998,
+           0.05469,0.10159,0.18030)
 )
-standardize(pop, age_col = "age", method = "direct",
-            rate_col = "rate", std_pop_col = "std_pop")
+standardize(box21, age_col = "age",
+            rate1_col = "m_Sw", rate2_col = "m_K",
+            pop1_col = "pop_Sw", pop2_col = "pop_K",
+            labels = c("Sweden", "Kazakhstan"))
 
 }
 \references{
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 2: Age-standardization.)
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. (Chapter 2; Box 2.1.)
 }
