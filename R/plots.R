@@ -15,6 +15,12 @@
     )
 }
 
+# Anchor a non-negative value axis at 0 (no padding below), with a little
+# headroom above.
+.y_from_zero <- function() {
+  scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05)))
+}
+
 # Order an age vector for plotting: numeric ages by value, "0-4"-style labels
 # by their leading number.
 .order_age <- function(x) {
@@ -34,13 +40,15 @@
   } else {
     p <- p + geom_line(colour = .dem_male) + geom_point(colour = .dem_male)
   }
-  p + labs(x = "Age group", y = ylab, title = title) + .dem_theme()
+  p + .y_from_zero() +
+    labs(x = "Age group", y = ylab, title = title) + .dem_theme()
 }
 
 .plot_survival <- function(age, lx, title = "Survival curve l(x)") {
   d <- data.frame(age = as.numeric(age), lx = as.numeric(lx))
   ggplot(d, aes(x = age, y = lx)) +
     geom_line(colour = .dem_male) + geom_point(colour = .dem_male) +
+    .y_from_zero() +
     labs(x = "Age", y = "Survivors l(x)", title = title) + .dem_theme()
 }
 
@@ -51,6 +59,7 @@
     geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.2, fill = .dem_male) +
     geom_line(aes(y = med), colour = .dem_male) +
     facet_wrap(~ subregion, scales = "free_y") +
+    .y_from_zero() +
     labs(x = "Year", y = "Population",
          title = "Projected population (median and interquartile band)") +
     .dem_theme()
@@ -84,6 +93,7 @@
   ggplot(d, aes(x = digit, y = percent)) +
     geom_col(fill = .dem_male) +
     geom_hline(yintercept = 10, linetype = 2) +
+    .y_from_zero() +
     labs(x = "Terminal digit", y = "Percent of population",
          title = "Distribution by terminal digit (10% expected)") + .dem_theme()
 }
@@ -99,6 +109,7 @@
     geom_line() + geom_point() +
     geom_hline(yintercept = 100, linetype = 2) +
     scale_colour_manual(values = c(Male = .dem_male, Female = .dem_female)) +
+    .y_from_zero() +
     labs(x = "Age group", y = "Age ratio (100 = smooth)", colour = NULL,
          title = "Age ratios by sex") + .dem_theme()
 }

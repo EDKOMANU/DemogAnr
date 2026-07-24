@@ -14,5 +14,6 @@
 #' @importFrom ggplot2 geom_hline scale_y_continuous scale_fill_manual
 #' @importFrom ggplot2 scale_colour_manual coord_flip labs theme_minimal theme
 #' @importFrom ggplot2 element_text element_line element_blank facet_wrap
+#' @importFrom ggplot2 expansion
 ## usethis namespace: end
 NULL
