@@ -10,6 +10,7 @@ dem.cdr(
   age_col = NULL,
   population_col,
   deaths_col,
+  graph = TRUE,
   verbose = FALSE
 )
 }
@@ -24,6 +25,10 @@ Options: "CDR", "ASDR". Use "all" to calculate both.}
 \item{population_col}{The column name for total population.}
 
 \item{deaths_col}{The column name for total deaths.}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
+age-specific death rates is attached to the result as \verb{$plot} and shown
+when the object is printed.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }

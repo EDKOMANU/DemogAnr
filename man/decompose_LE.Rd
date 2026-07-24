@@ -10,7 +10,8 @@ decompose_LE(
   age_col = "Age",
   lx_col = "lx",
   Lx_col = "Lx",
-  Tx_col = "Tx"
+  Tx_col = "Tx",
+  graph = TRUE
 )
 }
 \arguments{
@@ -20,6 +21,10 @@ age and the life-table functions \code{lx}, \code{Lx} and \code{Tx} (as returned
 groups and radix.}
 
 \item{age_col, lx_col, Lx_col, Tx_col}{Column names in \code{lt1}/\code{lt2}.}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} bar chart of the
+age-specific contributions is attached to the result as \verb{$plot} and shown
+when the object is printed.}
 }
 \value{
 An object of class \code{dem_le_decomp}: a list with the \code{total}

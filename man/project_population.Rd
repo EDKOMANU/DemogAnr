@@ -16,6 +16,7 @@ project_population(
   net_migration_var = "net_migration",
   num_samples = 2000,
   random_seed = 42,
+  graph = TRUE,
   verbose = FALSE
 )
 }
@@ -41,6 +42,10 @@ project_population(
 \item{num_samples}{Integer. Number of simulation samples (default: 2000).}
 
 \item{random_seed}{Integer. Random seed for reproducibility (default: 42).}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
+projected trajectories (median and interquartile band, faceted by
+subregion) is attached to the result and shown when it is printed.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during projection.}
 }

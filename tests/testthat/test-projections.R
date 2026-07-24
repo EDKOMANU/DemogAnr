@@ -33,7 +33,7 @@ test_that("project_population returns quantile summaries and is reproducible", {
     TFR_var = "TFR", base_pop_var = "base_pop",
     region_var = "Country", death_rate_var = "death_rate",
     net_migration_var = "net_migration", subregion_var = "Region",
-    num_samples = 500
+    num_samples = 500, graph = FALSE
   )
   expect_true(all(c("region", "subregion", "year", "lower", "median", "mean", "upper") %in% names(proj)))
   expect_equal(nrow(proj), 2 * 4) # base year + 3 projected years, per region
@@ -46,7 +46,7 @@ test_that("project_population returns quantile summaries and is reproducible", {
     TFR_var = "TFR", base_pop_var = "base_pop",
     region_var = "Country", death_rate_var = "death_rate",
     net_migration_var = "net_migration", subregion_var = "Region",
-    num_samples = 500
+    num_samples = 500, graph = FALSE
   )
   expect_equal(proj, proj2)
 })

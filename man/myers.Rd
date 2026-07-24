@@ -4,7 +4,7 @@
 \alias{myers}
 \title{Myers' Blended Index of Age Heaping}
 \usage{
-myers(data, age_col, pop_col, lower = 10, upper = 89)
+myers(data, age_col, pop_col, lower = 10, upper = 89, graph = TRUE)
 }
 \arguments{
 \item{data}{A data frame with single years of age.}
@@ -15,6 +15,10 @@ myers(data, age_col, pop_col, lower = 10, upper = 89)
 
 \item{lower, upper}{The initial tabulation range (defaults 10 and 89). The
 blend extends nine years beyond \code{upper}.}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} bar chart of the
+deviation from 10\% by terminal digit is attached to the result and shown
+on print.}
 }
 \value{
 An object of class \code{dem_myers}: a list with the index value and a

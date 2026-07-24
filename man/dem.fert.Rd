@@ -12,6 +12,7 @@ dem.fert(
   women_col = NULL,
   births_col,
   age_interval = 5,
+  graph = TRUE,
   verbose = FALSE
 )
 }
@@ -31,6 +32,10 @@ Options: "CBR", "GFR", "ASFR", "TFR". Use "all" to calculate all metrics.}
 
 \item{age_interval}{Width (in years) of the age groups, used to compute TFR
 from the ASFRs (default 5, for standard 5-year age groups).}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
+age-specific fertility rates is attached to the result as \verb{$plot} and shown
+when the object is printed.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }

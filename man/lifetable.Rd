@@ -14,6 +14,7 @@ lifetable(
   nax_method = c("cd", "keyfitz"),
   nax = NULL,
   radix = 1e+05,
+  graph = TRUE,
   verbose = FALSE
 )
 }
@@ -40,6 +41,10 @@ five-year intervals). Ignored if \code{nax} is supplied.}
 group) borrowed from an external model life table. Overrides \code{nax_method}.}
 
 \item{radix}{Numeric: the life table radix, i.e. survivors at exact age 0 (default 100,000).}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} survival curve
+(\eqn{l_x} against age) is attached to the result as \verb{$plot} and shown when
+the object is printed.}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during computation.}
 }

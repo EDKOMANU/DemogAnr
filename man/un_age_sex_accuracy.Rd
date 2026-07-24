@@ -4,7 +4,14 @@
 \alias{un_age_sex_accuracy}
 \title{United Nations Age-Sex Accuracy Index}
 \usage{
-un_age_sex_accuracy(data, age_col, male_col, female_col, open_ended = TRUE)
+un_age_sex_accuracy(
+  data,
+  age_col,
+  male_col,
+  female_col,
+  open_ended = TRUE,
+  graph = TRUE
+)
 }
 \arguments{
 \item{data}{A data frame with one row per five-year age group.}
@@ -15,6 +22,9 @@ un_age_sex_accuracy(data, age_col, male_col, female_col, open_ended = TRUE)
 
 \item{open_ended}{Logical; if \code{TRUE} (default), the last age group is treated
 as open-ended.}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the male
+and female age ratios by age is attached to the result and shown on print.}
 }
 \value{
 An object of class \code{dem_unasa}: a list with the joint index, its

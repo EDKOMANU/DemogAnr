@@ -231,7 +231,8 @@ lifetable <- function(data,
 print.dem_lifetable <- function(x, ...) {
   cat(sprintf("Life table: e0 = %.2f, total life-table deaths = %.0f\n",
               x$metrics$LifeExpectancyAtBirth, x$metrics$TotalDeaths))
-  print(utils::head(x$lifetable, 10))
+  n_show <- min(10, nrow(x$lifetable))
+  print(x$lifetable[seq_len(n_show), ], row.names = FALSE)
   if (nrow(x$lifetable) > 10) cat(sprintf("... (%d age groups)\n", nrow(x$lifetable)))
   if (!is.null(x$plot)) print(x$plot)
   invisible(x)

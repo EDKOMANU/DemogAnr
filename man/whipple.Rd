@@ -4,7 +4,7 @@
 \alias{whipple}
 \title{Whipple's Index of Age Heaping}
 \usage{
-whipple(data, age_col, pop_col, lower = 23, upper = 62)
+whipple(data, age_col, pop_col, lower = 23, upper = 62, graph = TRUE)
 }
 \arguments{
 \item{data}{A data frame with single years of age.}
@@ -15,6 +15,9 @@ whipple(data, age_col, pop_col, lower = 23, upper = 62)
 
 \item{lower, upper}{Age range over which to evaluate the index (defaults 23
 and 62, the UN standard).}
+
+\item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} bar chart of the
+distribution by terminal digit is attached to the result and shown on print.}
 }
 \value{
 An object of class \code{dem_whipple}: a list with the index value, its

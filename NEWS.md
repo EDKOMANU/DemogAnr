@@ -19,6 +19,14 @@
 * New `decompose_LE()`: Arriaga decomposition of a difference in life
   expectancy at birth into age-specific direct and indirect/interaction
   effects.
+* Visual output: `dem.fert`, `dem.cdr`, `lifetable`, `project_population`,
+  `decompose_LE`, `myers`, `whipple` and `un_age_sex_accuracy` gain a
+  `graph = TRUE` argument. When enabled, a 'ggplot2' plot of the analysis is
+  attached to the result (`$plot`) and shown when the object is printed;
+  `plot()` methods are provided for each. Scripts that assign the result draw
+  nothing, so the behaviour is safe in batch code.
+* New `pyramid()`: draws a population pyramid (back-to-back bar chart by age
+  group and sex) with 'ggplot2'.
 * New age-quality / age-heaping indices: `whipple()` (Whipple's index of
   digit preference for 0 and 5), `myers()` (Myers' blended index over all ten
   terminal digits), `sex_ratio()` and `age_ratio()` helpers, and
