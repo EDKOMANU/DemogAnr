@@ -92,15 +92,15 @@ print.dem_whipple <- function(x, ...) {
               x$range[1], x$range[2]))
   cat("\nPopulation by terminal digit over the range:\n")
   tb <- x$table
-  tb$population <- format(round(tb$population), big.mark = ",", trim = TRUE)
+  tb$population <- format(round(tb$population), big.mark = ",", trim = TRUE, scientific = FALSE)
   tb$percent <- sprintf("%.2f", x$table$percent)
   print(tb, row.names = FALSE)
   cat(sprintf("\n  Population at ages ending 0 or 5 (%d-%d): %s\n",
               x$range[1] + 2, x$range[2] - 2,
-              format(round(x$numerator), big.mark = ",", trim = TRUE)))
+              format(round(x$numerator), big.mark = ",", trim = TRUE, scientific = FALSE)))
   cat(sprintf("  One fifth of the total (%d-%d):          %s\n",
               x$range[1], x$range[2],
-              format(round(x$expected), big.mark = ",", trim = TRUE)))
+              format(round(x$expected), big.mark = ",", trim = TRUE, scientific = FALSE)))
   cat(sprintf("  Whipple's index:                         %.1f (%s)\n",
               x$index, x$quality))
   if (!is.null(x$plot)) print(x$plot)
@@ -199,8 +199,8 @@ print.dem_myers <- function(x, ...) {
               x$range[1], x$range[2]))
   cat("\nBlended distribution by terminal digit:\n")
   tb <- x$table
-  tb$reported <- format(round(tb$reported), big.mark = ",", trim = TRUE)
-  tb$blended <- format(round(tb$blended), big.mark = ",", trim = TRUE)
+  tb$reported <- format(round(tb$reported), big.mark = ",", trim = TRUE, scientific = FALSE)
+  tb$blended <- format(round(tb$blended), big.mark = ",", trim = TRUE, scientific = FALSE)
   tb$percent <- sprintf("%.2f", x$table$percent)
   tb$deviation <- sprintf("%+.2f", x$table$deviation)
   print(tb, row.names = FALSE)
@@ -393,7 +393,7 @@ plot.dem_unasa <- function(x, ...) {
 print.dem_unasa <- function(x, ...) {
   cat("United Nations age-sex accuracy index\n\n")
   tb <- x$table
-  fmt_n <- function(v) format(round(v), big.mark = ",", trim = TRUE)
+  fmt_n <- function(v) format(round(v), big.mark = ",", trim = TRUE, scientific = FALSE)
   fmt_r <- function(v) ifelse(is.na(v), "", sprintf("%.1f", v))
   disp <- data.frame(
     age = as.character(tb$age),

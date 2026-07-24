@@ -103,11 +103,32 @@ standardize <- function(data, age_col, method = c("direct", "indirect"),
 
 #' @export
 print.dem_std <- function(x, ...) {
+  tb <- x$table
   if (x$method == "direct") {
-    cat(sprintf("Direct age-standardized rate: %.4f per %d\n",
+    cat("Direct age standardization\n\n")
+    disp <- data.frame(
+      age = as.character(tb$age),
+      rate = round(tb$rate, 6),
+      std_pop = format(round(tb$std_pop), big.mark = ",", trim = TRUE, scientific = FALSE),
+      weight = round(tb$weight, 4),
+      contribution = round(tb$contribution, 4),
+      stringsAsFactors = FALSE
+    )
+    print(disp, row.names = FALSE)
+    cat(sprintf("\n  Age-standardized rate: %.4f per %d\n",
                 x$standardized_rate, x$per))
   } else {
-    cat(sprintf("Indirect standardization\n  SMR: %.4f (observed %.0f / expected %.1f)\n",
+    cat("Indirect age standardization\n\n")
+    disp <- data.frame(
+      age = as.character(tb$age),
+      pop = format(round(tb$pop), big.mark = ",", trim = TRUE, scientific = FALSE),
+      deaths = format(round(tb$deaths), big.mark = ",", trim = TRUE, scientific = FALSE),
+      std_rate = round(tb$std_rate, 6),
+      expected_deaths = round(tb$expected_deaths, 1),
+      stringsAsFactors = FALSE
+    )
+    print(disp, row.names = FALSE)
+    cat(sprintf("\n  SMR: %.4f (observed %.0f / expected %.1f)\n",
                 x$SMR, x$observed_deaths, x$expected_deaths))
     if (!is.na(x$standardized_rate)) {
       cat(sprintf("  Indirectly standardized rate: %.4f per %d\n",
@@ -184,7 +205,9 @@ decompose_rates <- function(data, age_col, rate1_col, rate2_col,
     crude_rate1 = cdr1,
     crude_rate2 = cdr2,
     per = per,
-    table = data.frame(age = age, rate_effect = rate_contrib,
+    table = data.frame(age = age, rate1 = M1, rate2 = M2,
+                       share1 = c1, share2 = c2,
+                       rate_effect = rate_contrib,
                        composition_effect = comp_contrib)
   )
   class(out) <- "dem_decomp"
@@ -193,12 +216,22 @@ decompose_rates <- function(data, age_col, rate1_col, rate2_col,
 
 #' @export
 print.dem_decomp <- function(x, ...) {
-  cat("Kitagawa decomposition of a difference between two rates\n")
-  cat(sprintf("  Crude rate 1: %.4f per %d\n", x$crude_rate1, x$per))
+  cat("Kitagawa decomposition of a difference between two rates\n\n")
+  tb <- x$table
+  disp <- data.frame(
+    age = as.character(tb$age),
+    rate1 = round(tb$rate1, 5), rate2 = round(tb$rate2, 5),
+    share1 = round(tb$share1, 4), share2 = round(tb$share2, 4),
+    rate_effect = round(tb$rate_effect, 4),
+    comp_effect = round(tb$composition_effect, 4),
+    stringsAsFactors = FALSE
+  )
+  print(disp, row.names = FALSE)
+  cat(sprintf("\n  Crude rate 1: %.4f per %d\n", x$crude_rate1, x$per))
   cat(sprintf("  Crude rate 2: %.4f per %d\n", x$crude_rate2, x$per))
   cat(sprintf("  Total difference (1 - 2): %.4f\n", x$total))
-  cat(sprintf("    Rate component:        %.4f\n", x$rate_component))
-  cat(sprintf("    Composition component: %.4f\n", x$composition_component))
+  cat(sprintf("    Rate component (sum):        %.4f\n", x$rate_component))
+  cat(sprintf("    Composition component (sum): %.4f\n", x$composition_component))
   invisible(x)
 }
 
