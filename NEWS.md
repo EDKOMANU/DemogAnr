@@ -19,6 +19,9 @@
 * New `decompose_LE()`: Arriaga decomposition of a difference in life
   expectancy at birth into age-specific direct and indirect/interaction
   effects.
+* New bundled data set `ghmort2021`: age-specific population and deaths for
+  Ghana in 2021 by sex, for demonstrating sex-specific life tables and the
+  decomposition of the male-female gap in life expectancy.
 
 # DemogAnr 0.1.0
 

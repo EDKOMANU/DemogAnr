@@ -41,3 +41,18 @@ test_that("Arriaga LE decomposition sums to the e0 difference", {
   expect_equal(ad$direct + ad$indirect, ad$total, tolerance = 1e-6)
   expect_equal(ad$total, ad$e0_2 - ad$e0_1, tolerance = 1e-9)
 })
+
+test_that("Arriaga decomposition recovers a real sex gap (Ghana 2021)", {
+  data(ghmort2021, envir = environment())
+  male   <- subset(ghmort2021, Sex == "Male")
+  female <- subset(ghmort2021, Sex == "Female")
+  m <- lifetable(male,   age = "Age", pop = "Population", Dx = "Deaths",
+                 sex = "male",   nax_method = "keyfitz")
+  f <- lifetable(female, age = "Age", pop = "Population", Dx = "Deaths",
+                 sex = "female", nax_method = "keyfitz")
+  ad <- decompose_LE(m$lifetable, f$lifetable)
+  # females outlive males by a few years, and it decomposes additively
+  expect_gt(ad$total, 2)
+  expect_lt(ad$total, 6)
+  expect_equal(sum(ad$table$contribution), ad$total, tolerance = 1e-6)
+})

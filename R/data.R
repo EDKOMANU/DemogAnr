@@ -132,3 +132,23 @@
 #' }
 #' @source Simulated data.
 "testdata"
+
+#' Ghana age-specific mortality by sex, 2021
+#'
+#' Age-specific population and deaths for Ghana in 2021, separately for males
+#' and females, taken as the base year of a national age-specific mortality
+#' projection. Because it is split by sex, this data set is suitable for
+#' demonstrating sex-specific life tables and the decomposition of the
+#' male-female gap in life expectancy with [decompose_LE()].
+#'
+#' @format A data frame with 36 rows (18 age groups x 2 sexes) and 5 variables:
+#' \describe{
+#'   \item{Sex}{Character. "Male" or "Female".}
+#'   \item{Age}{Integer. Lower bound of the age group (0, 1, 5, 10, ..., 80).}
+#'   \item{AgeGroup}{Character. Age-group label ("<1", "1-4", ..., "80+").}
+#'   \item{Population}{Integer. Mid-year population (exposure) in the age group.}
+#'   \item{Deaths}{Integer. Deaths in the age group.}
+#' }
+#' @source Ghana Statistical Service, age-specific mortality projection
+#'   (2021 base year).
+"ghmort2021"

@@ -43,9 +43,14 @@ applies. The contributions sum to \eqn{e_0^2 - e_0^1}. Superscripts 1 and 2
 refer to \code{lt1} (baseline) and \code{lt2} (comparison).
 }
 \examples{
-data(gphc2010)
-m <- lifetable(gphc2010, age = "Age", pop = "Pop", Dx = "Deaths", sex = "male")
-f <- lifetable(gphc2010, age = "Age", pop = "Pop", Dx = "Deaths", sex = "female")
+# Male-female gap in life expectancy, Ghana 2021
+data(ghmort2021)
+male   <- subset(ghmort2021, Sex == "Male")
+female <- subset(ghmort2021, Sex == "Female")
+m <- lifetable(male,   age = "Age", pop = "Population", Dx = "Deaths",
+               sex = "male",   nax_method = "keyfitz")
+f <- lifetable(female, age = "Age", pop = "Population", Dx = "Deaths",
+               sex = "female", nax_method = "keyfitz")
 decompose_LE(m$lifetable, f$lifetable)
 
 }
