@@ -11,6 +11,8 @@ lifetable(
   pop = NULL,
   Dx = NULL,
   sex = c("male", "female"),
+  nax_method = c("cd", "keyfitz"),
+  nax = NULL,
   radix = 1e+05,
   verbose = FALSE
 )
@@ -29,6 +31,14 @@ lifetable(
 \item{sex}{Character: "male" (default) or "female". Determines the
 Coale-Demeny coefficients used for \eqn{a_0} and \eqn{{}_4a_1}.}
 
+\item{nax_method}{Character: how to set \eqn{{}_na_x} for interior age
+groups. Either \code{"cd"} (Coale-Demeny young ages, \eqn{n/2} elsewhere;
+default) or \code{"keyfitz"} (iterative Keyfitz 1966 refinement for interior
+five-year intervals). Ignored if \code{nax} is supplied.}
+
+\item{nax}{Optional numeric vector of \eqn{{}_na_x} values (one per age
+group) borrowed from an external model life table. Overrides \code{nax_method}.}
+
 \item{radix}{Numeric: the life table radix, i.e. survivors at exact age 0 (default 100,000).}
 
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during computation.}
@@ -41,21 +51,39 @@ A list containing:
 }
 }
 \description{
-This function computes a complete life table based on given mortality rates or raw mortality data.
-It takes a dataframe with the necessary inputs and computes standard life table metrics.
+This function computes a complete (or abridged) life table from given
+mortality rates or from raw deaths and population counts. It returns the
+standard life-table columns using textbook notation.
 }
 \details{
 Interval widths \eqn{n} are derived from the age column (e.g. ages 0, 1, 5,
 10, ... give widths 1, 4, 5, ...). Probabilities of dying are obtained from
 the death rates with the standard conversion
-\eqn{{}_nq_x = n \cdot {}_nM_x / (1 + (n - {}_na_x) \cdot {}_nM_x)}.
-The average person-years lived by those dying in the interval
-(\eqn{{}_na_x}) use the Coale-Demeny model values for ages 0 and 1-4
-(which depend on \code{sex} and the level of infant mortality; see Preston
-et al. 2001, Table 3.3), \eqn{n/2} for other closed intervals, and
-\eqn{1/{}_nM_x} for the open-ended interval. Person-years lived are
-\eqn{{}_nL_x = n \cdot l_{x+n} + {}_na_x \cdot {}_nd_x} for closed
-intervals and \eqn{l_x / M_x} for the open-ended interval.
+\eqn{{}_nq_x = n \cdot {}_nM_x / (1 + (n - {}_na_x) \cdot {}_nM_x)}, and
+person-years lived are \eqn{{}_nL_x = n \cdot l_{x+n} + {}_na_x \cdot {}_nd_x}
+for closed intervals and \eqn{l_x / M_x} for the open-ended interval.
+
+The average person-years lived by those dying in an interval,
+\eqn{{}_na_x}, controls the accuracy of the \eqn{{}_nM_x \to {}_nq_x}
+conversion. \code{lifetable()} offers three ways to set it, chosen with
+\code{nax_method}:
+\describe{
+\item{\code{"cd"} (default)}{Coale-Demeny model values for ages 0 and 1-4
+(sex-specific functions of \eqn{{}_1M_0}; Preston et al. 2001, Table
+3.3), \eqn{n/2} for other closed intervals, and \eqn{1/{}_nM_x} for the
+open interval. This reproduces the behaviour of earlier versions.}
+\item{\code{"keyfitz"}}{As \code{"cd"} for ages 0 and 1-4 and for the open interval,
+but for the interior five-year intervals \eqn{{}_na_x} is refined with
+the iterative Keyfitz (1966) formula
+\eqn{{}_na_x = n/2 + (n/24)({}_nd_{x+n} - {}_nd_{x-n})/{}_nd_x},
+which borrows information on the slope of the death distribution from
+the neighbouring age groups. The table is solved iteratively (a few
+iterations) because \eqn{{}_nd_x} itself depends on \eqn{{}_na_x}.}
+\item{user-supplied}{Pass a numeric vector to \code{nax} (one value per age
+group) to borrow \eqn{{}_na_x} values from any external model life table
+system, e.g. Coale-Demeny or the United Nations model life tables. This
+overrides \code{nax_method}.}
+}
 }
 \examples{
 # Example computing rates from deaths and population
@@ -64,9 +92,16 @@ res <- lifetable(data = gphc2010, age = "Age", pop = "Pop", Dx = "Deaths")
 res$metrics
 head(res$lifetable)
 
+# Refine nax for adult ages with the iterative Keyfitz method
+res2 <- lifetable(gphc2010, age = "Age", pop = "Pop", Dx = "Deaths",
+                  nax_method = "keyfitz")
+head(res2$lifetable[, c("Age", "nax", "nqx", "ex")])
+
 }
 \references{
 Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 3: The Life Table and Single Decrement Processes; Table 3.3 for the Coale-Demeny separation factors.)
+
+Keyfitz, N. (1966). A life table that agrees with the data. \emph{Journal of the American Statistical Association}, 61(314), 305-312. \doi{10.1080/01621459.1966.10480871}
 
 Chiang, C. L. (1984). \emph{The Life Table and Its Applications}. Malabar, FL: Robert E. Krieger Publishing.
 

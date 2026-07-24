@@ -1,3 +1,25 @@
+# DemogAnr 0.2.0
+
+* `lifetable()` gains a `nax_method` argument. In addition to the default
+  Coale-Demeny young-age factors with `n/2` elsewhere (`"cd"`), it can now
+  refine the average person-years lived in adult intervals with the iterative
+  Keyfitz (1966) method (`"keyfitz"`). A user-supplied `nax` vector can also be
+  passed to borrow separation factors from any external model life table
+  system (e.g. Coale-Demeny or United Nations). Default behaviour is unchanged.
+* New `chm_brass()`: indirect estimation of child mortality from children ever
+  born and children surviving classified by age of mother, using the Trussell
+  variant of the Brass method (United Nations Manual X, 1983). Supports all
+  four Coale-Demeny model families (North, South, East, West), returns q(x) for
+  x = 1, 2, 3, 5, 10, 15, 20 with reference periods and dates. Reproduces the
+  Manual X Panama (1976) worked example to the published precision.
+* New `standardize()`: direct and indirect age standardization of rates,
+  including the standardized mortality ratio (SMR).
+* New `decompose_rates()`: Kitagawa decomposition of a difference between two
+  crude rates into rate and age-composition components.
+* New `decompose_LE()`: Arriaga decomposition of a difference in life
+  expectancy at birth into age-specific direct and indirect/interaction
+  effects.
+
 # DemogAnr 0.1.0
 
 * Initial CRAN release.
