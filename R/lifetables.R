@@ -50,6 +50,9 @@
 #' @param nax Optional numeric vector of \eqn{{}_na_x} values (one per age
 #'   group) borrowed from an external model life table. Overrides `nax_method`.
 #' @param radix Numeric: the life table radix, i.e. survivors at exact age 0 (default 100,000).
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} survival curve
+#'   (\eqn{l_x} against age) is attached to the result as `$plot` and shown when
+#'   the object is printed.
 #' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during computation.
 #'
 #' @return
@@ -90,6 +93,7 @@ lifetable <- function(data,
                       nax_method = c("cd", "keyfitz"),
                       nax = NULL,
                       radix = 100000,
+                      graph = TRUE,
                       verbose = FALSE) {
   sex <- match.arg(sex)
   nax_method <- match.arg(nax_method)
@@ -217,5 +221,24 @@ lifetable <- function(data,
     LifeExpectancyAtBirth = lifetable$ex[1]
   )
 
-  return(list(metrics = metrics, lifetable = lifetable))
+  out <- list(metrics = metrics, lifetable = lifetable)
+  if (graph) out$plot <- .plot_survival(lifetable$Age, lifetable$lx)
+  class(out) <- "dem_lifetable"
+  return(out)
+}
+
+#' @export
+print.dem_lifetable <- function(x, ...) {
+  cat(sprintf("Life table: e0 = %.2f, total life-table deaths = %.0f\n",
+              x$metrics$LifeExpectancyAtBirth, x$metrics$TotalDeaths))
+  print(utils::head(x$lifetable, 10))
+  if (nrow(x$lifetable) > 10) cat(sprintf("... (%d age groups)\n", nrow(x$lifetable)))
+  if (!is.null(x$plot)) print(x$plot)
+  invisible(x)
+}
+
+#' @export
+plot.dem_lifetable <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call lifetable(..., graph = TRUE).")
+  x$plot
 }

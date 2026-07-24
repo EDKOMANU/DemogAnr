@@ -18,6 +18,8 @@
 #' @param pop_col Column name for the population count.
 #' @param lower,upper Age range over which to evaluate the index (defaults 23
 #'   and 62, the UN standard).
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} bar chart of the
+#'   distribution by terminal digit is attached to the result and shown on print.
 #'
 #' @return An object of class `dem_whipple`: a list with the index value, its
 #'   quality band, the numerator/denominator used, and a `table` giving the
@@ -35,7 +37,7 @@
 #' United Nations (1955). \emph{Manual II: Methods of Appraisal of Quality of Basic Data for Population Estimates}. New York: United Nations.
 #'
 #' @export
-whipple <- function(data, age_col, pop_col, lower = 23, upper = 62) {
+whipple <- function(data, age_col, pop_col, lower = 23, upper = 62, graph = TRUE) {
   if (!is.data.frame(data)) stop("'data' must be a data frame.")
   if (!(age_col %in% names(data)) || !(pop_col %in% names(data))) {
     stop("age_col and pop_col must exist in 'data'.")
@@ -73,8 +75,15 @@ whipple <- function(data, age_col, pop_col, lower = 23, upper = 62) {
   out <- list(index = wi, quality = band, numerator = numerator,
               denominator = denominator, expected = expected,
               range = c(lower, upper), table = tbl)
+  if (graph) out$plot <- .plot_whipple(tbl)
   class(out) <- "dem_whipple"
   out
+}
+
+#' @export
+plot.dem_whipple <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call whipple(..., graph = TRUE).")
+  x$plot
 }
 
 #' @export
@@ -94,6 +103,7 @@ print.dem_whipple <- function(x, ...) {
               format(round(x$expected), big.mark = ",", trim = TRUE)))
   cat(sprintf("  Whipple's index:                         %.1f (%s)\n",
               x$index, x$quality))
+  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -121,6 +131,9 @@ print.dem_whipple <- function(x, ...) {
 #' @param pop_col Column name for the population count.
 #' @param lower,upper The initial tabulation range (defaults 10 and 89). The
 #'   blend extends nine years beyond `upper`.
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} bar chart of the
+#'   deviation from 10% by terminal digit is attached to the result and shown
+#'   on print.
 #'
 #' @return An object of class `dem_myers`: a list with the index value and a
 #'   `table` giving, for each terminal digit, the reported and blended counts,
@@ -138,7 +151,7 @@ print.dem_whipple <- function(x, ...) {
 #' Rodriguez, G. (2015). \emph{Demographic Methods} (course notes). Princeton University. \url{https://grodri.github.io/demography/}
 #'
 #' @export
-myers <- function(data, age_col, pop_col, lower = 10, upper = 89) {
+myers <- function(data, age_col, pop_col, lower = 10, upper = 89, graph = TRUE) {
   if (!is.data.frame(data)) stop("'data' must be a data frame.")
   if (!(age_col %in% names(data)) || !(pop_col %in% names(data))) {
     stop("age_col and pop_col must exist in 'data'.")
@@ -169,8 +182,15 @@ myers <- function(data, age_col, pop_col, lower = 10, upper = 89) {
                     percent = as.numeric(pct),
                     deviation = as.numeric(pct - 10))
   out <- list(index = index, table = tbl, range = c(lower, upper))
+  if (graph) out$plot <- .plot_myers(tbl)
   class(out) <- "dem_myers"
   out
+}
+
+#' @export
+plot.dem_myers <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call myers(..., graph = TRUE).")
+  x$plot
 }
 
 #' @export
@@ -186,6 +206,7 @@ print.dem_myers <- function(x, ...) {
   print(tb, row.names = FALSE)
   cat(sprintf("\n  Myers' index (half the sum of |deviations|): %.2f\n", x$index))
   cat("  (0 = no digit preference, 90 = all ages at one digit)\n")
+  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -284,6 +305,8 @@ age_ratio <- function(data, age_col, pop_col, open_ended = TRUE) {
 #' @param male_col,female_col Column names for the male and female counts.
 #' @param open_ended Logical; if `TRUE` (default), the last age group is treated
 #'   as open-ended.
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the male
+#'   and female age ratios by age is attached to the result and shown on print.
 #'
 #' @return An object of class `dem_unasa`: a list with the joint index, its
 #'   components (`SRS`, `ARSM`, `ARSF`), the quality band, and a full `table`
@@ -317,7 +340,7 @@ age_ratio <- function(data, age_col, pop_col, open_ended = TRUE) {
 #'
 #' @export
 un_age_sex_accuracy <- function(data, age_col, male_col, female_col,
-                                open_ended = TRUE) {
+                                open_ended = TRUE, graph = TRUE) {
   if (!is.data.frame(data)) stop("'data' must be a data frame.")
   m <- as.numeric(data[[male_col]]); f <- as.numeric(data[[female_col]])
   k <- length(m)
@@ -355,8 +378,15 @@ un_age_sex_accuracy <- function(data, age_col, male_col, female_col,
 
   out <- list(index = joint, SRS = srs, ARSM = arsm, ARSF = arsf,
               quality = band, table = tbl)
+  if (graph) out$plot <- .plot_unasa(tbl)
   class(out) <- "dem_unasa"
   out
+}
+
+#' @export
+plot.dem_unasa <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call un_age_sex_accuracy(..., graph = TRUE).")
+  x$plot
 }
 
 #' @export
@@ -383,5 +413,6 @@ print.dem_unasa <- function(x, ...) {
   cat(sprintf("  Age ratio score, females (ARSF): %.2f\n", x$ARSF))
   cat(sprintf("  Joint index (3*SRS + ARSM + ARSF): %.2f (%s)\n",
               x$index, x$quality))
+  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }

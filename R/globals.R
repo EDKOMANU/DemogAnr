@@ -1,1 +1,7 @@
-utils::globalVariables(c("standards", "start_age", "age"))
+utils::globalVariables(c(
+  "standards", "start_age", "age",
+  # plotting helper column names (built inside plot constructors)
+  "value", "lx", "year", "subregion", "lo", "hi", "med",
+  "contribution", "digit", "deviation", "percent", "ratio", "sex",
+  "count", "x", "y", "sign"
+))

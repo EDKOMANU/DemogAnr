@@ -225,6 +225,9 @@ print.dem_decomp <- function(x, ...) {
 #'   `lifetable` component of [lifetable()]). Both must share the same age
 #'   groups and radix.
 #' @param age_col,lx_col,Lx_col,Tx_col Column names in `lt1`/`lt2`.
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} bar chart of the
+#'   age-specific contributions is attached to the result as `$plot` and shown
+#'   when the object is printed.
 #'
 #' @return An object of class `dem_le_decomp`: a list with the `total`
 #'   difference in life expectancy at birth, its decomposition into `direct` and
@@ -248,7 +251,8 @@ print.dem_decomp <- function(x, ...) {
 #'
 #' @export
 decompose_LE <- function(lt1, lt2, age_col = "Age",
-                         lx_col = "lx", Lx_col = "Lx", Tx_col = "Tx") {
+                         lx_col = "lx", Lx_col = "Lx", Tx_col = "Tx",
+                         graph = TRUE) {
   for (df in list(lt1, lt2)) {
     for (nm in c(age_col, lx_col, Lx_col, Tx_col)) {
       if (!(nm %in% names(df))) stop("Column not found in a life table: ", nm)
@@ -283,6 +287,7 @@ decompose_LE <- function(lt1, lt2, age_col = "Age",
     table = data.frame(age = age, direct = direct, indirect = indirect,
                        contribution = contribution)
   )
+  if (graph) out$plot <- .plot_le_decomp(out$table)
   class(out) <- "dem_le_decomp"
   out
 }
@@ -299,5 +304,12 @@ print.dem_le_decomp <- function(x, ...) {
   tb <- x$table
   tb[-1] <- lapply(tb[-1], function(v) round(v, 4))
   print(tb, row.names = FALSE)
+  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
+}
+
+#' @export
+plot.dem_le_decomp <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call decompose_LE(..., graph = TRUE).")
+  x$plot
 }

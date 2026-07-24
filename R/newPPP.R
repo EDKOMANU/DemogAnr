@@ -25,6 +25,9 @@
 #' @param net_migration_var Character. Column name for net migration.
 #' @param num_samples Integer. Number of simulation samples (default: 2000).
 #' @param random_seed Integer. Random seed for reproducibility (default: 42).
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the
+#'   projected trajectories (median and interquartile band, faceted by
+#'   subregion) is attached to the result and shown when it is printed.
 #' @param verbose Logical. If `TRUE`, prints detailed status messages to the console during projection.
 #'
 #' @return A data frame with one row per region, subregion, and year,
@@ -58,7 +61,7 @@ project_population <- function(
     region_var = "region", subregion_var = "subregion",
     base_pop_var = "base_pop", TFR_var = "TFR",
     death_rate_var = "death_rate", net_migration_var = "net_migration",
-    num_samples = 2000, random_seed = 42, verbose = FALSE
+    num_samples = 2000, random_seed = 42, graph = TRUE, verbose = FALSE
 ) {
   set.seed(random_seed)
 
@@ -144,5 +147,27 @@ project_population <- function(
   # Combine all region results
   results_df <- do.call(rbind, results_list)
   rownames(results_df) <- NULL
+  if (graph) {
+    attr(results_df, "plot") <- .plot_projection(results_df)
+    class(results_df) <- c("dem_projection", "data.frame")
+  }
   return(results_df)
+}
+
+#' @export
+print.dem_projection <- function(x, ...) {
+  p <- attr(x, "plot")
+  y <- x
+  attr(y, "plot") <- NULL
+  class(y) <- "data.frame"
+  print(y, ...)
+  if (!is.null(p)) print(p)
+  invisible(x)
+}
+
+#' @export
+plot.dem_projection <- function(x, ...) {
+  p <- attr(x, "plot")
+  if (is.null(p)) stop("No plot available; call project_population(..., graph = TRUE).")
+  p
 }

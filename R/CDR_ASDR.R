@@ -8,6 +8,9 @@
 #' @param age_col The column name for age groups (used for "ASDR").
 #' @param population_col The column name for total population.
 #' @param deaths_col The column name for total deaths.
+#' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the
+#'   age-specific death rates is attached to the result as `$plot` and shown
+#'   when the object is printed.
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
 #' @return A list of named outputs for the requested death rate calculations.
@@ -27,7 +30,7 @@
 #' Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials of Demography} (2nd ed.). San Diego: Elsevier Academic Press. ISBN 978-0126419559. (Chapter on mortality measures.)
 #'
 #' @export
-dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col, verbose = FALSE) {
+dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col, graph = TRUE, verbose = FALSE) {
   # Validate inputs
   if (!is.data.frame(data)) stop("Input 'data' must be a dataframe.")
   if (identical(type, "all")) type <- c("CDR", "ASDR")
@@ -60,6 +63,10 @@ dem.cdr <- function(data, type, age_col = NULL, population_col, deaths_col, verb
   }
 
   out <- list(results = results, modified_data = data)
+  if (graph && "ASDR" %in% names(results) && !is.null(age_col)) {
+    out$plot <- .plot_series(data[[age_col]], results$ASDR,
+                             "ASDR (per 1,000)", "Age-specific death rates")
+  }
   class(out) <- "dem_cdr"
   return(out)
 }
@@ -74,7 +81,14 @@ print.dem_cdr <- function(x, ...) {
     cat("Age-Specific Death Rate (ASDR):\n")
     print(x$results$ASDR)
   }
+  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
+}
+
+#' @export
+plot.dem_cdr <- function(x, ...) {
+  if (is.null(x$plot)) stop("No plot available; call dem.cdr(..., graph = TRUE).")
+  x$plot
 }
 
 
