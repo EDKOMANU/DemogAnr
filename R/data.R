@@ -152,3 +152,23 @@
 #' @source Ghana Statistical Service, age-specific mortality projection
 #'   (2021 base year).
 "ghmort2021"
+
+#' Ghana single-year age distribution by sex, 2021
+#'
+#' Population by single year of age (0 to 79, with 80 representing the open
+#' age group 80+), separately for males and females, Ghana 2021. Single-year
+#' age counts are the input required by the digit-preference indices
+#' [whipple()] and [myers()], and can be grouped into five-year age groups for
+#' [un_age_sex_accuracy()].
+#'
+#' @format A data frame with 162 rows (81 single ages x 2 sexes) and 3
+#'   variables:
+#' \describe{
+#'   \item{Sex}{Character. "Male" or "Female".}
+#'   \item{Age}{Integer. Single year of age; 0 is age <1 and 80 is the open
+#'     interval 80+.}
+#'   \item{Population}{Integer. Population count.}
+#' }
+#' @source Ghana Statistical Service, 2021 Population and Housing Census
+#'   (national single-year age distribution).
+"ghpop2021"

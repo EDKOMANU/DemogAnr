@@ -19,6 +19,14 @@
 * New `decompose_LE()`: Arriaga decomposition of a difference in life
   expectancy at birth into age-specific direct and indirect/interaction
   effects.
+* New age-quality / age-heaping indices: `whipple()` (Whipple's index of
+  digit preference for 0 and 5), `myers()` (Myers' blended index over all ten
+  terminal digits), `sex_ratio()` and `age_ratio()` helpers, and
+  `un_age_sex_accuracy()` (the United Nations joint age-sex accuracy index).
+  `un_age_sex_accuracy()` reproduces the Ghana 1960 worked example of Kpedekpo
+  (1982); Myers follows Rodriguez (2015) / Myers (1940).
+* New bundled data set `ghpop2021`: Ghana 2021 single-year age distribution by
+  sex, for the digit-preference indices.
 * New bundled data set `ghmort2021`: age-specific population and deaths for
   Ghana in 2021 by sex, for demonstrating sex-specific life tables and the
   decomposition of the male-female gap in life expectancy.
