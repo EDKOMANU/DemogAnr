@@ -21,9 +21,13 @@ ratio.
 Computes the sex ratio (males per 100 females) for each age group.
 }
 \examples{
-d <- data.frame(age = c("0-4","5-9","10-14"),
-                m = c(5100, 4800, 4500), f = c(5000, 4700, 4600))
-sex_ratio(d, "age", "m", "f")
+data(ghpop2021)
+# collapse single years into five-year groups, by sex
+g <- within(ghpop2021, grp <- ifelse(Age >= 80, 80, (Age \%/\% 5) * 5))
+wide <- tapply(g$Population, list(g$grp, g$Sex), sum)
+sr_data <- data.frame(age = rownames(wide),
+                      m = wide[, "Male"], f = wide[, "Female"])
+head(sex_ratio(sr_data, "age", "m", "f"))
 
 }
 \references{

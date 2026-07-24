@@ -17,9 +17,10 @@ un_age_sex_accuracy(data, age_col, male_col, female_col, open_ended = TRUE)
 as open-ended.}
 }
 \value{
-An object of class \code{dem_unasa}: a list with the joint index and its
-components (\code{SRS}, \code{ARSM}, \code{ARSF}), the quality band, and the underlying
-\code{sex_ratios} and \code{age_ratios} tables.
+An object of class \code{dem_unasa}: a list with the joint index, its
+components (\code{SRS}, \code{ARSM}, \code{ARSF}), the quality band, and a full \code{table}
+with the male and female counts, their age ratios and deviations, the sex
+ratio and its successive differences.
 }
 \description{
 Computes the United Nations joint age-sex accuracy index, a summary measure
@@ -38,7 +39,15 @@ United Nations guidance regards values under 20 as accurate, 20-40 as
 inaccurate, and over 40 as highly inaccurate.
 }
 \examples{
-# United Nations / Kpedekpo worked example: Ghana, 1960 census
+# Ghana 2021, five-year age groups by sex (from the single-year data)
+data(ghpop2021)
+g <- within(ghpop2021, grp <- ifelse(Age >= 80, 80, (Age \%/\% 5) * 5))
+wide <- tapply(g$Population, list(g$grp, g$Sex), sum)
+five <- data.frame(age = as.integer(rownames(wide)),
+                   males = wide[, "Male"], females = wide[, "Female"])
+un_age_sex_accuracy(five, "age", "males", "females")
+
+# Reproduces the published 1960 Ghana census worked example (Kpedekpo 1982)
 ghana1960 <- data.frame(
   age = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
           "40-44","45-49","50-54","55-59","60-64","65+"),

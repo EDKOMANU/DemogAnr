@@ -18,7 +18,8 @@ and 62, the UN standard).}
 }
 \value{
 An object of class \code{dem_whipple}: a list with the index value, its
-quality band, and the numerator/denominator used.
+quality band, the numerator/denominator used, and a \code{table} giving the
+population and share by terminal digit over the range.
 }
 \description{
 Computes Whipple's index, a measure of preference for ages ending in the
@@ -35,11 +36,10 @@ under 105 highly accurate, 105-109.9 fairly accurate, 110-124.9 approximate,
 125-174.9 rough, and 175 or more very rough.
 }
 \examples{
-# Data with strong heaping on multiples of five
-ages <- 20:65
-pop <- ifelse(ages \%\% 5 == 0, 5000, 1000)
-d <- data.frame(age = ages, pop = pop)
-whipple(d, "age", "pop")
+# Ghana 2021 single-year ages, males
+data(ghpop2021)
+male <- subset(ghpop2021, Sex == "Male")
+whipple(male, age_col = "Age", pop_col = "Population")
 
 }
 \references{

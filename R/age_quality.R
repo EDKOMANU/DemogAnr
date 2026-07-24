@@ -20,14 +20,14 @@
 #'   and 62, the UN standard).
 #'
 #' @return An object of class `dem_whipple`: a list with the index value, its
-#'   quality band, and the numerator/denominator used.
+#'   quality band, the numerator/denominator used, and a `table` giving the
+#'   population and share by terminal digit over the range.
 #'
 #' @examples
-#' # Data with strong heaping on multiples of five
-#' ages <- 20:65
-#' pop <- ifelse(ages %% 5 == 0, 5000, 1000)
-#' d <- data.frame(age = ages, pop = pop)
-#' whipple(d, "age", "pop")
+#' # Ghana 2021 single-year ages, males
+#' data(ghpop2021)
+#' male <- subset(ghpop2021, Sex == "Male")
+#' whipple(male, age_col = "Age", pop_col = "Population")
 #'
 #' @references
 #' Shryock, H. S., & Siegel, J. S. (1976). \emph{The Methods and Materials of Demography}. New York: Academic Press.
@@ -51,25 +51,49 @@ whipple <- function(data, age_col, pop_col, lower = 23, upper = 62) {
   mult5 <- age %% 5 == 0 & age >= (lower + 2) & age <= (upper - 2)
   numerator <- sum(pop[mult5])
   denominator <- sum(pop[in_range])
-
-  wi <- 100 * numerator / (denominator / 5)
+  expected <- denominator / 5
+  wi <- 100 * numerator / expected
 
   band <- if (wi < 105) "highly accurate" else
     if (wi < 110) "fairly accurate" else
     if (wi < 125) "approximate" else
     if (wi < 175) "rough" else "very rough"
 
+  # Distribution by terminal digit over the range (expected share 10% each)
+  d <- age[in_range] %% 10
+  by_digit <- tapply(pop[in_range], d, sum)
+  by_digit <- by_digit[as.character(0:9)]
+  by_digit[is.na(by_digit)] <- 0
+  tbl <- data.frame(
+    terminal_digit = 0:9,
+    population = as.numeric(by_digit),
+    percent = 100 * as.numeric(by_digit) / denominator
+  )
+
   out <- list(index = wi, quality = band, numerator = numerator,
-              denominator = denominator, range = c(lower, upper))
+              denominator = denominator, expected = expected,
+              range = c(lower, upper), table = tbl)
   class(out) <- "dem_whipple"
   out
 }
 
 #' @export
 print.dem_whipple <- function(x, ...) {
-  cat(sprintf("Whipple's index (ages %d-%d): %.1f\n",
-              x$range[1], x$range[2], x$index))
-  cat(sprintf("  Data quality: %s\n", x$quality))
+  cat(sprintf("Whipple's index of age heaping (ages %d-%d)\n",
+              x$range[1], x$range[2]))
+  cat("\nPopulation by terminal digit over the range:\n")
+  tb <- x$table
+  tb$population <- format(round(tb$population), big.mark = ",", trim = TRUE)
+  tb$percent <- sprintf("%.2f", x$table$percent)
+  print(tb, row.names = FALSE)
+  cat(sprintf("\n  Population at ages ending 0 or 5 (%d-%d): %s\n",
+              x$range[1] + 2, x$range[2] - 2,
+              format(round(x$numerator), big.mark = ",", trim = TRUE)))
+  cat(sprintf("  One fifth of the total (%d-%d):          %s\n",
+              x$range[1], x$range[2],
+              format(round(x$expected), big.mark = ",", trim = TRUE)))
+  cat(sprintf("  Whipple's index:                         %.1f (%s)\n",
+              x$index, x$quality))
   invisible(x)
 }
 
@@ -89,8 +113,8 @@ print.dem_whipple <- function(x, ...) {
 #' (Rodriguez 2015; equivalent to Myers 1940). The blended counts by terminal
 #' digit are expressed as percentages \eqn{p_d}, and the index is
 #' \deqn{M = \tfrac{1}{2}\sum_{d=0}^{9} |p_d - 10|,}
-#' ranging from 0 (no heaping) to 90 (all ages at one digit). Note that the data
-#' should extend up to age \eqn{upper + 9} for the blending weights to apply.
+#' ranging from 0 (no heaping) to 90 (all ages at one digit). The data should
+#' extend up to age \eqn{upper + 9} for the blending weights to apply.
 #'
 #' @param data A data frame with single years of age.
 #' @param age_col Column name for single year of age.
@@ -99,12 +123,14 @@ print.dem_whipple <- function(x, ...) {
 #'   blend extends nine years beyond `upper`.
 #'
 #' @return An object of class `dem_myers`: a list with the index value and a
-#'   `table` of blended counts and percentages by terminal digit.
+#'   `table` giving, for each terminal digit, the reported and blended counts,
+#'   the blended percentage, and its deviation from 10.
 #'
 #' @examples
-#' # Uniform single-year population: no heaping
-#' d <- data.frame(age = 0:99, pop = rep(1000, 100))
-#' myers(d, "age", "pop", lower = 10, upper = 89)
+#' # Ghana 2021 single-year ages, males (blend over 10-69)
+#' data(ghpop2021)
+#' male <- subset(ghpop2021, Sex == "Male")
+#' myers(male, age_col = "Age", pop_col = "Population", lower = 10, upper = 69)
 #'
 #' @references
 #' Myers, R. J. (1940). Errors and bias in the reporting of ages in census data. \emph{Transactions of the Actuarial Society of America}, 41(2), 395-415.
@@ -130,13 +156,16 @@ myers <- function(data, age_col, pop_col, lower = 10, upper = 89) {
        ifelse(age <= upper + 9, upper + 10 - age, 0))))
 
   digit <- age %% 10
+  reported <- tapply(pop * (w > 0), digit, sum)   # counts actually used
   blended <- tapply(pop * w, digit, sum)
-  blended <- blended[as.character(0:9)]
-  blended[is.na(blended)] <- 0
+  reported <- reported[as.character(0:9)]; reported[is.na(reported)] <- 0
+  blended <- blended[as.character(0:9)];   blended[is.na(blended)] <- 0
   pct <- 100 * blended / sum(blended)
   index <- sum(abs(pct - 10)) / 2
 
-  tbl <- data.frame(digit = 0:9, blended = as.numeric(blended),
+  tbl <- data.frame(digit = 0:9,
+                    reported = as.numeric(reported),
+                    blended = as.numeric(blended),
                     percent = as.numeric(pct),
                     deviation = as.numeric(pct - 10))
   out <- list(index = index, table = tbl, range = c(lower, upper))
@@ -146,8 +175,16 @@ myers <- function(data, age_col, pop_col, lower = 10, upper = 89) {
 
 #' @export
 print.dem_myers <- function(x, ...) {
-  cat(sprintf("Myers' blended index (ages %d-%d): %.2f\n",
-              x$range[1], x$range[2], x$index))
+  cat(sprintf("Myers' blended index of age heaping (ages %d-%d)\n",
+              x$range[1], x$range[2]))
+  cat("\nBlended distribution by terminal digit:\n")
+  tb <- x$table
+  tb$reported <- format(round(tb$reported), big.mark = ",", trim = TRUE)
+  tb$blended <- format(round(tb$blended), big.mark = ",", trim = TRUE)
+  tb$percent <- sprintf("%.2f", x$table$percent)
+  tb$deviation <- sprintf("%+.2f", x$table$deviation)
+  print(tb, row.names = FALSE)
+  cat(sprintf("\n  Myers' index (half the sum of |deviations|): %.2f\n", x$index))
   cat("  (0 = no digit preference, 90 = all ages at one digit)\n")
   invisible(x)
 }
@@ -165,9 +202,13 @@ print.dem_myers <- function(x, ...) {
 #'   ratio.
 #'
 #' @examples
-#' d <- data.frame(age = c("0-4","5-9","10-14"),
-#'                 m = c(5100, 4800, 4500), f = c(5000, 4700, 4600))
-#' sex_ratio(d, "age", "m", "f")
+#' data(ghpop2021)
+#' # collapse single years into five-year groups, by sex
+#' g <- within(ghpop2021, grp <- ifelse(Age >= 80, 80, (Age %/% 5) * 5))
+#' wide <- tapply(g$Population, list(g$grp, g$Sex), sum)
+#' sr_data <- data.frame(age = rownames(wide),
+#'                       m = wide[, "Male"], f = wide[, "Female"])
+#' head(sex_ratio(sr_data, "age", "m", "f"))
 #'
 #' @references
 #' Shryock, H. S., & Siegel, J. S. (1976). \emph{The Methods and Materials of Demography}. New York: Academic Press.
@@ -244,12 +285,21 @@ age_ratio <- function(data, age_col, pop_col, open_ended = TRUE) {
 #' @param open_ended Logical; if `TRUE` (default), the last age group is treated
 #'   as open-ended.
 #'
-#' @return An object of class `dem_unasa`: a list with the joint index and its
-#'   components (`SRS`, `ARSM`, `ARSF`), the quality band, and the underlying
-#'   `sex_ratios` and `age_ratios` tables.
+#' @return An object of class `dem_unasa`: a list with the joint index, its
+#'   components (`SRS`, `ARSM`, `ARSF`), the quality band, and a full `table`
+#'   with the male and female counts, their age ratios and deviations, the sex
+#'   ratio and its successive differences.
 #'
 #' @examples
-#' # United Nations / Kpedekpo worked example: Ghana, 1960 census
+#' # Ghana 2021, five-year age groups by sex (from the single-year data)
+#' data(ghpop2021)
+#' g <- within(ghpop2021, grp <- ifelse(Age >= 80, 80, (Age %/% 5) * 5))
+#' wide <- tapply(g$Population, list(g$grp, g$Sex), sum)
+#' five <- data.frame(age = as.integer(rownames(wide)),
+#'                    males = wide[, "Male"], females = wide[, "Female"])
+#' un_age_sex_accuracy(five, "age", "males", "females")
+#'
+#' # Reproduces the published 1960 Ghana census worked example (Kpedekpo 1982)
 #' ghana1960 <- data.frame(
 #'   age = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
 #'           "40-44","45-49","50-54","55-59","60-64","65+"),
@@ -272,38 +322,66 @@ un_age_sex_accuracy <- function(data, age_col, male_col, female_col,
   m <- as.numeric(data[[male_col]]); f <- as.numeric(data[[female_col]])
   k <- length(m)
 
-  # Sex ratios over the closed age groups
-  closed <- if (open_ended) 1:(k - 1) else 1:k
-  sr <- 100 * m[closed] / f[closed]
-  srs <- mean(abs(diff(sr)))
-
-  # Age ratios (males and females), excluding first, open, and pre-open groups
+  # Age ratios (males and females)
   arm <- age_ratio(data.frame(a = data[[age_col]], p = m), "a", "p", open_ended)
   arf <- age_ratio(data.frame(a = data[[age_col]], p = f), "a", "p", open_ended)
   arsm <- mean(abs(arm$deviation), na.rm = TRUE)
   arsf <- mean(abs(arf$deviation), na.rm = TRUE)
 
+  # Sex ratios over the closed age groups, and their successive differences
+  sr <- 100 * m / f
+  sr_used <- if (open_ended) c(rep(TRUE, k - 1), FALSE) else rep(TRUE, k)
+  sr[!sr_used] <- NA
+  sr_diff <- rep(NA_real_, k)
+  used_idx <- which(sr_used)
+  if (length(used_idx) >= 2) {
+    for (j in 2:length(used_idx)) {
+      i <- used_idx[j]
+      sr_diff[i] <- abs(sr[i] - sr[used_idx[j - 1]])
+    }
+  }
+  srs <- mean(sr_diff, na.rm = TRUE)
+
   joint <- 3 * srs + arsm + arsf
   band <- if (joint < 20) "accurate" else
     if (joint <= 40) "inaccurate" else "highly inaccurate"
 
-  out <- list(
-    index = joint, SRS = srs, ARSM = arsm, ARSF = arsf, quality = band,
-    sex_ratios = data.frame(age = data[[age_col]][closed], sex_ratio = sr),
-    age_ratios = data.frame(age = data[[age_col]], male_ratio = arm$age_ratio,
-                            female_ratio = arf$age_ratio)
+  tbl <- data.frame(
+    age = data[[age_col]],
+    males = m, male_ratio = arm$age_ratio, male_dev = arm$deviation,
+    females = f, female_ratio = arf$age_ratio, female_dev = arf$deviation,
+    sex_ratio = sr, sr_diff = sr_diff
   )
+
+  out <- list(index = joint, SRS = srs, ARSM = arsm, ARSF = arsf,
+              quality = band, table = tbl)
   class(out) <- "dem_unasa"
   out
 }
 
 #' @export
 print.dem_unasa <- function(x, ...) {
-  cat("United Nations age-sex accuracy index\n")
-  cat(sprintf("  Sex ratio score (SRS):        %.2f\n", x$SRS))
-  cat(sprintf("  Age ratio score, males:       %.2f\n", x$ARSM))
-  cat(sprintf("  Age ratio score, females:     %.2f\n", x$ARSF))
-  cat(sprintf("  Joint index (3*SRS+ARSM+ARSF): %.2f\n", x$index))
-  cat(sprintf("  Assessment: %s\n", x$quality))
+  cat("United Nations age-sex accuracy index\n\n")
+  tb <- x$table
+  fmt_n <- function(v) format(round(v), big.mark = ",", trim = TRUE)
+  fmt_r <- function(v) ifelse(is.na(v), "", sprintf("%.1f", v))
+  disp <- data.frame(
+    age = as.character(tb$age),
+    males = fmt_n(tb$males),
+    m_ratio = fmt_r(tb$male_ratio),
+    m_dev = ifelse(is.na(tb$male_dev), "", sprintf("%+.1f", tb$male_dev)),
+    females = fmt_n(tb$females),
+    f_ratio = fmt_r(tb$female_ratio),
+    f_dev = ifelse(is.na(tb$female_dev), "", sprintf("%+.1f", tb$female_dev)),
+    sex_ratio = fmt_r(tb$sex_ratio),
+    sr_diff = fmt_r(tb$sr_diff),
+    stringsAsFactors = FALSE
+  )
+  print(disp, row.names = FALSE)
+  cat(sprintf("\n  Sex ratio score (SRS):           %.2f\n", x$SRS))
+  cat(sprintf("  Age ratio score, males (ARSM):   %.2f\n", x$ARSM))
+  cat(sprintf("  Age ratio score, females (ARSF): %.2f\n", x$ARSF))
+  cat(sprintf("  Joint index (3*SRS + ARSM + ARSF): %.2f (%s)\n",
+              x$index, x$quality))
   invisible(x)
 }

@@ -18,7 +18,8 @@ blend extends nine years beyond \code{upper}.}
 }
 \value{
 An object of class \code{dem_myers}: a list with the index value and a
-\code{table} of blended counts and percentages by terminal digit.
+\code{table} giving, for each terminal digit, the reported and blended counts,
+the blended percentage, and its deviation from 10.
 }
 \description{
 Computes Myers' blended index, which measures preference for or avoidance of
@@ -34,13 +35,14 @@ ages just above (\eqn{upper+1} to \eqn{upper+9}) receive weights 9 to 1
 (Rodriguez 2015; equivalent to Myers 1940). The blended counts by terminal
 digit are expressed as percentages \eqn{p_d}, and the index is
 \deqn{M = \tfrac{1}{2}\sum_{d=0}^{9} |p_d - 10|,}
-ranging from 0 (no heaping) to 90 (all ages at one digit). Note that the data
-should extend up to age \eqn{upper + 9} for the blending weights to apply.
+ranging from 0 (no heaping) to 90 (all ages at one digit). The data should
+extend up to age \eqn{upper + 9} for the blending weights to apply.
 }
 \examples{
-# Uniform single-year population: no heaping
-d <- data.frame(age = 0:99, pop = rep(1000, 100))
-myers(d, "age", "pop", lower = 10, upper = 89)
+# Ghana 2021 single-year ages, males (blend over 10-69)
+data(ghpop2021)
+male <- subset(ghpop2021, Sex == "Male")
+myers(male, age_col = "Age", pop_col = "Population", lower = 10, upper = 69)
 
 }
 \references{
