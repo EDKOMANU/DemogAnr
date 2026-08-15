@@ -55,6 +55,12 @@ the calculation in the book alongside the code.
 
 ## Documentation
 
+* A package vignette, `vignette("DemogAnr")`, walks through a complete
+  demographic workflow: rates, life tables, multiple-decrement and
+  cause-deleted tables, reproduction and the stable population, indirect
+  estimation, standardization and decomposition, projection, and data-quality
+  assessment. Each section reproduces the published worked example for the
+  method it demonstrates.
 * Examples throughout the package now use the published worked examples from
   the standard texts, so that a student can follow the calculation in the book
   alongside the code. `dem.fert()` uses the *Manual X* Bangladesh 1974 schedule
