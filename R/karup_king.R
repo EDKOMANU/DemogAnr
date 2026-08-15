@@ -33,16 +33,18 @@
 #'   the input age groups (overflow ages) are removed.
 #'
 #' @examples
-#' data(data)
-#' head(data)
+#' # The bundled grouped age distribution. (It is named `data`, so it is bound
+#' # to another name here to avoid masking base R's `data()` function.)
+#' grouped <- DemogAnr::data
+#' head(grouped)
 #'
 #' # Split the 5-year age groups into single years for the 2021 population,
 #' # using the packaged Karup-King coefficients:
-#' single <- karup_king(df = data, age_col = "age_col", pops = "2021")
+#' single <- karup_king(df = grouped, age_col = "age_col", pops = "2021")
 #' head(single)
 #'
 #' # Population totals are (approximately) preserved:
-#' sum(data[["2021"]])
+#' sum(grouped[["2021"]])
 #' sum(single[["2021"]])
 #'
 #' @references

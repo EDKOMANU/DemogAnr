@@ -5,24 +5,35 @@
 \alias{region2000}
 \title{Regional projection parameters, Ghana 2000}
 \format{
-A data frame with 16 rows and 6 variables:
+A data frame with 16 rows and 9 variables:
 \describe{
 \item{Country}{Character. Country name.}
 \item{Region}{Character. Region name.}
 \item{base_pop}{Numeric. Base-year population.}
 \item{TFR}{Numeric. Total fertility rate.}
-\item{death_rate}{Numeric. Crude death rate.}
-\item{net_migration}{Numeric. Net migration (persons).}
+\item{death_rate}{Numeric. Raw (illustrative) death index.}
+\item{net_migration}{Numeric. Net migration stock (persons).}
+\item{cbr}{Numeric. Crude birth rate (per-capita annual rate).}
+\item{cdr}{Numeric. Crude death rate (per-capita annual rate).}
+\item{nmr}{Numeric. Net-migration rate (per-capita annual rate).}
 }
 }
 \source{
-Derived from Ghana Statistical Service census publications.
+Population and fertility figures adapted from Ghana Statistical
+Service census publications; the \code{cbr}, \code{cdr}, and \code{nmr} rate columns are
+illustrative, constructed for the projection example.
 }
 \usage{
 region2000
 }
 \description{
 Base-year demographic parameters for the regions of Ghana in 2000, used to
-demonstrate \code{\link[=project_population]{project_population()}}.
+demonstrate \code{\link[=project_population]{project_population()}}. The three per-capita rate columns
+(\code{cbr}, \code{cdr}, \code{nmr}) are the inputs to the balancing-equation projection;
+they are illustrative values derived from the raw fields so that the example
+produces realistic growth (roughly 1--3\\% per year): \code{cbr} rises with
+fertility (\eqn{0.005 \times TFR + 0.010}), \code{cdr} rescales \code{death_rate}
+(\eqn{death\_rate / 7}), and \code{nmr} spreads the migration stock into an
+annual per-capita rate (\eqn{net\_migration / base\_pop / 40}).
 }
 \keyword{datasets}

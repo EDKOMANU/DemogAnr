@@ -2,7 +2,7 @@
 % Please edit documentation in R/newPPP.R
 \name{project_population}
 \alias{project_population}
-\title{Basic Probabilistic Population Projection}
+\title{Probabilistic Population Projection (Balancing Equation)}
 \usage{
 project_population(
   data,
@@ -11,80 +11,134 @@ project_population(
   region_var = "region",
   subregion_var = "subregion",
   base_pop_var = "base_pop",
-  TFR_var = "TFR",
-  death_rate_var = "death_rate",
-  net_migration_var = "net_migration",
+  birth_rate_var = "cbr",
+  death_rate_var = "cdr",
+  net_migration_var = "nmr",
+  birth_dist = NULL,
+  death_dist = NULL,
+  migration_dist = NULL,
+  cv = 0.1,
+  annual_noise_sd = 0,
   num_samples = 2000,
+  probs = c(0.1, 0.9),
   random_seed = 42,
   graph = TRUE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{data}{A data frame containing projection parameters.}
+\item{data}{A data frame with one row per region.}
 
-\item{future_year}{Numeric. The target year for the projection.}
+\item{future_year}{Numeric. Target (final) year of the projection.}
 
-\item{base_year}{Numeric. The base year for the projection.}
+\item{base_year}{Numeric. Base (launch) year.}
 
-\item{region_var}{Character. Column name for the region.}
+\item{region_var, subregion_var}{Character. Column names identifying the
+region and subregion.}
 
-\item{subregion_var}{Character. Column name for the subregion.}
+\item{base_pop_var}{Character. Column name for the base-year population.}
 
-\item{base_pop_var}{Character. Column name for the base population.}
+\item{birth_rate_var}{Character. Column name for the crude birth rate
+\eqn{b} (a per-capita annual rate, e.g. 0.032 for 32 per 1000).}
 
-\item{TFR_var}{Character. Column name for the Total Fertility Rate (TFR).}
+\item{death_rate_var}{Character. Column name for the crude death rate
+\eqn{d} (per-capita annual rate).}
 
-\item{death_rate_var}{Character. Column name for the death rate.}
+\item{net_migration_var}{Character. Column name for the net-migration rate
+\eqn{m} (per-capita annual rate; positive for net in-migration).}
 
-\item{net_migration_var}{Character. Column name for net migration.}
+\item{birth_dist, death_dist, migration_dist}{Optional samplers. Each is a
+\verb{function(mean, n)} returning \code{n} random draws of the rate for a region
+whose central value is \code{mean}. When \code{NULL} (default), a lognormal
+(\code{birth_dist}, \code{death_dist}) or normal (\code{migration_dist}) sampler with
+coefficient of variation \code{cv} is used.}
 
-\item{num_samples}{Integer. Number of simulation samples (default: 2000).}
+\item{cv}{Numeric. Coefficient of variation of the default samplers
+(default 0.10). Ignored for any component given an explicit sampler.}
 
-\item{random_seed}{Integer. Random seed for reproducibility (default: 42).}
+\item{annual_noise_sd}{Numeric. Standard deviation of an optional Normal
+innovation added to the growth rate each year (default 0, i.e. none).}
+
+\item{num_samples}{Integer. Number of simulated trajectories (default 2000).}
+
+\item{probs}{Numeric length-2. Lower and upper quantiles summarising the
+trajectories (default \code{c(0.1, 0.9)}, the 10th to 90th percentile band).}
+
+\item{random_seed}{Integer. Seed for reproducibility (default 42).}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
-projected trajectories (median and interquartile band, faceted by
-subregion) is attached to the result and shown when it is printed.}
+projected trajectories (median and the \code{probs} band, faceted by subregion)
+is attached to the result and shown when it is printed.}
 
-\item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console during projection.}
+\item{verbose}{Logical. If \code{TRUE}, prints status messages during projection.}
 }
 \value{
-A data frame with one row per region, subregion, and year,
-containing the summary statistics of the simulated population trajectories:
-\code{lower} (25th percentile), \code{median}, \code{mean}, and \code{upper} (75th percentile).
+A data frame with one row per region, subregion, and year, carrying
+the summary of the simulated trajectories: \code{lower} (the \code{probs[1]}
+quantile), \code{median}, \code{mean}, and \code{upper} (the \code{probs[2]} quantile). When
+\code{graph = TRUE} the result also carries an attached plot and prints through
+its \code{print} method (\code{print.dem_projection}).
 }
 \description{
-This function projects population trajectories for multiple
-administrative regions using a simple stochastic (simulation-based)
-exponential growth model, inspired by the probabilistic projection
-literature (e.g. Raftery et al. 2012), but without a full Bayesian model.
+Projects population trajectories for several administrative
+regions by stochastic simulation of the demographic balancing equation
+(Preston et al. 2001, Ch. 1). The annual continuous growth rate of a
+population is the crude birth rate minus the crude death rate plus the
+net-migration rate, \code{g = b - d + m}, and the population is carried forward
+one year at a time as \code{P(t+1) = P(t) * exp(g)}.
 
-For each region, \code{num_samples} growth-rate trajectories are simulated. The
-annual growth rate of each trajectory is the sum of a random baseline, a
-fertility effect (increasing in TFR), a mortality effect (decreasing in the
-death rate), a migration effect (with the sign of net migration), and
-random noise. Each trajectory is propagated independently through all
-years, so that uncertainty accumulates over the projection horizon, and the
-results are summarised per region and year.
+Uncertainty is treated in the spirit of probabilistic projection (Raftery et
+al. 2012): rather than fixing \eqn{b}, \eqn{d} and \eqn{m}, the function
+draws each of them from a distribution. For every one of \code{num_samples}
+trajectories the three rates are drawn \strong{once} (parameter uncertainty) and
+then held across the horizon, so that a "high-fertility" or "high-mortality"
+world persists over time and the projection fan widens as the horizon
+lengthens. An optional per-year innovation (\code{annual_noise_sd}) adds temporal
+variability on top.
+
+The distribution of each component is \strong{user-definable}. Supply a sampler
+\verb{function(mean, n)} returning \code{n} draws centred on the region's rate to
+\code{birth_dist}, \code{death_dist}, or \code{migration_dist}; leave them \code{NULL} to use the
+defaults (a lognormal for the non-negative birth and death rates, a normal
+for net migration), whose spread is set by \code{cv}.
 }
 \examples{
 data(region2000)
+# Default uncertainty (lognormal births/deaths, normal migration, cv = 0.10)
 proj <- project_population(region2000,
-  base_year = 2000, future_year = 2009,
-  TFR_var = "TFR", base_pop_var = "base_pop",
-  region_var = "Country", death_rate_var = "death_rate",
-  net_migration_var = "net_migration",
-  subregion_var = "Region",
-  num_samples = 1000
+  base_year = 2000, future_year = 2010,
+  region_var = "Country", subregion_var = "Region",
+  base_pop_var = "base_pop",
+  birth_rate_var = "cbr", death_rate_var = "cdr",
+  net_migration_var = "nmr",
+  num_samples = 500, graph = FALSE
 )
 head(proj)
 
+# User-defined distributions: wider, skewed mortality; tight fertility
+proj2 <- project_population(region2000[1:4, ],
+  base_year = 2000, future_year = 2010,
+  region_var = "Country", subregion_var = "Region",
+  base_pop_var = "base_pop",
+  birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+  birth_dist     = function(mean, n) rnorm(n, mean, 0.001),
+  death_dist     = function(mean, n) rlnorm(n, log(mean), 0.25),
+  migration_dist = function(mean, n) rnorm(n, mean, 0.004),
+  num_samples = 500, graph = FALSE
+)
+
 }
 \references{
-Raftery, A. E., Li, N., Sevcikova, H., Gerland, P., & Heilig, G. K. (2012). Bayesian probabilistic population projections for all countries. \emph{Proceedings of the National Academy of Sciences}, 109(35), 13915-13921. \doi{10.1073/pnas.1211452109} (Inspiration for the stochastic/probabilistic projection logic.)
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography:
+Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers.
+ISBN 978-0631226161. (Chapter 1: the balancing equation and growth rates.)
 
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 6: Population Projections.)
-
-Rowland, D. T. (2003). \emph{Demographic Methods and Concepts}. Oxford: Oxford University Press. ISBN 978-0198752639. (Chapter on population projections.)
+Raftery, A. E., Li, N., Sevcikova, H., Gerland, P., & Heilig, G. K. (2012).
+Bayesian probabilistic population projections for all countries.
+\emph{Proceedings of the National Academy of Sciences}, 109(35),
+13915-13921. \doi{10.1073/pnas.1211452109} (Probabilistic projection through
+component uncertainty.)
+}
+\seealso{
+\code{\link[=math_project]{math_project()}} for deterministic subnational projection.
 }

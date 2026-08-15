@@ -36,9 +36,9 @@ test_that("age-quality and rate functions attach plots", {
 test_that("project_population carries a plot and remains usable as a data frame", {
   data(region2000, envir = environment())
   pp <- project_population(region2000[1:3, ], base_year = 2000, future_year = 2004,
-    TFR_var = "TFR", base_pop_var = "base_pop", region_var = "Country",
-    death_rate_var = "death_rate", net_migration_var = "net_migration",
-    subregion_var = "Region", num_samples = 300)
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    num_samples = 300)
   expect_s3_class(plot(pp), "ggplot")
   expect_true(all(c("year", "median", "lower", "upper") %in% names(pp)))
   expect_true(nrow(subset(pp, year == 2000)) == 3)

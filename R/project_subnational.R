@@ -17,18 +17,32 @@
 #'
 #' @return A dataframe appending the projected columns to the original data.
 #' @examples
-#' districts <- data.frame(
-#'   Region = c("A", "A", "B", "B"),
-#'   District = c("A1", "A2", "B1", "B2"),
-#'   pop2010 = c(10000, 20000, 15000, 5000),
-#'   pop2020 = c(12000, 26000, 16500, 5500)
+#' # Ghana's regions, projected from their 2000 census populations. A second
+#' # observation is needed to establish a trend; here each region is grown at
+#' # its own implied rate over the 2000-2010 decade.
+#' data(region2000)
+#' regions <- data.frame(
+#'   Country  = region2000$Country,
+#'   Region   = region2000$Region,
+#'   pop2000  = region2000$base_pop,
+#'   pop2010  = round(region2000$base_pop *
+#'                    exp(10 * (region2000$cbr - region2000$cdr + region2000$nmr)))
 #' )
 #'
-#' # Exponential extrapolation of each district
-#' math_project(districts,
-#'   sub_group_col = "District", parent_group_col = "Region",
-#'   pop_cols = c("pop2010", "pop2020"), time_vals = c(2010, 2020),
+#' # Exponential extrapolation of each region to 2025 and 2030
+#' math_project(regions,
+#'   sub_group_col = "Region", parent_group_col = "Country",
+#'   pop_cols = c("pop2000", "pop2010"), time_vals = c(2000, 2010),
 #'   target_times = c(2025, 2030), method = "exponential"
+#' )
+#'
+#' # Share-of-growth, constraining the regions to a national control total
+#' regions$total2025 <- 40000000
+#' math_project(regions,
+#'   sub_group_col = "Region", parent_group_col = "Country",
+#'   pop_cols = c("pop2000", "pop2010"), time_vals = c(2000, 2010),
+#'   target_times = 2025, method = "share_of_growth",
+#'   parent_totals_cols = "total2025"
 #' )
 #'
 #' @references

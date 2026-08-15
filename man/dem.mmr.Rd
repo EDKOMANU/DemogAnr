@@ -29,13 +29,19 @@ This function calculates the maternal mortality rate (maternal deaths per
 (maternal deaths per 100,000 live births).
 }
 \examples{
-demo_data <- data.frame(
-  age=c("15-24", "25-34", "35-44"),
-  maternal_deaths = c(5, 10, 15),
-  live_births = c(5000, 7000, 6000),
-  women =c(20000, 22000, 32000)
-)
-dem.mmr(demo_data, deaths_col = "maternal_deaths", births_col = "live_births", pop_women = "women")
+# Women of reproductive age in Ghana, 2021, by five-year age group, with an
+# illustrative distribution of births and maternal deaths across those ages.
+# The maternal mortality ratio is expressed per 100,000 live births.
+data(ghpop2021)
+women <- subset(ghpop2021, Sex == "Female" & Age >= 15 & Age <= 49)
+women$grp <- paste0((women$Age \%/\% 5) * 5, "-", (women$Age \%/\% 5) * 5 + 4)
+repro <- aggregate(Population ~ grp, data = women, FUN = sum)
+repro$live_births     <- round(repro$Population * c(0.06, 0.16, 0.17, 0.14,
+                                                    0.09, 0.04, 0.01))
+repro$maternal_deaths <- round(repro$live_births * c(3, 2, 2, 3, 4, 6, 8) / 1e4)
+
+dem.mmr(repro, deaths_col = "maternal_deaths",
+        births_col = "live_births", pop_women = "Population")
 }
 \references{
 World Health Organization (1992). \emph{International Statistical Classification of Diseases and Related Health Problems, 10th Revision (ICD-10)}. Geneva: World Health Organization. (Definitions of maternal death and maternal mortality measures.)

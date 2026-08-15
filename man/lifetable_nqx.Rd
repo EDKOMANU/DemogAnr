@@ -50,14 +50,19 @@ open interval is available. If death rates are available, \code{\link[=lifetable
 provides a more precise treatment of the open interval.
 }
 \examples{
-# Example data
-data <- data.frame(
-  age = c(0, 1, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85),
-  nqx = c(0.05, 0.01, 0.005, 0.002, 0.003, 0.004, 0.005, 0.007, 0.010, 0.015,
-          0.020, 0.030, 0.050, 0.070, 0.100, 0.150, 0.200, 0.300, 1.000)
+# Preston et al. (2001), Box 4.1: the published probabilities of dying for
+# United States females in 1991. This function assumes nax = n/2, which
+# gives e0 = 78.1; Preston's master life table, which uses proper separation
+# factors (0.152 at age 0), reports 78.92. Use lifetable() with an explicit
+# `nax` when the separation factors matter.
+us91 <- data.frame(
+  age = c(0, 1, seq(5, 85, 5)),
+  nqx = c(0.00783, 0.00168, 0.00092, 0.00090, 0.00236, 0.00262, 0.00314,
+          0.00425, 0.00584, 0.00818, 0.01330, 0.02095, 0.03371, 0.05155,
+          0.07669, 0.11552, 0.17427, 0.27363, 1.00000)
 )
-life_table <- lifetable_nqx(data, age = "age", nqx = "nqx")
-print(life_table)
+life_table <- lifetable_nqx(us91, age = "age", nqx = "nqx")
+head(life_table)
 
 }
 \references{

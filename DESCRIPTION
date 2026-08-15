@@ -1,6 +1,6 @@
 Package: DemogAnr
 Title: Demographic Analysis
-Version: 0.2.0
+Version: 0.3.0
 Authors@R:
     person("Edward", "Owusu Manu", email = "edward.manu@statsghana.gov.gh",
            role = c("aut", "cre"))
@@ -31,6 +31,9 @@ Imports:
     stats,
     tidyr
 Suggests:
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 LazyData: true
 Config/testthat/edition: 3

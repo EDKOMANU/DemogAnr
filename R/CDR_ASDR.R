@@ -15,13 +15,16 @@
 #'
 #' @return A list of named outputs for the requested death rate calculations.
 #' @examples
-#' data <- data.frame(
-#'   age = c("0-4", "5-9", "10-14"),
-#'   population = c(10000, 12000, 11000),
-#'   deaths = c(100, 50, 30)
-#' )
-#' dem.cdr(data, type = "all", age_col = "age",
-#'                     population_col = "population", deaths_col = "deaths")
+#' # Preston et al. (2001) Box 1.2: Sweden, 1988. With 96,756 deaths and
+#' # 8,438,477 person-years lived, the crude death rate is 11.47 per 1000.
+#' sweden88 <- data.frame(population = 8438477, deaths = 96756)
+#' dem.cdr(sweden88, type = "CDR", population_col = "population",
+#'         deaths_col = "deaths", graph = FALSE)
+#'
+#' # Age-specific death rates: Ghana, 2010 Population and Housing Census
+#' data(gphc2010)
+#' dem.cdr(gphc2010, type = "all", age_col = "Age",
+#'         population_col = "Pop", deaths_col = "Deaths", graph = FALSE)
 #' @references
 #' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 2: Age-Specific Rates and Probabilities.)
 #'

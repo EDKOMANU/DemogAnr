@@ -18,19 +18,25 @@
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A list of named outputs for the requested fertility calculations and the modified dataframe with ASFR.
 #' @examples
-#' demo_data <- data.frame(
-#'   age = c("15-19", "20-24", "25-29"),
-#'   population = c(10000, 12000, 11000),
-#'   women = c(5000, 6000, 5500),
-#'   live_births = c(200, 400, 300)
+#' # United Nations (1983) Manual X, Ch. II: Bangladesh, 1974.
+#' # Women and births in the year preceding the survey, by age of mother.
+#' # The reported total fertility rate of this schedule is 4.83.
+#' bangladesh <- data.frame(
+#'   age         = c("15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"),
+#'   women       = c(3014706, 2653155, 2607009, 2015663, 1771680, 1479505, 1135129),
+#'   live_births = c(320406, 609269, 561494, 367833, 237297, 95357, 38125),
+#'   population  = 71315944
 #' )
-#
-#' # Calculate ASFR
-#' dem.fert(demo_data, type = "ASFR", age_col = "age",
-#'                     population_col = "population", women_col = "women", births_col = "live_births")
-#' # Calculate all metrics
-#' dem.fert(demo_data, type = "all", age_col = "age",
-#'                     population_col = "population", women_col = "women", births_col = "live_births")
+#'
+#' # Age-specific fertility rates
+#' dem.fert(bangladesh, type = "ASFR", age_col = "age",
+#'          population_col = "population", women_col = "women",
+#'          births_col = "live_births", graph = FALSE)
+#'
+#' # All fertility measures (TFR = 4.83 as published in Manual X)
+#' dem.fert(bangladesh, type = "all", age_col = "age",
+#'          population_col = "population", women_col = "women",
+#'          births_col = "live_births", graph = FALSE)
 #' @references
 #' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapter 5: Fertility and Reproduction.)
 #'

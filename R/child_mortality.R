@@ -23,15 +23,19 @@
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A numeric value representing the mortality rate per 1,000 live births.
 #' @examples
-#' demo_data <- data.frame(
-#'   age = 0:10,
-#'   population = c(1000, 950, 900, 850, 800, 750, 700, 650, 600, 550, 500),
-#'   deaths = c(30, 20, 15, 10, 5, 2, 1, 1, 0, 0, 0)
-#' )
-#' dm.chm(demo_data,age_col = "age",
-#'                                  live_births = "population",
-#'                                  deaths_col = "deaths",
-#'                                  type = "under5")
+#' # Ghana, 2021: deaths and population of children by age and sex.
+#' # Where births are not registered, the population under age 1 is commonly
+#' # used in place of live births as the denominator, as it is here.
+#' data(ghmort2021)
+#' males <- subset(ghmort2021, Sex == "Male")
+#'
+#' # Infant mortality (deaths under age 1)
+#' dm.chm(males, age_col = "Age", live_births = "Population",
+#'        deaths_col = "Deaths", type = "infant")
+#'
+#' # Under-five mortality
+#' dm.chm(males, age_col = "Age", live_births = "Population",
+#'        deaths_col = "Deaths", type = "under5")
 #' @references
 #' Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Sydney: Pergamon Press.
 #'

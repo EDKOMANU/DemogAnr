@@ -1,0 +1,322 @@
+---
+title: "Demographic Analysis with DemogAnr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Demographic Analysis with DemogAnr}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE, comment = "#>",
+  fig.width = 6, fig.height = 4, fig.align = "center"
+)
+options(width = 90)
+library(DemogAnr)
+```
+
+## Why this package
+
+Applied demographic work is still carried out largely in spreadsheets: a life
+table here, a total fertility rate there, an age distribution split into single
+years. Spreadsheets are visual and familiar, but their formulas are invisible
+until each cell is inspected, and reproducing an analysis a year later often
+means rebuilding it from memory.
+
+**DemogAnr** aims to make the standard textbook methods directly usable in R.
+Three commitments shape it:
+
+* **Textbook notation.** Rates are requested by their conventional
+  abbreviations (`"CBR"`, `"TFR"`, `"CDR"`), and life-table columns are named as
+  they appear in Preston, Heuveline and Guillot (2001): `nMx`, `nax`, `nqx`,
+  `lx`, `dx`, `Lx`, `Tx`, `ex`.
+* **Readable output.** Functions return a classed object whose `print` method
+  lays the numbers out as a labelled table, so you see what you would write in a
+  report rather than a nested list.
+* **A consistent API.** Every function takes a data frame plus character column
+  names.
+
+Wherever possible, the examples below reproduce a published worked example, so
+that you can follow the calculation in the textbook alongside the code.
+
+## Data bundled with the package
+
+| Data set | Contents |
+|---|---|
+| `gphc2010` | Population and deaths by age, 2010 Ghana Population and Housing Census |
+| `ghmort2021` | Population and deaths by age and sex, Ghana 2021 |
+| `ghpop2021` | Single-year age distribution by sex, Ghana 2021 |
+| `region2000` | Regional base-year parameters, Ghana 2000 |
+| `standards` | Brass African and General-UN standard life tables |
+| `data` | A grouped (five-year) age distribution |
+
+## 1. Rates: fertility and mortality
+
+`dem.fert()` computes the crude birth rate, general fertility rate,
+age-specific rates and the total fertility rate. Here is the Bangladesh 1974
+schedule from United Nations *Manual X*, Chapter II, whose reported total
+fertility rate is 4.83.
+
+```{r fert}
+bangladesh <- data.frame(
+  age         = c("15-19","20-24","25-29","30-34","35-39","40-44","45-49"),
+  women       = c(3014706, 2653155, 2607009, 2015663, 1771680, 1479505, 1135129),
+  live_births = c(320406, 609269, 561494, 367833, 237297, 95357, 38125),
+  population  = 71315944
+)
+fert <- dem.fert(bangladesh, type = "all", age_col = "age",
+                 population_col = "population", women_col = "women",
+                 births_col = "live_births", graph = FALSE)
+fert$results$TFR
+```
+
+`dem.cdr()` does the same for mortality. Preston et al. (2001, Box 1.2) report a
+crude death rate of 11.47 per 1000 for Sweden in 1988:
+
+```{r cdr}
+sweden88 <- data.frame(population = 8438477, deaths = 96756)
+dem.cdr(sweden88, type = "CDR", population_col = "population",
+        deaths_col = "deaths", graph = FALSE)$results$CDR
+```
+
+Childhood and maternal mortality are available through `dm.chm()` and
+`dem.mmr()`.
+
+## 2. Life tables
+
+`lifetable()` builds a complete or abridged life table from death rates, or from
+deaths and population. Interval widths are taken from the age vector, and the
+separation factors ${}_na_x$ follow Coale–Demeny by default.
+
+```{r lt}
+lt <- lifetable(gphc2010, age = "Age", pop = "Pop", Dx = "Deaths",
+                graph = FALSE)
+head(lt$lifetable)
+lt$metrics$LifeExpectancyAtBirth
+```
+
+Passing `nax_method = "keyfitz"` refines the adult separation factors
+iteratively; passing a `nax` vector borrows them from any external model life
+table. `lifetable_nqx()` builds a table directly from a series of ${}_nq_x$.
+
+## 3. Multiple decrement and cause-deleted tables
+
+When deaths are classified by cause, `multiple_decrement()` distributes the
+life-table deaths across causes. This reproduces Preston et al. (2001) Box 4.1
+for US females in 1991: of 100,000 newborns, 21,205 (21.2%) would eventually die
+of neoplasms.
+
+```{r mdlt}
+us91 <- data.frame(
+  Age  = c(0, 1, seq(5, 85, 5)),
+  Dall = c(15758, 3169, 1634, 1573, 3955, 4948, 6491, 9428, 12027, 15543,
+           19264, 25384, 37211, 59431, 88087, 114693, 143554, 164986, 320578),
+  Dneo = c(63, 275, 268, 217, 318, 467, 856, 1924, 3532, 5958,
+           8434, 11673, 17078, 25263, 33534, 36695, 36571, 30220, 32739),
+  lx   = c(100000, 99217, 99050, 98959, 98870, 98637, 98379, 98070, 97653,
+           97083, 96289, 95008, 93018, 89882, 85249, 78711, 69618, 57486, 41756),
+  nqx  = c(0.00783, 0.00168, 0.00092, 0.00090, 0.00236, 0.00262, 0.00314,
+           0.00425, 0.00584, 0.00818, 0.01330, 0.02095, 0.03371, 0.05155,
+           0.07669, 0.11552, 0.17427, 0.27363, 1.00000),
+  nax  = c(0.152, 1.605, 2.275, 2.843, 2.657, 2.547, 2.550, 2.616, 2.677,
+           2.685, 2.681, 2.655, 2.647, 2.646, 2.631, 2.628, 2.618, 2.570, 6.539)
+)
+us91$Dother <- us91$Dall - us91$Dneo
+
+md <- multiple_decrement(us91, age = "Age", causes = c("Dneo", "Dother"),
+                         deaths = "Dall", lx = "lx", nqx = "nqx", graph = FALSE)
+round(md$cause_distribution, 3)
+```
+
+`cause_deleted_lt()` answers the companion question: what would life expectancy
+be if the cause were eliminated? The deletion assumption is yours to choose
+through `method`.
+
+```{r cdlt}
+cd <- cause_deleted_lt(us91, age = "Age", cause = "Dneo", deaths = "Dall",
+                       lx = "lx", nqx = "nqx", nax_all = "nax", graph = FALSE)
+c(e0 = cd$e0, without_neoplasms = cd$e0_deleted, gain = cd$gain)
+```
+
+Both functions accept either a population column, from which the life table is
+built, or a ready-made table through `lx`, `nqx` and `nax_all`.
+
+## 4. Reproduction and the stable population
+
+`reproduction()` computes the gross and net reproduction rates. For US females
+in 1991 (Preston et al. 2001, Box 5.5) the published values are GRR 1.013 and
+NRR 0.995.
+
+```{r repro}
+us1991 <- data.frame(
+  age   = seq(10, 45, 5),
+  fbir  = c(5816, 253979, 532712, 596823, 431694, 162005, 25531, 829),
+  women = c(8620, 8371, 9419, 10325, 11125, 10344, 9496, 7188) * 1000,
+  nLx   = c(494603, 493804, 492552, 491138, 489356, 486941, 483577, 478475)
+)
+r <- reproduction(us1991, age = "age", births = "fbir", women = "women",
+                  nLx = "nLx", radix = 1e5, fraction_female = 1, graph = FALSE)
+c(GRR = r$GRR, NRR = r$NRR)
+```
+
+`stable_population()` solves Lotka's equation for the intrinsic growth rate by
+Coale's iterative procedure. Preston et al. (2001, Box 7.1) obtain
+$r = 0.01424$ for Egypt in 1997:
+
+```{r stable}
+egypt <- data.frame(
+  age = seq(15, 45, 5),
+  Lx  = c(4.66740, 4.63097, 4.58518, 4.53206, 4.46912, 4.39135, 4.28969),
+  ma  = c(0.00567, 0.06627, 0.11204, 0.07889, 0.05075, 0.01590, 0.00610)
+)
+sp <- stable_population(egypt, age = "age", asfr = "ma", nLx = "Lx",
+                        radix = 1, fraction_female = 1, graph = FALSE)
+c(r = sp$r, b = sp$b, d = sp$d, NRR = sp$NRR)
+```
+
+## 5. Indirect estimation
+
+Where registration is incomplete, fertility and child mortality are estimated
+indirectly. `pf_ratio()` implements the Brass P/F ratio method; on the *Manual
+X* Bangladesh 1974 example the adjustment factor is 1.500 and the adjusted total
+fertility rate 7.24.
+
+```{r pf}
+bd <- data.frame(
+  age    = seq(15, 45, 5),
+  women  = c(3014706, 2653155, 2607009, 2015663, 1771680, 1479505, 1135129),
+  ceb    = c(1160919, 4901382, 9085852, 9910256, 10384001, 9164329, 6905673),
+  births = c(320406, 609269, 561494, 367833, 237297, 95357, 38125)
+)
+pf <- pf_ratio(bd, age = "age", women = "women", ceb = "ceb",
+               births = "births", graph = FALSE)
+c(K = pf$K, TFR = pf$TFR, TFR_adjusted = pf$TFR_adjusted)
+```
+
+`chm_brass()` estimates child mortality from children ever born and children
+surviving, returning $q(x)$ with the calendar date each estimate refers to.
+
+## 6. Standardization and decomposition
+
+Crude rates are not comparable across populations with different age structures.
+`standardize()` compares two populations against a common standard, and
+`decompose_rates()` splits the difference into a rate component and an
+age-composition component.
+
+```{r std}
+male   <- subset(ghmort2021, Sex == "Male")
+female <- subset(ghmort2021, Sex == "Female")
+comp <- data.frame(
+  age  = male$Age,
+  m_m  = male$Deaths / male$Population,
+  m_f  = female$Deaths / female$Population,
+  n_m  = male$Population,
+  n_f  = female$Population
+)
+standardize(comp, "age", rate1_col = "m_m", rate2_col = "m_f",
+            pop1_col = "n_m", pop2_col = "n_f",
+            labels = c("Males", "Females"))
+```
+
+`decompose_LE()` attributes a difference in life expectancy at birth to each age
+group, following Arriaga.
+
+## 7. Projection
+
+`math_project()` performs deterministic subnational projection by six methods
+(linear, exponential, geometric, constant-share, shift-share, share-of-growth),
+optionally constraining units to a parent control total.
+
+`cohort_component()` performs the full age–sex projection through a Leslie
+matrix. It reproduces Preston et al. (2001) Box 6.1 for Swedish females exactly:
+
+```{r ccm}
+sweden <- data.frame(
+  Age = c(seq(0, 80, 5), 85),
+  N93 = c(293395, 248369, 240012, 261346, 285209, 314388, 281290, 286923,
+          304108, 324946, 247613, 211351, 215140, 221764, 223506, 183654,
+          141990, 112424),
+  Lx  = c(497487, 497138, 496901, 496531, 495902, 495168, 494213, 492760,
+          490447, 486613, 480665, 471786, 457852, 436153, 402775, 350358,
+          271512, 291707),
+  Fx  = c(0, 0, 0, 0.0120, 0.0908, 0.1499, 0.1125, 0.0441, 0.0074, 0.0003,
+          rep(0, 8))
+)
+cc <- cohort_component(sweden, age = "Age", population = "N93", nLx = "Lx",
+                       asfr = "Fx", steps = 2, graph = FALSE)
+round(cc$totals)
+```
+
+`project_population()` carries uncertainty through the demographic balancing
+equation $g = b - d + m$, drawing each component from a distribution that you
+specify.
+
+```{r pproj}
+pp <- project_population(region2000[1:4, ],
+        base_year = 2000, future_year = 2010,
+        region_var = "Country", subregion_var = "Region",
+        base_pop_var = "base_pop", birth_rate_var = "cbr",
+        death_rate_var = "cdr", net_migration_var = "nmr",
+        num_samples = 500, graph = FALSE)
+subset(pp, year == 2010)
+```
+
+Each trajectory draws its rates once and holds them across the horizon, so the
+band widens with the projection. Supplying `death_dist`, `birth_dist` or
+`migration_dist` replaces the defaults with your own sampler.
+
+## 8. Data quality
+
+Reported ages should be screened before analysis. `whipple()` and `myers()`
+measure digit preference, and `un_age_sex_accuracy()` combines age and sex
+ratios into the United Nations joint index.
+
+```{r quality}
+males <- subset(ghpop2021, Sex == "Male")
+w <- whipple(males, age_col = "Age", pop_col = "Population", graph = FALSE)
+w$index
+```
+
+`smam()` computes the singulate mean age at marriage from proportions single by
+age. Preston et al. (2001, Box 4.4) report 25.0 years for Turkish males in 1990:
+
+```{r smam}
+turkey <- data.frame(
+  age    = seq(15, 50, 5),
+  men    = c(3165061, 2581153, 2435765, 2096899, 1784121, 1418784,
+             1111113, 980115),
+  single = c(3030203, 1853222, 629077, 180767, 77134, 43412, 28627, 22527)
+)
+smam(turkey, age = "age", single = "single", total = "men")$SMAM
+```
+
+## 9. Figures
+
+Core functions take `graph = TRUE`, attaching a **ggplot2** figure retrievable
+with `plot()`. A standalone `pyramid()` draws a population pyramid.
+
+```{r pyramid, fig.height = 5}
+g <- within(ghpop2021, grp <- ifelse(Age >= 80, "80+",
+            paste0((Age %/% 5) * 5, "-", (Age %/% 5) * 5 + 4)))
+pyr <- aggregate(Population ~ grp + Sex, data = g, FUN = sum)
+pyramid(pyr, age_col = "grp", sex_col = "Sex", count_col = "Population",
+        title = "Ghana, 2021")
+```
+
+## References
+
+Coale, A. J., & Trussell, T. J. (1974). Model fertility schedules.
+*Population Index*, 40(2), 185–258.
+
+Hajnal, J. (1953). Age at marriage and proportions marrying.
+*Population Studies*, 7(2), 111–136.
+
+Preston, S. H., Heuveline, P., & Guillot, M. (2001). *Demography: Measuring and
+Modeling Population Processes*. Oxford: Blackwell.
+
+Siegel, J. S., & Swanson, D. A. (Eds.) (2004). *The Methods and Materials of
+Demography* (2nd ed.). San Diego: Elsevier.
+
+United Nations (1983). *Manual X: Indirect Techniques for Demographic
+Estimation*. New York: United Nations.

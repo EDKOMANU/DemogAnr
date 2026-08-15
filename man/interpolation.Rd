@@ -42,20 +42,26 @@ Performs interpolation on numeric data, supporting linear, quadratic,
 Lagrange, and cubic spline methods. Can handle both vector and dataframe inputs.
 }
 \examples{
-# Example 1: Interpolating between points (vector input)
-x <- c(1, 2, 3, 4, 5)
-y <- c(2, 4, 6, 8, 10)
-x_new <- c(2.5, 3.5, 4.5)
-interpolation(x, y, x_new, method = "linear")
+# Intercensal estimation, the commonest use of interpolation in demography:
+# estimating the population in years between two censuses. Ghana enumerated
+# 18,912,079 in 2000 and 30,079,802 in 2010 (the bundled `region2000` and
+# `gphc2010` totals).
+census_years <- c(2000, 2010)
+census_pop   <- c(18912079, 30079802)
+interpolation(census_years, census_pop, x_new = c(2003, 2005, 2008),
+              method = "linear")
 
-# Example 2: Interpolating for a dataframe
-data <- data.frame(
-  category = c("A", "B", "C"),
-  y1 = c(2, 5, 9),
-  y2 = c(3, 6, 10)
+# The data-frame interface interpolates each row across the columns given in
+# `y_cols`, which is what intercensal estimation for several areas looks
+# like: one row per region, one column per census.
+regions <- data.frame(
+  Region  = c("Greater Accra", "Ashanti", "Northern"),
+  pop2000 = c(2905726, 3612950, 1087606),
+  pop2010 = c(4010054, 4780380, 1387744)
 )
-x_new <- c(2.5, 3.5)
-interpolation(x = c(1, 2), data = data, y_cols = c("y1", "y2"), x_new = x_new, method = "spline")
+interpolation(x = c(2000, 2010), data = regions,
+              y_cols = c("pop2000", "pop2010"),
+              x_new = c(2005, 2008), method = "linear")
 
 }
 \references{
