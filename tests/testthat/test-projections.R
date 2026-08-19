@@ -73,3 +73,69 @@ test_that("project_population accepts user-defined component distributions", {
   # a wider mortality distribution yields a wider projection band
   expect_true(all(w_w > w_t))
 })
+
+test_that("project_population(): a target rate is reached at the horizon", {
+  data(region2000, envir = environment())
+  one <- region2000[1, , drop = FALSE]
+  args <- list(one, base_year = 2000, future_year = 2030,
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    cv = 0, num_samples = 20, graph = FALSE)
+  tr <- do.call(project_population, c(args, list(birth_target = 0.020)))
+  # growth in the final year must equal b_target - d + m
+  g_last <- log(tr$median[tr$year == 2030] / tr$median[tr$year == 2029])
+  expect_equal(g_last, 0.020 - one$cdr + one$nmr, tolerance = 1e-6)
+})
+
+test_that("project_population(): declining fertility lowers the projection", {
+  data(region2000, envir = environment())
+  args <- list(region2000[1:3, ], base_year = 2000, future_year = 2030,
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    cv = 0, num_samples = 20, graph = FALSE)
+  flat  <- do.call(project_population, args)
+  trend <- do.call(project_population, c(args, list(birth_target = 0.020)))
+  expect_true(all(trend$median[trend$year == 2030] < flat$median[flat$year == 2030]))
+})
+
+test_that("project_population(): no target reproduces the constant-rate model", {
+  data(region2000, envir = environment())
+  args <- list(region2000[1:2, ], base_year = 2000, future_year = 2010,
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    num_samples = 200, graph = FALSE)
+  a <- do.call(project_population, args)
+  b <- do.call(project_population, c(args, list(birth_target = NULL,
+                                                death_target = NULL,
+                                                migration_target = NULL)))
+  expect_equal(a, b)
+})
+
+test_that("project_population(): targets may be given per region by column", {
+  data(region2000, envir = environment())
+  d <- region2000[1:3, ]
+  d$cbr_2030 <- c(0.020, 0.022, 0.018)
+  args <- list(d, base_year = 2000, future_year = 2030,
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    cv = 0, num_samples = 20, graph = FALSE)
+  bycol <- do.call(project_population, c(args, list(birth_target = "cbr_2030")))
+  for (i in seq_len(3)) {
+    r <- bycol[bycol$subregion == d$Region[i], ]
+    g <- log(r$median[r$year == 2030] / r$median[r$year == 2029])
+    expect_equal(g, d$cbr_2030[i] - d$cdr[i] + d$nmr[i], tolerance = 1e-6)
+  }
+})
+
+test_that("project_population(): target_cv widens the band at the horizon", {
+  data(region2000, envir = environment())
+  args <- list(region2000[1, , drop = FALSE], base_year = 2000, future_year = 2030,
+    region_var = "Country", subregion_var = "Region", base_pop_var = "base_pop",
+    birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+    birth_target = 0.024, cv = 0.05, num_samples = 800, graph = FALSE)
+  tight <- do.call(project_population, c(args, list(target_cv = 0.05)))
+  wide  <- do.call(project_population, c(args, list(target_cv = 0.30)))
+  w_t <- tight$upper[tight$year == 2030] - tight$lower[tight$year == 2030]
+  w_w <- wide$upper[wide$year == 2030]  - wide$lower[wide$year == 2030]
+  expect_gt(w_w, w_t)
+})

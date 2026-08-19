@@ -2,12 +2,42 @@
 
 This release extends the package from the everyday measures into the classical
 models of formal demography: reproduction and the stable population, multiple
-decrement and cause-deleted life tables, indirect fertility estimation, and
-cohort-component projection. Wherever possible each new function reproduces the
-published worked example from the standard texts, so that a reader can follow
-the calculation in the book alongside the code.
+decrement and cause-deleted life tables, indirect fertility estimation,
+cohort-component projection, and the regional disaggregation of a national
+projection. Wherever possible each new function reproduces the published worked
+example from the standard texts, so that a reader can follow the calculation in
+the book alongside the code.
 
 ## New features
+
+* `calibrate_regions()` is a new function for the disaggregation step that
+  follows a national projection. Where `project_population()` projects each
+  region independently from the balancing equation, `calibrate_regions()` takes
+  an already-settled national projection as a control total and asks only how it
+  is split between the regions: each region's base-year profile is allowed to
+  deviate from the national one by a user-specified distribution, multiplied by
+  the regional population, and then raked back onto the national figure. This is
+  the pattern used in official projection work, where the national series is
+  agreed first and the regional series must add up to it.
+
+  Two things it does that independent projection cannot. It rakes: the regions
+  sum exactly to the national control total in every year, and in every age
+  group when `age_col` is supplied, with the raking factors reported in the
+  output so the adjustment is auditable rather than silent. And its deviation is
+  correlated: the regions move around a shared national path instead of
+  wandering independently, since independent regional errors cancel on
+  aggregation and understate uncertainty at the top.
+
+  The deviation may be given as a single coefficient of variation, a per-region
+  vector, or a sampler `function(mean, n)` in the same form as the samplers of
+  `project_population()`; it is drawn once per region and trajectory and phased
+  in over the horizon, so the base year is reproduced exactly and the fan widens
+  with time. With no deviation the function reduces to the ordinary
+  constant-share allocation and every raking factor is 1. The result is an
+  object of class `dem_calibration` whose `print` method shows the full working
+  table (base population, share, control total, growth factor, deviation,
+  unraked allocation, raking factor, calibrated population and interval),
+  the raking factors, and the additivity check.
 
 * `reproduction()` computes the gross and net reproduction rates (GRR, NRR)
   with the total fertility rate, the mean age of childbearing, and an
@@ -94,6 +124,18 @@ the calculation in the book alongside the code.
   **Breaking change:** the inputs are now per-capita rates
   (`birth_rate_var`, `death_rate_var`, `net_migration_var`) rather than
   `TFR_var` and a migration count.
+* `project_population()` also gains target rates. `birth_target`,
+  `death_target` and `migration_target` set the value each component is assumed
+  to reach at `future_year` — as a single number, or as a column giving a
+  separate target for each region — and `path` chooses whether the rate moves
+  there linearly or exponentially. Each trajectory draws both a start rate and
+  an end rate, so the assumed trend and the uncertainty about it are carried
+  together; `target_cv` sets the spread around the target, and is normally
+  wider than `cv` because a rate two decades out is less well known than
+  today's. Without a target the component is held constant and the previous
+  behaviour is reproduced exactly. This turns the function from a
+  constant-rate scenario into a projection in the usual demographic sense,
+  where the analyst states where the rates are going.
 * The bundled `region2000` data set gains illustrative `cbr`, `cdr`, and `nmr`
   per-capita rate columns for the new `project_population()` interface.
 

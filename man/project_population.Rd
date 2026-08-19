@@ -14,10 +14,15 @@ project_population(
   birth_rate_var = "cbr",
   death_rate_var = "cdr",
   net_migration_var = "nmr",
+  birth_target = NULL,
+  death_target = NULL,
+  migration_target = NULL,
+  path = c("linear", "exponential"),
   birth_dist = NULL,
   death_dist = NULL,
   migration_dist = NULL,
   cv = 0.1,
+  target_cv = NULL,
   annual_noise_sd = 0,
   num_samples = 2000,
   probs = c(0.1, 0.9),
@@ -47,6 +52,18 @@ region and subregion.}
 \item{net_migration_var}{Character. Column name for the net-migration rate
 \eqn{m} (per-capita annual rate; positive for net in-migration).}
 
+\item{birth_target, death_target, migration_target}{Optional target rates at
+\code{future_year}. Each may be a single number applied to every region, or the
+name of a column holding a per-region target. When \code{NULL} (the default) the
+component is held constant across the horizon. Supplying a target turns the
+projection from a constant-rate scenario into one following an assumed
+trend: each trajectory draws a start rate and an end rate and moves between
+them.}
+
+\item{path}{How the rate moves from its base-year value to its target,
+\code{"linear"} (the default) or \code{"exponential"} (a constant proportional change
+each year, used for positive rates).}
+
 \item{birth_dist, death_dist, migration_dist}{Optional samplers. Each is a
 \verb{function(mean, n)} returning \code{n} random draws of the rate for a region
 whose central value is \code{mean}. When \code{NULL} (default), a lognormal
@@ -55,6 +72,10 @@ coefficient of variation \code{cv} is used.}
 
 \item{cv}{Numeric. Coefficient of variation of the default samplers
 (default 0.10). Ignored for any component given an explicit sampler.}
+
+\item{target_cv}{Coefficient of variation applied to the target rates.
+Defaults to \code{cv}; it is usually set larger, because the rate two decades
+out is less well known than the rate today.}
 
 \item{annual_noise_sd}{Numeric. Standard deviation of an optional Normal
 innovation added to the growth rate each year (default 0, i.e. none).}
@@ -114,6 +135,20 @@ proj <- project_population(region2000,
   num_samples = 500, graph = FALSE
 )
 head(proj)
+
+# A projection with an assumed trend: fertility declining towards a crude
+# birth rate of 0.024 and mortality towards 0.008 by 2035, with more
+# uncertainty about the target than about the present rate.
+proj_trend <- project_population(region2000[1:4, ],
+  base_year = 2000, future_year = 2035,
+  region_var = "Country", subregion_var = "Region",
+  base_pop_var = "base_pop",
+  birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+  birth_target = 0.024, death_target = 0.008,
+  cv = 0.05, target_cv = 0.20,
+  num_samples = 500, graph = FALSE
+)
+subset(proj_trend, year == 2035)
 
 # User-defined distributions: wider, skewed mortality; tight fertility
 proj2 <- project_population(region2000[1:4, ],

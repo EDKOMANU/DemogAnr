@@ -266,6 +266,59 @@ Each trajectory draws its rates once and holds them across the horizon, so the
 band widens with the projection. Supplying `death_dist`, `birth_dist` or
 `migration_dist` replaces the defaults with your own sampler.
 
+`project_population()` can also carry an assumed trend rather than holding
+each rate constant. `birth_target`, `death_target` and `migration_target` give
+the value a component is heading towards by `future_year` (a single number, or
+a column of per-region targets), and `path` chooses whether it gets there
+`"linear"`ly or `"exponential"`ly. Each trajectory then draws both a start rate
+and an end rate and interpolates between them, so the trend and the
+uncertainty about it travel together; `target_cv` sets the spread around the
+target and is normally wider than `cv`, since a rate two decades out is less
+certain than today's:
+
+```{r pproj-trend}
+pp_trend <- project_population(region2000[1:4, ],
+        base_year = 2000, future_year = 2030,
+        region_var = "Country", subregion_var = "Region",
+        base_pop_var = "base_pop", birth_rate_var = "cbr",
+        death_rate_var = "cdr", net_migration_var = "nmr",
+        birth_target = 0.024, death_target = 0.008,
+        cv = 0.05, target_cv = 0.20,
+        num_samples = 500, graph = FALSE)
+subset(pp_trend, year == 2030)
+```
+
+Omitting the targets holds every rate at its base-year value and reproduces
+the earlier, constant-rate behaviour exactly.
+
+`calibrate_regions()` addresses a different problem: not projecting each
+region, but disaggregating a **national projection that is already settled**
+down to regions, raking the regions back onto the national control total in
+every year. Where `project_population()` lets each region find its own total,
+`calibrate_regions()` takes the national trajectory as given and asks only how
+it is shared out, which is the sequence used in official projection work
+(first agree the national numbers, then split them regionally):
+
+```{r calreg}
+base_total <- sum(region2000$base_pop)
+national <- data.frame(
+  year  = seq(2000, 2020, 5),
+  total = round(base_total * exp(0.025 * seq(0, 20, 5)))
+)
+cal <- calibrate_regions(region2000,
+        region_col = "Region", pop_col = "base_pop",
+        national = national, year_col = "year", total_col = "total",
+        deviation = 0.08, num_samples = 500, graph = FALSE)
+cal$check
+```
+
+Each region is allowed to deviate from the national profile by a
+mean-preserving lognormal (here with coefficient of variation 0.08), phased in
+over the horizon, and then raked back onto the national total; `cal$check`
+confirms the regional sum reproduces the control total in every year. With no
+`deviation` the function reduces to the ordinary constant-share allocation and
+every raking factor is 1.
+
 ## 8. Data quality
 
 Reported ages should be screened before analysis. `whipple()` and `myers()`

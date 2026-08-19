@@ -65,6 +65,26 @@
     .dem_theme()
 }
 
+# Calibrated regional series. When the calibration is by age group the ages are
+# summed to a regional total for display; the band is then the sum of the
+# age-specific bands, which is an approximation used for the picture only (the
+# tabled quantiles are the authoritative ones).
+.plot_calibration <- function(tbl, deterministic = FALSE) {
+  d <- stats::aggregate(
+    data.frame(med = tbl$calibrated, lo = tbl$lower, hi = tbl$upper),
+    list(year = tbl$year, region = as.character(tbl$region)), sum)
+  p <- ggplot(d, aes(x = year, y = med, group = region))
+  if (!deterministic) {
+    p <- p + geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.2, fill = .dem_male)
+  }
+  p + geom_line(colour = .dem_male) +
+    facet_wrap(~ region, scales = "free_y") +
+    .y_from_zero() +
+    labs(x = "Year", y = "Population",
+         title = "Regional population calibrated to the national total") +
+    .dem_theme()
+}
+
 .plot_le_decomp <- function(tbl) {
   d <- data.frame(age = .order_age(tbl$age),
                   contribution = tbl$contribution,

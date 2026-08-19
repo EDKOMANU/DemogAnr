@@ -35,6 +35,19 @@
 #'   \eqn{d} (per-capita annual rate).
 #' @param net_migration_var Character. Column name for the net-migration rate
 #'   \eqn{m} (per-capita annual rate; positive for net in-migration).
+#' @param birth_target,death_target,migration_target Optional target rates at
+#'   `future_year`. Each may be a single number applied to every region, or the
+#'   name of a column holding a per-region target. When `NULL` (the default) the
+#'   component is held constant across the horizon. Supplying a target turns the
+#'   projection from a constant-rate scenario into one following an assumed
+#'   trend: each trajectory draws a start rate and an end rate and moves between
+#'   them.
+#' @param path How the rate moves from its base-year value to its target,
+#'   `"linear"` (the default) or `"exponential"` (a constant proportional change
+#'   each year, used for positive rates).
+#' @param target_cv Coefficient of variation applied to the target rates.
+#'   Defaults to `cv`; it is usually set larger, because the rate two decades
+#'   out is less well known than the rate today.
 #' @param birth_dist,death_dist,migration_dist Optional samplers. Each is a
 #'   `function(mean, n)` returning `n` random draws of the rate for a region
 #'   whose central value is `mean`. When `NULL` (default), a lognormal
@@ -72,6 +85,20 @@
 #' )
 #' head(proj)
 #'
+#' # A projection with an assumed trend: fertility declining towards a crude
+#' # birth rate of 0.024 and mortality towards 0.008 by 2035, with more
+#' # uncertainty about the target than about the present rate.
+#' proj_trend <- project_population(region2000[1:4, ],
+#'   base_year = 2000, future_year = 2035,
+#'   region_var = "Country", subregion_var = "Region",
+#'   base_pop_var = "base_pop",
+#'   birth_rate_var = "cbr", death_rate_var = "cdr", net_migration_var = "nmr",
+#'   birth_target = 0.024, death_target = 0.008,
+#'   cv = 0.05, target_cv = 0.20,
+#'   num_samples = 500, graph = FALSE
+#' )
+#' subset(proj_trend, year == 2035)
+#'
 #' # User-defined distributions: wider, skewed mortality; tight fertility
 #' proj2 <- project_population(region2000[1:4, ],
 #'   base_year = 2000, future_year = 2010,
@@ -105,11 +132,15 @@ project_population <- function(
     base_pop_var = "base_pop",
     birth_rate_var = "cbr", death_rate_var = "cdr",
     net_migration_var = "nmr",
+    birth_target = NULL, death_target = NULL, migration_target = NULL,
+    path = c("linear", "exponential"),
     birth_dist = NULL, death_dist = NULL, migration_dist = NULL,
-    cv = 0.10, annual_noise_sd = 0,
+    cv = 0.10, target_cv = NULL, annual_noise_sd = 0,
     num_samples = 2000, probs = c(0.1, 0.9),
     random_seed = 42, graph = TRUE, verbose = FALSE
 ) {
+  path <- match.arg(path)
+  if (is.null(target_cv)) target_cv <- cv
   if (future_year <= base_year) stop("future_year must be greater than base_year.")
   if (length(probs) != 2 || any(probs < 0) || any(probs > 1) || probs[1] >= probs[2]) {
     stop("'probs' must be two increasing quantiles in [0, 1].")
@@ -158,6 +189,17 @@ project_population <- function(
     d <- death_sampler(d_mean, num_samples)
     m <- mig_sampler(m_mean, num_samples)
 
+    # Target rates at the projection horizon. Where a target is given, a second
+    # value is drawn around it and each trajectory follows its own path from
+    # its start rate to its end rate, so that the assumed trend and the
+    # uncertainty about it are carried together.
+    b_end <- .target_draw(birth_target, row_data, b_mean, birth_sampler,
+                          target_cv, cv, num_samples, b)
+    d_end <- .target_draw(death_target, row_data, d_mean, death_sampler,
+                          target_cv, cv, num_samples, d)
+    m_end <- .target_draw(migration_target, row_data, m_mean, mig_sampler,
+                          target_cv, cv, num_samples, m)
+
     sim_pop <- rep(base_pop, num_samples)
 
     region_results <- data.frame(
@@ -167,8 +209,12 @@ project_population <- function(
     )
 
     for (j in seq_len(num_years)) {
+      w   <- j / num_years                       # position along the horizon
+      b_j <- .rate_path(b, b_end, w, path)
+      d_j <- .rate_path(d, d_end, w, path)
+      m_j <- .rate_path(m, m_end, w, path)
       eps <- if (annual_noise_sd > 0) rnorm(num_samples, 0, annual_noise_sd) else 0
-      g <- b - d + m + eps                       # balancing equation, per year
+      g <- b_j - d_j + m_j + eps                 # balancing equation, per year
       sim_pop <- sim_pop * exp(g)                # P_{t+1} = P_t * exp(g)
 
       region_results <- rbind(region_results, data.frame(
@@ -191,6 +237,42 @@ project_population <- function(
     class(results_df) <- c("dem_projection", "data.frame")
   }
   results_df
+}
+
+# Resolve a target rate for one region and draw the trajectory-specific end
+# values around it. 'target' may be NULL (no trend: the end value equals the
+# start value), a single number applied to every region, or the name of a
+# column holding a per-region target. Uncertainty about the target uses
+# 'target_cv', which is normally at least as large as 'cv' because the future
+# is less well known than the present.
+.target_draw <- function(target, row_data, start_mean, sampler,
+                         target_cv, cv, n, start_draw) {
+  if (is.null(target)) return(start_draw)          # flat rates
+  tgt <- if (is.character(target)) {
+    if (!(target %in% names(row_data)))
+      stop("Target column not found in 'data': ", target)
+    as.numeric(row_data[[target]])
+  } else {
+    as.numeric(target)[1]
+  }
+  if (is.na(tgt)) return(start_draw)
+  # Re-scale the sampler's spread from cv to target_cv by drawing around the
+  # target and stretching the deviation.
+  draw <- sampler(tgt, n)
+  if (cv > 0 && target_cv != cv) draw <- tgt + (draw - tgt) * (target_cv / cv)
+  draw
+}
+
+# Interpolate between the start and end rate of each trajectory. 'w' runs from
+# 0 at the base year to 1 at the horizon.
+.rate_path <- function(start, end, w, path) {
+  if (identical(start, end)) return(start)
+  if (path == "exponential" && all(start > 0, na.rm = TRUE) &&
+      all(end > 0, na.rm = TRUE)) {
+    start * (end / start)^w
+  } else {
+    start + (end - start) * w
+  }
 }
 
 # Build a component sampler. If 'dist' is a function it is returned unchanged
