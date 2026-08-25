@@ -252,8 +252,8 @@ print.dem_decomp <- function(x, ...) {
 #'   groups and radix.
 #' @param age_col,lx_col,Lx_col,Tx_col Column names in `lt1`/`lt2`.
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} bar chart of the
-#'   age-specific contributions is attached to the result as `$plot` and shown
-#'   when the object is printed.
+#'   age-specific contributions is attached to the result as `$plot`;
+#'   retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_le_decomp`: a list with the `total`
 #'   difference in life expectancy at birth, its decomposition into `direct` and
@@ -291,6 +291,15 @@ decompose_LE <- function(lt1, lt2, age_col = "Age",
   l1 <- as.numeric(lt1[[lx_col]]); l2 <- as.numeric(lt2[[lx_col]])
   L1 <- as.numeric(lt1[[Lx_col]]); L2 <- as.numeric(lt2[[Lx_col]])
   T1 <- as.numeric(lt1[[Tx_col]]); T2 <- as.numeric(lt2[[Tx_col]])
+  # Arriaga's contributions are expressed per birth of a common radix. With
+  # mismatched radices every term is scaled wrongly and the "difference" is
+  # dominated by the radix ratio, so refuse rather than return a plausible
+  # but meaningless number.
+  if (!isTRUE(all.equal(l1[1], l2[1]))) {
+    stop("The two life tables must share the same radix (l0): ",
+         format(l1[1]), " in 'lt1' but ", format(l2[1]), " in 'lt2'. ",
+         "Rebuild one of them with the other's 'radix'.")
+  }
   l0 <- l1[1]
 
   direct <- numeric(k); indirect <- numeric(k)
@@ -330,7 +339,6 @@ print.dem_le_decomp <- function(x, ...) {
   tb <- x$table
   tb[-1] <- lapply(tb[-1], function(v) round(v, 4))
   print(tb, row.names = FALSE)
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

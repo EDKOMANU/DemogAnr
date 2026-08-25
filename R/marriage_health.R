@@ -83,7 +83,7 @@ smam <- function(data, age, prop_single = NULL, single = NULL, total = NULL) {
 #' @param prevalence Column name for the prevalence of ill-health/disability
 #'   (a proportion between 0 and 1).
 #' @param graph Logical; if `TRUE` (default) a plot of healthy vs. total life
-#'   expectancy by age is attached and shown on printing.
+#'   expectancy by age is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_sullivan`: a list with `HLE0` (health
 #'   expectancy at birth), `e0`, and a `table` of `ex`, `HLE`, `DLE`, and the
@@ -147,7 +147,6 @@ print.dem_sullivan <- function(x, ...) {
   cat(strrep("-", 46), "\n", sep = "")
   cat(sprintf("At birth: e0 = %.2f, healthy = %.2f (%.1f%% of life)\n",
               x$e0, x$HLE0, 100 * x$HLE0 / x$e0))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

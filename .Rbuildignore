@@ -7,3 +7,4 @@
 ^.*\.Rhistory$
 ^doc$
 ^Meta$
+^Rplots\.pdf$

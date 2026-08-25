@@ -9,8 +9,8 @@
 #' @param population_col The column name for total population.
 #' @param deaths_col The column name for total deaths.
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the
-#'   age-specific death rates is attached to the result as `$plot` and shown
-#'   when the object is printed.
+#'   age-specific death rates is attached to the result as `$plot`;
+#'   retrieve it with `plot()`.
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
 #' @return A list of named outputs for the requested death rate calculations.
@@ -84,7 +84,6 @@ print.dem_cdr <- function(x, ...) {
     cat("Age-Specific Death Rate (ASDR):\n")
     print(x$results$ASDR)
   }
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

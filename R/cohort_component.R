@@ -28,7 +28,7 @@
 #' @param n Age-interval width; defaults to the spacing of `age`.
 #' @param steps Number of `n`-year steps to project (default 1).
 #' @param graph Logical; if `TRUE` (default) a plot of the projected total
-#'   population by year is attached and shown on printing.
+#'   population by year is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_ccm`: a list with the Leslie `matrix`, a
 #'   `projection` data frame (population by age group and year), the total
@@ -117,7 +117,6 @@ print.dem_ccm <- function(x, ...) {
   cat("Total population by year:\n"); print(round(x$totals))
   cat(sprintf("Long-run growth ratio (lambda) = %.5f  ->  r = %.5f / year\n",
               x$lambda, x$r_annual))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

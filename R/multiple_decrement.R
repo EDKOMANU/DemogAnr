@@ -26,7 +26,7 @@
 #'   sum of the `causes` columns.
 #' @param sex,nax_method,radix Passed to [lifetable()] for the all-cause table.
 #' @param graph Logical; if `TRUE` (default) a plot of the cohort distribution
-#'   of deaths by cause is attached and shown on printing.
+#'   of deaths by cause is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_mdlt`: a list with the all-cause life
 #'   expectancy `e0`, a named vector `cause_distribution` (proportion of the
@@ -162,7 +162,7 @@ multiple_decrement <- function(data, age, causes, pop = NULL, lx = NULL,
 #'   \eqn{{}_na_x^{-i}}, one per age group, overriding the all-cause values.
 #' @param sex,nax_method,radix Passed to [lifetable()] for the all-cause table.
 #' @param graph Logical; if `TRUE` (default) a plot of the years of life gained
-#'   by age is attached and shown on printing.
+#'   by age is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_cause_deleted`: a list with `e0` (all-cause),
 #'   `e0_deleted`, `gain` (`e0_deleted - e0`), the deleted `cause`, and a
@@ -294,7 +294,6 @@ print.dem_mdlt <- function(x, ...) {
   cat("Distribution of deaths by cause (per birth):\n")
   print(round(x$cause_distribution, 4))
   cat(sprintf("All-cause life expectancy at birth = %.2f\n", x$e0))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -306,7 +305,6 @@ print.dem_cause_deleted <- function(x, ...) {
   cat(strrep("-", 52), "\n", sep = "")
   cat(sprintf("e0 (all causes) = %.2f   e0 (cause deleted) = %.2f   gain = %.2f years\n",
               x$e0, x$e0_deleted, x$gain))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

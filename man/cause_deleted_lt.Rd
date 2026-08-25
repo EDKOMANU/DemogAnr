@@ -53,7 +53,7 @@ all-cause deaths when \code{deaths} is not given.}
 \item{sex, nax_method, radix}{Passed to \code{\link[=lifetable]{lifetable()}} for the all-cause table.}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the years of life gained
-by age is attached and shown on printing.}
+by age is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_cause_deleted}: a list with \code{e0} (all-cause),

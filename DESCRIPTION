@@ -1,6 +1,6 @@
 Package: DemogAnr
 Title: Demographic Analysis
-Version: 0.3.0
+Version: 0.3.1
 Authors@R:
     person("Edward", "Owusu Manu", email = "edward.manu@statsghana.gov.gh",
            role = c("aut", "cre"))

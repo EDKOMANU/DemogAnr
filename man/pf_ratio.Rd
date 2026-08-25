@@ -35,7 +35,7 @@ classified by mother's age at the survey; the default) or \code{"at_delivery"}
 the adjustment factor \code{K} (default \code{c(20, 25, 30)}).}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the P/F ratios by age is
-attached and shown on printing.}
+attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_pf}: a list with the adjustment factor \code{K},

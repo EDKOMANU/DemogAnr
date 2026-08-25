@@ -1,3 +1,40 @@
+# DemogAnr 0.3.1
+
+## Bug fixes
+
+* `print()` methods no longer draw the attached figure. Printing a result in a
+  non-interactive session opened a graphics device and wrote an `Rplots.pdf`
+  into the working directory. Figures are unchanged and still reached with
+  `plot()`, or as the `$plot` element.
+
+* `project_population()` and `calibrate_regions()` now restore the caller's
+  random stream when they return. Previously they called `set.seed()`
+  unconditionally, so any simulation running around them silently changed
+  its draws. Results for a given `random_seed` are unchanged; passing
+  `random_seed = NULL` now skips seeding altogether.
+
+* `decompose_LE()` now checks that the two life tables share a radix. Given
+  tables built on different radices it returned a difference dominated by the
+  radix ratio -- two tables with identical mortality reported a gap of 99
+  years -- rather than the intended decomposition.
+
+* `myers()` now warns when the data do not cover every single year of age from
+  `lower` to `upper + 9`. Without the full span the blending weights are
+  unbalanced and the index is biased; the warning names an `upper` the data
+  can support.
+
+* `karup_king()` now rejects age groups that are not contiguous five-year
+  groups. Ten-year groups previously produced a distribution with half the age
+  range missing while the column totals still matched the input.
+
+* `stable_population()` now warns when the iterative solution of Lotka's
+  equation stops at `max_iter` without converging, and reports `converged` in
+  the returned object. The provisional `r` was previously returned in silence.
+
+* `pf_ratio()` now raises an error when `k_ages` matches no age group (which
+  produced a silent `NaN` for `K` and `TFR_adjusted`) and warns about
+  individual `k_ages` values that are not age-group lower bounds.
+
 # DemogAnr 0.3.0
 
 This release extends the package from the everyday measures into the classical

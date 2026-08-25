@@ -34,8 +34,8 @@ Options: "CBR", "GFR", "ASFR", "TFR". Use "all" to calculate all metrics.}
 from the ASFRs (default 5, for standard 5-year age groups).}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
-age-specific fertility rates is attached to the result as \verb{$plot} and shown
-when the object is printed.}
+age-specific fertility rates is attached to the result as \verb{$plot};
+retrieve it with \code{plot()}.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }

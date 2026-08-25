@@ -44,7 +44,7 @@
 #' @param k_ages Age-group lower bounds whose P/F ratios are averaged to form
 #'   the adjustment factor `K` (default `c(20, 25, 30)`).
 #' @param graph Logical; if `TRUE` (default) a plot of the P/F ratios by age is
-#'   attached and shown on printing.
+#'   attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_pf`: a list with the adjustment factor `K`,
 #'   the unadjusted and adjusted total fertility rates `TFR` and `TFR_adjusted`,
@@ -91,7 +91,20 @@ pf_ratio <- function(data, age, women, ceb, births,
   F[7] <- phi_prev[7] + co$a[7] * f[7] + co$b[7] * f[6] + co$cc[7] * phi7   # b(7) applies to f(6)
 
   PF <- P / F
-  K  <- mean(PF[ages %in% k_ages])
+  # K is an average over the age groups named in k_ages. An unmatched k_ages
+  # otherwise averages an empty vector and every result downstream is NaN.
+  sel <- ages %in% k_ages
+  if (!any(sel)) {
+    stop("'k_ages' matched no age group. Give age-group lower bounds drawn ",
+         "from ", paste(ages, collapse = ", "), "; got ",
+         paste(k_ages, collapse = ", "), ".")
+  }
+  unmatched <- setdiff(k_ages, ages)
+  if (length(unmatched) > 0) {
+    warning("Ignoring 'k_ages' value(s) that are not age-group lower bounds: ",
+            paste(unmatched, collapse = ", "), ".", call. = FALSE)
+  }
+  K  <- mean(PF[sel])
   TFR      <- 5 * sum(f)
   TFR_adj  <- K * TFR
 
@@ -116,7 +129,6 @@ print.dem_pf <- function(x, ...) {
   cat(sprintf("Adjustment factor K = %.3f\n", x$K))
   cat(sprintf("TFR (reported) = %.2f   TFR (adjusted) = %.2f\n",
               x$TFR, x$TFR_adjusted))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

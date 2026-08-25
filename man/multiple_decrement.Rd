@@ -40,7 +40,7 @@ sum of the \code{causes} columns.}
 \item{sex, nax_method, radix}{Passed to \code{\link[=lifetable]{lifetable()}} for the all-cause table.}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the cohort distribution
-of deaths by cause is attached and shown on printing.}
+of deaths by cause is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_mdlt}: a list with the all-cause life

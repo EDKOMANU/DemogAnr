@@ -85,7 +85,11 @@ innovation added to the growth rate each year (default 0, i.e. none).}
 \item{probs}{Numeric length-2. Lower and upper quantiles summarising the
 trajectories (default \code{c(0.1, 0.9)}, the 10th to 90th percentile band).}
 
-\item{random_seed}{Integer. Seed for reproducibility (default 42).}
+\item{random_seed}{Integer seed, so that repeated calls with the same
+arguments give the same answer (default 42). The generator is seeded
+only for the duration of the call: the caller's random stream is
+restored on exit, so surrounding simulations are unaffected. Pass
+\code{NULL} to draw from the stream as it stands and not seed at all.}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
 projected trajectories (median and the \code{probs} band, faceted by subregion)

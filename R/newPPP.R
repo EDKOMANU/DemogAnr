@@ -60,7 +60,11 @@
 #' @param num_samples Integer. Number of simulated trajectories (default 2000).
 #' @param probs Numeric length-2. Lower and upper quantiles summarising the
 #'   trajectories (default `c(0.1, 0.9)`, the 10th to 90th percentile band).
-#' @param random_seed Integer. Seed for reproducibility (default 42).
+#' @param random_seed Integer seed, so that repeated calls with the same
+#'   arguments give the same answer (default 42). The generator is seeded
+#'   only for the duration of the call: the caller's random stream is
+#'   restored on exit, so surrounding simulations are unaffected. Pass
+#'   `NULL` to draw from the stream as it stands and not seed at all.
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the
 #'   projected trajectories (median and the `probs` band, faceted by subregion)
 #'   is attached to the result and shown when it is printed.
@@ -150,7 +154,13 @@ project_population <- function(
   miss <- needed[!needed %in% names(data)]
   if (length(miss)) stop("Column(s) not found in 'data': ", paste(miss, collapse = ", "))
 
-  set.seed(random_seed)
+  # Seed for reproducibility, then hand the user's random stream back
+  # untouched when this call returns.
+  if (!is.null(random_seed)) {
+    old_rng <- .capture_seed()
+    on.exit(.restore_seed(old_rng), add = TRUE)
+    set.seed(random_seed)
+  }
   num_years <- future_year - base_year
 
   # Build the three component samplers. A user sampler is any function(mean, n);
@@ -299,12 +309,10 @@ project_population <- function(
 
 #' @export
 print.dem_projection <- function(x, ...) {
-  p <- attr(x, "plot")
   y <- x
   attr(y, "plot") <- NULL
   class(y) <- "data.frame"
   print(y, ...)
-  if (!is.null(p)) print(p)
   invisible(x)
 }
 

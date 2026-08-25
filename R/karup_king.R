@@ -85,6 +85,24 @@ karup_king <- function(df, age_col = "age_group", pops = "population",
                     sep = "-", convert = TRUE) |>
     dplyr::arrange(start_age)
 
+  # The Karup-King multipliers are defined for contiguous five-year groups.
+  # Anything else silently yields a distribution with gaps (each group still
+  # emits exactly five single years), so check the shape up front.
+  widths <- df$end_age - df$start_age + 1
+  if (any(widths != 5)) {
+    stop("Karup-King interpolation requires five-year age groups, but ",
+         "width(s) of ", paste(sort(unique(widths[widths != 5])), collapse = ", "),
+         " year(s) were given (e.g. '", df$start_age[which(widths != 5)[1]], "-",
+         df$end_age[which(widths != 5)[1]], "').")
+  }
+  gap <- which(diff(df$start_age) != 5)
+  if (length(gap) > 0) {
+    stop("Age groups must be contiguous (each starting five years after the ",
+         "previous one), but there is a gap or overlap between the groups ",
+         "starting at ", df$start_age[gap[1]], " and ",
+         df$start_age[gap[1] + 1], ".")
+  }
+
   single_ages <- list()
 
   for (i in 1:nrow(df)) {
