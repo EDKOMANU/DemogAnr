@@ -25,7 +25,6 @@
   `60` = c(-0.466, -0.352, -0.217, -0.084, 0.053, 0.220, 0.378, 0.579, 0.800)
 )
 .orph_M <- 22:30          # columns of table 86
-.orph_ages <- seq(10, 60, 5)
 
 # Table 88: the standard function Z(x) used to locate an estimate in time,
 # for exact ages 26 to 75.

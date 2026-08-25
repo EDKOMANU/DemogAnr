@@ -76,6 +76,15 @@
   Windows, and Linux on R-devel, release, oldrel and the declared minimum
   R 4.1.
 
+### Documentation
+
+* The vignette now covers the indirect estimation pipeline end to end: child
+  mortality from `chm_brass()` completed into a life table with
+  `model_lifetable()`, the Brass relational alternative through
+  `brass_logit(complete = TRUE)` and `brass_lifetable()`, adult mortality from
+  `orphanhood()`, and a section on assessing the completeness of death
+  registration with `ggb()`, `seg()` and `ggb_seg()`.
+
 ## Renamed, with the old names kept working
 
 * The bundled dataset `data` is now `grouped_pop`. Its former name shadowed
