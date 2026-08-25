@@ -138,13 +138,8 @@ lifetable <- function(data,
 
   # --- Baseline nax: Coale-Demeny young ages, n/2 elsewhere, 1/Mx open ---
   m0 <- nMx[1]
-  if (sex == "male") {
-    a0 <- if (m0 >= 0.107) 0.330 else 0.045 + 2.684 * m0
-    a1 <- if (m0 >= 0.107) 1.352 else 1.651 - 2.816 * m0
-  } else {
-    a0 <- if (m0 >= 0.107) 0.350 else 0.053 + 2.800 * m0
-    a1 <- if (m0 >= 0.107) 1.361 else 1.522 - 1.518 * m0
-  }
+  cd <- .cd_a0_a1(m0, sex)
+  a0 <- cd[["a0"]]; a1 <- cd[["a1"]]
 
   nax_vec <- n / 2
   if (age[1] == 0 && n[1] == 1) nax_vec[1] <- a0

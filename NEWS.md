@@ -2,6 +2,47 @@
 
 ## New features
 
+### Model life tables and the completion of indirect estimates
+
+* `model_lifetable()` returns a life table from the four Coale-Demeny regional
+  families or the five United Nations patterns for developing countries,
+  indexed either by level (`e0`) or, more usefully, by an observed child
+  mortality (`q1` or `q5`). The tabulated rates ship as `model_lt`: nine
+  families by two sexes by 45 levels of `e0` from 54 to 76, in half-year
+  steps.
+
+  This closes a loop the package could not previously close. `chm_brass()`
+  estimates q(x) for a named Coale-Demeny family but stops there; passing its
+  q(5) to `model_lifetable()` now supplies the whole age pattern, and life
+  expectancy with it.
+
+* `brass_lifetable()` builds a complete life table from a pair of Brass
+  relational logit parameters. Where `brass_logit()` estimates alpha and beta
+  from observed survivorship and predicts only at the ages supplied, this runs
+  the model the other way, across the standard's full age range. It takes a
+  `brass_logit()` fit directly, or alpha and beta given by hand, or a
+  `target_e0` or `target_q5` to solve the level for -- so a table can be
+  generated with no data at all.
+
+* `brass_logit()` gains `complete = TRUE`, which carries the fit straight
+  through to that life table and attaches it as `$lifetable`, making the
+  common path a single call. Its result is now an object of class
+  `dem_brass_fit` recording `alpha`, `beta` and the `standard` used.
+
+### Completeness of death registration
+
+* `ggb()`, `seg()` and `ggb_seg()` estimate how completely deaths are
+  registered relative to an enumerated population, by the generalized growth
+  balance, synthetic extinct generations, and the combined procedure. Where
+  registration is incomplete a life table built from registered deaths
+  understates mortality, and these give the factor to correct it by; `ggb()`
+  also estimates how the coverage of two censuses differs. Each attaches a
+  diagnostic plot, which should be inspected before the estimate is used.
+
+  All three are validated in the test suite against a stable population built
+  by numerical integration, so the true completeness is known exactly: they
+  recover it to within 1 per cent over completeness from 0.3 to 1.0.
+
 * A `README`, and a GitHub Actions `R-CMD-check` workflow covering macOS,
   Windows, and Linux on R-devel, release, oldrel and the declared minimum
   R 4.1.

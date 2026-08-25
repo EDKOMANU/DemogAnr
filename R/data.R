@@ -201,3 +201,36 @@
 #' @source Ghana Statistical Service, 2021 Population and Housing Census
 #'   (national single-year age distribution).
 "ghpop2021"
+
+#' Coale-Demeny and United Nations model life table rates
+#'
+#' Age-specific death rates \eqn{{}_nM_x} for the four Coale-Demeny regional
+#' model life table families and the five United Nations patterns for
+#' developing countries, by sex and level. Used by [model_lifetable()], which
+#' builds a life table from them and is the usual way to reach this data.
+#'
+#' @format A data frame with 14,580 rows and 5 variables:
+#' \describe{
+#'   \item{family}{Factor. One of `CD_West`, `CD_North`, `CD_South`, `CD_East`,
+#'     `UN_General`, `UN_Latin_American`, `UN_Chilean`, `UN_South_Asian`,
+#'     `UN_Far_Eastern`.}
+#'   \item{sex}{Factor, `male` or `female`.}
+#'   \item{e0}{Numeric. Level of the table, as life expectancy at birth, from
+#'     54 to 76 in steps of half a year.}
+#'   \item{age}{Integer. Lower bound of the age group: 0, 1, 5, 10, ..., 80.}
+#'   \item{nMx}{Numeric. Central death rate in the age group.}
+#' }
+#'
+#' @details
+#' The tabulated levels run from \eqn{e_0} of 54 to 76, so the very high
+#' mortality levels of the published Coale-Demeny system are not covered here.
+#' For a level outside that range, [brass_lifetable()] fits a relational model
+#' that is not restricted to a tabulated grid.
+#'
+#' @source Coale, A. J., & Demeny, P. (1983). \emph{Regional Model Life Tables
+#'   and Stable Populations} (2nd ed.). New York: Academic Press; and United
+#'   Nations (1982), \emph{Model Life Tables for Developing Countries},
+#'   Population Studies No. 77. New York: United Nations.
+#'
+#' @seealso [model_lifetable()]
+"model_lt"

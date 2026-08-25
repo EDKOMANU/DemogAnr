@@ -63,8 +63,9 @@ dem.fert(bangladesh, type = "all", age_col = "age",
 | --- | --- |
 | Rates and ratios | `dem.fert()`, `dem.cdr()`, `dem.mmr()`, `dem.chm()` |
 | Life tables | `lifetable()`, `lifetable_nqx()`, `multiple_decrement()`, `cause_deleted_lt()` |
-| Model life tables | `brass_logit()` |
+| Model life tables | `model_lifetable()` (Coale-Demeny and UN), `brass_logit()`, `brass_lifetable()` |
 | Indirect estimation | `chm_brass()` (Brass–Trussell), `pf_ratio()` (Brass P/F) |
+| Registration completeness | `ggb()`, `seg()`, `ggb_seg()` |
 | Reproduction | `reproduction()`, `stable_population()` |
 | Data quality | `whipple()`, `myers()`, `age_ratio()`, `sex_ratio()`, `un_age_sex_accuracy()` |
 | Interpolation | `karup_king()`, `interpolation()` |

@@ -47,3 +47,19 @@
   }
   invisible(NULL)
 }
+
+# --- Coale-Demeny separation factors ------------------------------------------
+# a0 and 4a1: the average person-years lived in the interval by those dying in
+# it, at ages 0 and 1-4, as functions of the infant death rate 1M0 (Coale &
+# Demeny 1983; Preston et al. 2001, Table 3.3). Shared by lifetable(), which
+# has 1M0 to hand, and brass_lifetable(), which solves for it from 1q0.
+.cd_a0_a1 <- function(m0, sex = c("male", "female")) {
+  sex <- match.arg(sex)
+  if (sex == "male") {
+    c(a0 = if (m0 >= 0.107) 0.330 else 0.045 + 2.684 * m0,
+      a1 = if (m0 >= 0.107) 1.352 else 1.651 - 2.816 * m0)
+  } else {
+    c(a0 = if (m0 >= 0.107) 0.350 else 0.053 + 2.800 * m0,
+      a1 = if (m0 >= 0.107) 1.361 else 1.522 - 1.518 * m0)
+  }
+}

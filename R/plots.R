@@ -198,3 +198,43 @@ pyramid <- function(data, age_col, sex_col, count_col,
     labs(x = "Age group", y = "Population", fill = NULL, title = title) +
     .dem_theme(base_family)
 }
+
+
+# Growth balance diagnostic: the fitted line should pass through points that
+# lie straight. Curvature is the signal that the method's assumptions fail.
+.plot_ggb <- function(tbl, intercept, slope, age_range) {
+  d <- data.frame(x = tbl$death_rate, y = tbl$y,
+                  used = ifelse(tbl$fitted, "fitted", "excluded"))
+  d <- d[is.finite(d$x) & is.finite(d$y), ]
+  ggplot(d, aes(x = x, y = y)) +
+    ggplot2::geom_abline(intercept = intercept, slope = slope,
+                         colour = .dem_male, linewidth = 0.6) +
+    geom_point(aes(colour = used), size = 2) +
+    scale_colour_manual(values = c(fitted = .dem_male, excluded = "grey65")) +
+    labs(x = "Observed death rate above x,  d(x+)",
+         y = "Entry rate minus growth rate,  b(x+) - r(x+)",
+         colour = NULL,
+         title = "Generalized growth balance",
+         subtitle = sprintf("fitted over exact ages %g-%g; completeness = %.1f%%",
+                            age_range[1], age_range[2], 100 / slope)) +
+    .dem_theme()
+}
+
+# Extinct generations diagnostic: the age-specific completeness ratios should
+# be flat. A trend means the estimate is not trustworthy.
+.plot_seg <- function(tbl, completeness, age_range) {
+  d <- data.frame(age = tbl$age, ratio = tbl$ratio,
+                  used = ifelse(tbl$fitted, "averaged", "excluded"))
+  d <- d[is.finite(d$ratio), ]
+  ggplot(d, aes(x = age, y = ratio)) +
+    geom_hline(yintercept = completeness, linetype = 2, colour = .dem_male) +
+    geom_line(colour = "grey70") +
+    geom_point(aes(colour = used), size = 2) +
+    scale_colour_manual(values = c(averaged = .dem_male, excluded = "grey65")) +
+    labs(x = "Exact age x", y = "Estimated completeness at x",
+         colour = NULL,
+         title = "Synthetic extinct generations",
+         subtitle = sprintf("averaged over ages %g-%g; completeness = %.1f%%",
+                            age_range[1], age_range[2], 100 * completeness)) +
+    .dem_theme()
+}

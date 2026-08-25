@@ -10,6 +10,9 @@ brass_logit(
   age_col,
   standard,
   standards_data = NULL,
+  complete = FALSE,
+  sex = c("male", "female"),
+  radix = 1e+05,
   verbose = FALSE
 )
 }
@@ -27,13 +30,27 @@ estimated.}
 
 \item{standards_data}{Standards dataset (default: included \link{standards}).}
 
+\item{complete}{Logical. If \code{TRUE}, the fitted \eqn{\alpha} and
+\eqn{\beta} are carried straight through to the complete life table they
+imply, attached as \verb{$lifetable}. The fit on its own predicts only at the
+ages supplied, so this is usually what is wanted; it is the same as
+passing the result to \code{\link[=brass_lifetable]{brass_lifetable()}}. Default \code{FALSE}.}
+
+\item{sex, radix}{Passed to \code{\link[=brass_lifetable]{brass_lifetable()}} when \code{complete = TRUE}.}
+
 \item{verbose}{Logical. If \code{TRUE}, prints detailed status messages to the console.}
 }
 \value{
-A list containing the fitted model (\code{model}), the alpha/beta
-\code{coefficients}, and \code{data}: the input data with a \code{predicted_qx} column of
+An object of class \code{dem_brass_fit}: a list with the fitted \code{model},
+the \code{coefficients} (also given separately as \code{alpha} and \code{beta}), the
+\code{standard} used, and \code{data}: the input data with a \code{predicted_qx} column of
 smoothed/completed cumulative probabilities and a \code{predicted_lx} column of
 the implied survivorship \eqn{l(x) = 1 - q(x)}.
+
+Note that the predictions cover only the ages supplied in \code{data}. To turn
+the fitted \eqn{\alpha} and \eqn{\beta} into a complete life table over
+the standard's whole age range, set \code{complete = TRUE}, which attaches it
+as \verb{$lifetable}, or pass the result to \code{\link[=brass_lifetable]{brass_lifetable()}}.
 }
 \description{
 Fits the Brass relational logit model to an observed series of \emph{cumulative}
@@ -71,6 +88,11 @@ model <- brass_logit(
 
 model$coefficients
 model$data
+
+# Or go straight to the life table the fit implies
+full <- brass_logit(observed_data, qx_col = "qx", age_col = "age",
+                    standard = "African", complete = TRUE)
+full$lifetable$metrics$LifeExpectancyAtBirth
 
 }
 \references{

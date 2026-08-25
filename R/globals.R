@@ -3,5 +3,5 @@ utils::globalVariables(c(
   # plotting helper column names (built inside plot constructors)
   "value", "lx", "year", "subregion", "region", "lo", "hi", "med",
   "contribution", "digit", "deviation", "percent", "ratio", "sex",
-  "count", "x", "y", "sign"
+  "count", "x", "y", "sign", "used"
 ))

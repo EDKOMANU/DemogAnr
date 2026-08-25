@@ -15,12 +15,18 @@ There were 0 errors, 0 warnings, and 1 note.
 
 This is an update of an existing package, from version 0.2.0 to 0.3.0.
 
-It adds nine methods, extending the package from the everyday rate and life
-table measures into the classical demographic models: multiple-decrement and
-cause-deleted life tables, the Brass P/F ratio method for fertility,
-reproduction measures and the stable population model, cohort-component
-projection, the singulate mean age at marriage, Sullivan health expectancy,
-and the calibration of subnational projections to a national control total.
+It extends the package from the everyday rate and life table measures into
+the classical demographic models: multiple-decrement and cause-deleted life
+tables, the Brass P/F ratio method for fertility, reproduction measures and
+the stable population model, cohort-component projection, the singulate mean
+age at marriage, Sullivan health expectancy, and the calibration of
+subnational projections to a national control total.
+
+It also adds the Coale-Demeny and United Nations model life table systems
+(`model_lifetable()`, with the rates shipped as the `model_lt` dataset), a
+life table generated from Brass relational logit parameters
+(`brass_lifetable()`), and the three death distribution methods for estimating
+the completeness of death registration (`ggb()`, `seg()`, `ggb_seg()`).
 Where a method has a published worked example the test suite reproduces it,
 including from United Nations *Manual X*, Preston, Heuveline and Guillot
 (2001), and Kpedekpo (1982).
