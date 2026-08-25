@@ -1,0 +1,66 @@
+State-of-field comparison for DemogAnr's JOSS paper (paper/paper.md, "State of the field").
+Produced by dev_state_of_field_comparison.R on the author's machine (R 4.5.3, Windows 11),
+DemogAnr_0.3.0, DemoTools_01.13.87, 2026-08-25. Both functions are given the identical
+published input: Preston, Heuveline & Guillot (2001), Box 4.1, United States females 1991,
+probabilities of dying (nqx) by abridged age group.
+
+==================== DemoTools::lt_abridged() ====================
+
+   Age AgeInt          nMx       nAx       nqx        lx         ndx      nLx
+0    0      1 0.0078835289 0.1328272 0.0078300 100000.00   783.00000  99321.0
+1    1      4 0.0004204395 1.5112606 0.0016800  99217.00   166.68456 396453.2
+5    5      5 0.0001840910 2.3136672 0.0009200  99050.32    91.12629 495006.8
+10  10      5 0.0001800747 2.6960050 0.0009000  98959.19    89.06327 494590.7
+15  15      5 0.0004725081 2.7218073 0.0023600  98870.13   233.33350 493819.1
+20  20      5 0.0005246712 2.5584890 0.0026200  98636.79   258.42840 492553.0
+25  25      5 0.0006289481 2.5996236 0.0031400  98378.36   308.90806 491150.3
+30  30      5 0.0008517174 2.6277602 0.0042500  98069.46   416.79519 489358.5
+35  35      5 0.0011712362 2.6343466 0.0058400  97652.66   570.29154 486914.2
+40  40      5 0.0016422635 2.6687506 0.0081800  97082.37   794.13378 483560.5
+45  45      5 0.0026764343 2.6915833 0.0133000  96288.24  1280.63353 478484.9
+50  50      5 0.0042310056 2.6869481 0.0209500  95007.60  1990.40926 470434.1
+55  55      5 0.0068492996 2.6763896 0.0337100  93017.19  3135.60956 457800.0
+60  60      5 0.0105655942 2.6536198 0.0515500  89881.58  4633.39561 438536.2
+65  65      5 0.0159136525 2.6415765 0.0766900  85248.19  6537.68350 410822.3
+70  70      5 0.0244420950 2.6304747 0.1155200  78710.50  9092.63742 372007.3
+75  75      5 0.0380110479 2.6170293 0.1742700  69617.87 12132.30560 319178.4
+80  80      5 0.0626872406 2.5737997 0.2720584  57485.56 15639.42724 249483.4
+85  85     NA 0.1452641017 6.8840132 1.0000000  41846.13 41846.13370 288069.3
+          Sx        Tx        ex
+0  0.9915483 7907543.4 79.075434
+1  0.9984521 7808222.4 78.698432
+5  0.9991595 7411769.2 74.828325
+...
+85 0.0000000  288069.3  6.884013
+
+Column names as returned:
+ [1] "Age"    "AgeInt" "nMx"    "nAx"    "nqx"    "lx"     "ndx"    "nLx"
+ [9] "Sx"     "Tx"     "ex"
+
+To get life expectancy at birth: dt_lt$ex[dt_lt$Age == 0] -> 79.07543
+
+==================== DemogAnr::lifetable_nqx() ====================
+
+   Age   n     nqx        lx          dx       Lx        Tx        ex
+1    0   1 0.00783 100000.00   783.00000  99608.5 7805628.5 78.056285
+2    1   4 0.00168  99217.00   166.68456 396534.6 7706020.0 77.668343
+3    5   5 0.00092  99050.32    91.12629 495023.8 7309485.4 73.795680
+10  40   5 0.00818  97082.37   794.13378 483426.5 3866320.7 39.825158
+...
+19  85 Inf 1.00000  41755.79 41755.78690 192941.7  192941.7  4.620717
+
+Columns returned (8, matching Preston et al. 2001 notation directly):
+Age, n, nqx, lx, dx, Lx, Tx, ex
+
+To get life expectancy at birth: da_lt$ex[da_lt$Age == 0] -> 78.05629
+
+Note: the two life expectancy values differ (79.08 vs 78.06) because the packages use
+different assumptions for the open age interval and for nAx in the closed intervals
+(DemoTools's "un" method refines nAx iteratively and extrapolates the open interval with a
+parametric mortality law; DemogAnr's lifetable_nqx() uses the simpler nax = n/2
+approximation, a limitation documented in its own help page). Neither matches Preston's
+published e0 = 78.92 exactly, because that value depends on the master life table's own
+separation factors, which DemogAnr's lifetable() reproduces exactly when passed via the
+nax argument (see the package vignette). The comparison here is about the shape and
+labelling of the returned object, not about which package's default assumptions are more
+accurate.
