@@ -7,3 +7,5 @@
 ^.*\.Rhistory$
 ^doc$
 ^Meta$
+^paper$
+^\.github$
