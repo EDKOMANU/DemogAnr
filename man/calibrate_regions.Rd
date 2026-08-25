@@ -67,10 +67,14 @@ discrepancy can be seen.}
 \item{probs}{Numeric length-2. Lower and upper quantiles summarising the
 trajectories (default \code{c(0.1, 0.9)}).}
 
-\item{random_seed}{Integer. Seed for reproducibility (default 42).}
+\item{random_seed}{Integer seed, so that repeated calls with the same
+arguments give the same answer (default 42). The generator is seeded
+only for the duration of the call: the caller's random stream is
+restored on exit, so surrounding simulations are unaffected. Pass
+\code{NULL} to draw from the stream as it stands and not seed at all.}
 
 \item{graph}{Logical. If \code{TRUE} (default) a \pkg{ggplot2} plot of the
-calibrated regional series is attached and shown on printing.}
+calibrated regional series is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_calibration}: a list with

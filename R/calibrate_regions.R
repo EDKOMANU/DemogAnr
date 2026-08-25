@@ -92,9 +92,13 @@
 #'   discrepancy can be seen.
 #' @param probs Numeric length-2. Lower and upper quantiles summarising the
 #'   trajectories (default `c(0.1, 0.9)`).
-#' @param random_seed Integer. Seed for reproducibility (default 42).
+#' @param random_seed Integer seed, so that repeated calls with the same
+#'   arguments give the same answer (default 42). The generator is seeded
+#'   only for the duration of the call: the caller's random stream is
+#'   restored on exit, so surrounding simulations are unaffected. Pass
+#'   `NULL` to draw from the stream as it stands and not seed at all.
 #' @param graph Logical. If `TRUE` (default) a \pkg{ggplot2} plot of the
-#'   calibrated regional series is attached and shown on printing.
+#'   calibrated regional series is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_calibration`: a list with
 #'   \describe{
@@ -259,7 +263,13 @@ calibrate_regions <- function(
     (is.numeric(deviation) && all(deviation == 0))
   n_sim <- if (deterministic) 1L else as.integer(num_samples)
 
-  set.seed(random_seed)
+  # Seed for reproducibility, then hand the user's random stream back
+  # untouched when this call returns.
+  if (!is.null(random_seed)) {
+    old_rng <- .capture_seed()
+    on.exit(.restore_seed(old_rng), add = TRUE)
+    set.seed(random_seed)
+  }
 
   # ---- calibration, stratum by stratum -------------------------------------
   out_rows <- list()
@@ -428,7 +438,6 @@ print.dem_calibration <- function(x, ...) {
   cat(strrep("-", 78), "\n", sep = "")
   cat(sprintf("Largest regional-sum minus control-total difference: %.6g\n",
               max(abs(x$check$difference))))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

@@ -24,7 +24,8 @@ un_age_sex_accuracy(
 as open-ended.}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the male
-and female age ratios by age is attached to the result and shown on print.}
+and female age ratios by age is attached to the result as \verb{$plot};
+retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_unasa}: a list with the joint index, its

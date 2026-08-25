@@ -139,3 +139,75 @@ test_that("project_population(): target_cv widens the band at the horizon", {
   w_w <- wide$upper[wide$year == 2030]  - wide$lower[wide$year == 2030]
   expect_gt(w_w, w_t)
 })
+
+test_that("project_population() returns the same class whether or not it plots", {
+  pp <- data.frame(region = "R", subregion = "S", base_pop = 1e5,
+                   cbr = 0.03, cdr = 0.01, nmr = 0.001)
+  a <- project_population(pp, 2027, 2025, num_samples = 20, graph = TRUE)
+  b <- project_population(pp, 2027, 2025, num_samples = 20, graph = FALSE)
+
+  expect_s3_class(a, "dem_projection")
+  expect_s3_class(b, "dem_projection")
+  expect_s3_class(plot(a), "ggplot")
+  # graph = FALSE has no figure to give back, and says so rather than
+  # falling through to plot.data.frame
+  expect_error(plot(b), "No plot available")
+  # still an ordinary data frame for everything else
+  expect_equal(nrow(a), nrow(b))
+  expect_true(all(c("year", "median", "lower", "upper") %in% names(b)))
+})
+
+test_that("the projection figure names the interval it actually drew", {
+  pp <- data.frame(region = "R", subregion = "S", base_pop = 1e5,
+                   cbr = 0.03, cdr = 0.01, nmr = 0.001)
+  p80 <- project_population(pp, 2027, 2025, num_samples = 50,
+                            probs = c(0.1, 0.9))
+  p50 <- project_population(pp, 2027, 2025, num_samples = 50,
+                            probs = c(0.25, 0.75))
+  expect_match(plot(p80)$labels$title, "80% interval")
+  expect_match(plot(p50)$labels$title, "50% interval")
+})
+
+test_that("net migration of zero still carries uncertainty", {
+  # A region with balanced migration but ordinary births and deaths: the
+  # common case where cv * |nmr| = 0 used to wipe out migration uncertainty.
+  pp <- data.frame(region = "R", subregion = "S", base_pop = 1e5,
+                   cbr = 0.03, cdr = 0.01, nmr = 0)
+
+  expect_warning(fallback <- project_population(pp, 2030, 2025,
+                                                num_samples = 4000, cv = 0.30,
+                                                graph = FALSE),
+                 "migration_sd")
+  # migration_sd = 0 asks for no migration uncertainty at all, so the
+  # difference between the two is what migration now contributes
+  none <- project_population(pp, 2030, 2025, num_samples = 4000, cv = 0.30,
+                             migration_sd = 0, graph = FALSE)
+  band <- function(z) with(subset(z, year == 2030), upper - lower)
+  expect_gt(band(fallback), band(none))
+
+  # and an explicit, larger migration_sd widens it further, silently
+  wide <- project_population(pp, 2030, 2025, num_samples = 4000, cv = 0.30,
+                             migration_sd = 0.01, graph = FALSE)
+  expect_gt(band(wide), band(fallback))
+
+  # a non-zero rate keeps its old cv * |nmr| spread and raises no warning
+  nz <- data.frame(region = "R", subregion = "S", base_pop = 1e5,
+                   cbr = 0.03, cdr = 0.01, nmr = 0.002)
+  expect_silent(project_population(nz, 2030, 2025, num_samples = 500,
+                                   cv = 0.30, graph = FALSE))
+})
+
+test_that("with no vital rates to borrow from, the warning names the remedy", {
+  # Nothing in the row carries a scale, so there is genuinely nothing to
+  # infer: the spread stays zero, but the user is told what to set.
+  flat <- data.frame(region = "R", subregion = "S", base_pop = 1e5,
+                     cbr = 0, cdr = 0, nmr = 0)
+  expect_warning(z <- project_population(flat, 2030, 2025, num_samples = 200,
+                                         cv = 0.30, graph = FALSE),
+                 "set 'migration_sd'")
+  expect_equal(with(subset(z, year == 2030), upper - lower), 0)
+
+  s <- project_population(flat, 2030, 2025, num_samples = 2000, cv = 0.30,
+                          migration_sd = 0.004, graph = FALSE)
+  expect_gt(with(subset(s, year == 2030), upper - lower), 0)
+})

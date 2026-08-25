@@ -7,5 +7,6 @@
 ^.*\.Rhistory$
 ^doc$
 ^Meta$
+^Rplots\.pdf$
 ^paper$
 ^\.github$

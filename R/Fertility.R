@@ -13,8 +13,8 @@
 #' @param age_interval Width (in years) of the age groups, used to compute TFR
 #'   from the ASFRs (default 5, for standard 5-year age groups).
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the
-#'   age-specific fertility rates is attached to the result as `$plot` and shown
-#'   when the object is printed.
+#'   age-specific fertility rates is attached to the result as `$plot`;
+#'   retrieve it with `plot()`.
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #' @return A list of named outputs for the requested fertility calculations and the modified dataframe with ASFR.
 #' @examples
@@ -121,7 +121,6 @@ print.dem_fert <- function(x, ...) {
     cat("Total Fertility Rate (TFR):\n")
     print(x$results$TFR)
   }
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

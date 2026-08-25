@@ -46,7 +46,7 @@ births only.}
 spacing of \code{age}.}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the net maternity
-function is attached and shown on printing.}
+function is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_reproduction}: a list with \code{TFR}, \code{GRR},

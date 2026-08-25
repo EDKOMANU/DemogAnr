@@ -40,7 +40,7 @@ fraction of births that are female.}
 \item{steps}{Number of \code{n}-year steps to project (default 1).}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the projected total
-population by year is attached and shown on printing.}
+population by year is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_ccm}: a list with the Leslie \code{matrix}, a

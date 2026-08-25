@@ -27,8 +27,8 @@ Options: "CDR", "ASDR". Use "all" to calculate both.}
 \item{deaths_col}{The column name for total deaths.}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} plot of the
-age-specific death rates is attached to the result as \verb{$plot} and shown
-when the object is printed.}
+age-specific death rates is attached to the result as \verb{$plot};
+retrieve it with \code{plot()}.}
 
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }

@@ -1,14 +1,109 @@
 # DemogAnr 0.3.0
 
-This release extends the package from the everyday measures into the classical
-models of formal demography: reproduction and the stable population, multiple
-decrement and cause-deleted life tables, indirect fertility estimation,
-cohort-component projection, and the regional disaggregation of a national
-projection. Wherever possible each new function reproduces the published worked
-example from the standard texts, so that a reader can follow the calculation in
-the book alongside the code.
-
 ## New features
+
+### Model life tables and the completion of indirect estimates
+
+* `model_lifetable()` returns a life table from the four Coale-Demeny regional
+  families or the five United Nations patterns for developing countries,
+  indexed either by level (`e0`) or, more usefully, by an observed child
+  mortality (`q1` or `q5`). The tabulated rates ship as `model_lt`: nine
+  families by two sexes by 45 levels of `e0` from 54 to 76, in half-year
+  steps, generated with the MortCast package from the United Nations
+  Population Division's published tables.
+
+  The rates stop at age 80, and the value given there behaves like a
+  five-year group rate rather than an aggregate rate for the open interval.
+  Closing the table on it would let too much of the cohort survive above 80,
+  overshooting the level's own label by up to 1.2 years. The label is itself
+  published information, so it pins the open interval down exactly, and
+  `calibrate_open = TRUE` (the default) uses it: the returned table
+  reproduces its level exactly and implies a remaining life expectancy at 80
+  of 5.4 to 6.9 years, which is the order real life tables show. Pass
+  `calibrate_open = FALSE` for the uncalibrated figure.
+
+  This closes a loop the package could not previously close. `chm_brass()`
+  estimates q(x) for a named Coale-Demeny family but stops there; passing its
+  q(5) to `model_lifetable()` now supplies the whole age pattern, and life
+  expectancy with it.
+
+* `brass_lifetable()` builds a complete life table from a pair of Brass
+  relational logit parameters. Where `brass_logit()` estimates alpha and beta
+  from observed survivorship and predicts only at the ages supplied, this runs
+  the model the other way, across the standard's full age range. It takes a
+  `brass_logit()` fit directly, or alpha and beta given by hand, or a
+  `target_e0` or `target_q5` to solve the level for -- so a table can be
+  generated with no data at all.
+
+* `brass_logit()` gains `complete = TRUE`, which carries the fit straight
+  through to that life table and attaches it as `$lifetable`, making the
+  common path a single call. Its result is now an object of class
+  `dem_brass_fit` recording `alpha`, `beta` and the `standard` used.
+
+### Indirect adult mortality
+
+* `orphanhood()` estimates adult female survivorship from the proportion of
+  respondents whose mother is still alive, by the Brass method of *Manual X*
+  Chapter IV. It is the adult counterpart of `chm_brass()`: that estimates
+  child mortality from a mother's report on her children, this estimates the
+  mother's own mortality from her children's report on her. It returns the
+  conditional survivorship l(25+n)/l(25) for each age group of respondent,
+  together with the number of years before the survey each estimate refers
+  to, so that a single survey traces a mortality trend backwards.
+
+  The weighting factors of *Manual X* table 86 and the standard function of
+  table 88 are carried in the package. The whole chain reproduces the
+  published Bolivia 1975 worked example exactly: all seven weighting factors
+  to four decimal places (tables 91), all seven survivorship ratios to the
+  three decimals published, and all six time references to the tenth of a
+  year published (table 92). That example is a test.
+
+### Completeness of death registration
+
+* `ggb()`, `seg()` and `ggb_seg()` estimate how completely deaths are
+  registered relative to an enumerated population, by the generalized growth
+  balance, synthetic extinct generations, and the combined procedure. Where
+  registration is incomplete a life table built from registered deaths
+  understates mortality, and these give the factor to correct it by; `ggb()`
+  also estimates how the coverage of two censuses differs. Each attaches a
+  diagnostic plot, which should be inspected before the estimate is used.
+
+  All three are validated in the test suite against a stable population built
+  by numerical integration, so the true completeness is known exactly: they
+  recover it to within 1 per cent over completeness from 0.3 to 1.0.
+
+* A `README`, and a GitHub Actions `R-CMD-check` workflow covering macOS,
+  Windows, and Linux on R-devel, release, oldrel and the declared minimum
+  R 4.1.
+
+### Documentation
+
+* The vignette now covers the indirect estimation pipeline end to end: child
+  mortality from `chm_brass()` completed into a life table with
+  `model_lifetable()`, the Brass relational alternative through
+  `brass_logit(complete = TRUE)` and `brass_lifetable()`, adult mortality from
+  `orphanhood()`, and a section on assessing the completeness of death
+  registration with `ggb()`, `seg()` and `ggb_seg()`.
+
+## Renamed, with the old names kept working
+
+* The bundled dataset `data` is now `grouped_pop`. Its former name shadowed
+  base R's `data()` function as soon as it was loaded, which made `data(...)`
+  calls later in the same script fail confusingly. `data` is still shipped and
+  identical, and will be removed in a future release.
+
+* `dm.chm()` is now `dem.chm()`, matching `dem.cdr()`, `dem.fert()` and
+  `dem.mmr()`. `dm.chm()` still works, returns exactly the same value, and
+  warns once per session.
+
+* `dem.mmr()` gained `results$MMRate` (deaths per 100,000 women) and
+  `results$MMRatio` (deaths per 100,000 live births). Note that the existing
+  `results$MMR` holds the *rate*, which is the opposite of the near-universal
+  convention that "MMR" means the ratio. Rather than change what `MMR` returns
+  and silently alter existing results, the unambiguous pair was added
+  alongside it; `MMR` and `MMR_Ratio` keep their original values and will be
+  removed in a future release. `print()` now shows both, and no longer dumps
+  the whole input data frame.
 
 * `calibrate_regions()` is a new function for the disaggregation step that
   follows a national projection. Where `project_population()` projects each
@@ -138,6 +233,66 @@ the book alongside the code.
   where the analyst states where the rates are going.
 * The bundled `region2000` data set gains illustrative `cbr`, `cdr`, and `nmr`
   per-capita rate columns for the new `project_population()` interface.
+
+## Bug fixes
+
+* `project_population()` now returns an object of class `dem_projection`
+  whether or not `graph = TRUE`. Previously `graph = FALSE` returned a bare
+  data frame, so `plot()` fell through to `plot.data.frame()` and drew a
+  scatterplot matrix instead of raising an error.
+
+* `project_population()` no longer collapses migration uncertainty to zero
+  where the net migration rate is zero. A coefficient of variation is
+  degenerate for a signed quantity (`cv * |0| = 0`), so a region with balanced
+  migration carried no migration uncertainty at all. The spread is now an
+  absolute standard deviation, settable with the new `migration_sd` argument
+  and otherwise borrowed from the region's own birth and death rates, with a
+  warning naming the regions concerned.
+
+* The projection figure's title now names the interval it actually drew (for
+  example "80% interval" for the default `probs = c(0.1, 0.9)`), instead of
+  always claiming an interquartile band.
+
+* `print()` methods no longer draw the attached figure. Printing a result in a
+  non-interactive session opened a graphics device and wrote an `Rplots.pdf`
+  into the working directory. Figures are unchanged and still reached with
+  `plot()`, or as the `$plot` element.
+
+* `project_population()` and `calibrate_regions()` now restore the caller's
+  random stream when they return. Previously they called `set.seed()`
+  unconditionally, so any simulation running around them silently changed
+  its draws. Results for a given `random_seed` are unchanged; passing
+  `random_seed = NULL` now skips seeding altogether.
+
+* `decompose_LE()` now checks that the two life tables share a radix. Given
+  tables built on different radices it returned a difference dominated by the
+  radix ratio -- two tables with identical mortality reported a gap of 99
+  years -- rather than the intended decomposition.
+
+* `myers()` now warns when the data do not cover every single year of age from
+  `lower` to `upper + 9`. Without the full span the blending weights are
+  unbalanced and the index is biased; the warning names an `upper` the data
+  can support.
+
+* `karup_king()` now rejects age groups that are not contiguous five-year
+  groups. Ten-year groups previously produced a distribution with half the age
+  range missing while the column totals still matched the input.
+
+* `stable_population()` now warns when the iterative solution of Lotka's
+  equation stops at `max_iter` without converging, and reports `converged` in
+  the returned object. The provisional `r` was previously returned in silence.
+
+* `pf_ratio()` now raises an error when `k_ages` matches no age group (which
+  produced a silent `NaN` for `K` and `TFR_adjusted`) and warns about
+  individual `k_ages` values that are not age-group lower bounds.
+
+This release extends the package from the everyday measures into the classical
+models of formal demography: reproduction and the stable population, multiple
+decrement and cause-deleted life tables, indirect fertility estimation,
+cohort-component projection, and the regional disaggregation of a national
+projection. Wherever possible each new function reproduces the published worked
+example from the standard texts, so that a reader can follow the calculation in
+the book alongside the code.
 
 # DemogAnr 0.2.0
 

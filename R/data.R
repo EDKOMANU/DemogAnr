@@ -3,6 +3,10 @@
 #' Example population counts in 5-year age groups (0-4 to 75-79) for the years
 #' 2021 to 2035, used to demonstrate [karup_king()].
 #'
+#' This dataset was called `data` before version 0.3.0. That name shadowed
+#' base R's [utils::data()] function whenever it was loaded, so it was renamed;
+#' see [data] for the deprecated original.
+#'
 #' @format A data frame with 16 rows (age groups) and 16 variables:
 #' \describe{
 #'   \item{2021}{Numeric. Population in the age group in 2021.}
@@ -24,6 +28,20 @@
 #' }
 #' @source Simulated data based on population structures from the Ghana
 #'   Statistical Service.
+"grouped_pop"
+
+#' Grouped population data by 5-year age groups (deprecated name)
+#'
+#' `data` is the former name of [grouped_pop], kept so that code written
+#' against earlier versions keeps working. The name shadowed base R's
+#' [utils::data()] function once loaded, which made `data(...)` calls in the
+#' same script fail in confusing ways. Use [grouped_pop] instead; `data` will
+#' be removed in a future release.
+#'
+#' @format Identical to [grouped_pop]: a data frame with 16 rows (age groups)
+#'   and 16 variables.
+#' @seealso [grouped_pop], which this duplicates.
+#' @keywords internal
 "data"
 
 #' Karup-King coefficients for the first age group
@@ -183,3 +201,45 @@
 #' @source Ghana Statistical Service, 2021 Population and Housing Census
 #'   (national single-year age distribution).
 "ghpop2021"
+
+#' Coale-Demeny and United Nations model life table rates
+#'
+#' Age-specific death rates \eqn{{}_nM_x} for the four Coale-Demeny regional
+#' model life table families and the five United Nations patterns for
+#' developing countries, by sex and level. Used by [model_lifetable()], which
+#' builds a life table from them and is the usual way to reach this data.
+#'
+#' @format A data frame with 14,580 rows and 5 variables:
+#' \describe{
+#'   \item{family}{Factor. One of `CD_West`, `CD_North`, `CD_South`, `CD_East`,
+#'     `UN_General`, `UN_Latin_American`, `UN_Chilean`, `UN_South_Asian`,
+#'     `UN_Far_Eastern`.}
+#'   \item{sex}{Factor, `male` or `female`.}
+#'   \item{e0}{Numeric. Level of the table, as life expectancy at birth, from
+#'     54 to 76 in steps of half a year.}
+#'   \item{age}{Integer. Lower bound of the age group: 0, 1, 5, 10, ..., 80.}
+#'   \item{nMx}{Numeric. Central death rate in the age group.}
+#' }
+#'
+#' @details
+#' The tabulated levels run from \eqn{e_0} of 54 to 76, so the very high
+#' mortality levels of the published Coale-Demeny system are not covered here.
+#' For a level outside that range, [brass_lifetable()] fits a relational model
+#' that is not restricted to a tabulated grid.
+#'
+#' The rates stop at age 80. The value given there behaves like a five-year
+#' group rate rather than an aggregate rate for the open interval, so
+#' [model_lifetable()] does not close the table on it by default; see that
+#' function's Details.
+#'
+#' @source Generated with the \pkg{MortCast} package from the model life
+#'   tables published by the United Nations Population Division
+#'   (\url{https://www.un.org/development/desa/pd/data/model-life-tables}).
+#'   The underlying systems are Coale, A. J., & Demeny, P. (1983),
+#'   \emph{Regional Model Life Tables and Stable Populations} (2nd ed.), New
+#'   York: Academic Press; and United Nations (1982), \emph{Model Life Tables
+#'   for Developing Countries}, Population Studies No. 77, New York: United
+#'   Nations.
+#'
+#' @seealso [model_lifetable()]
+"model_lt"

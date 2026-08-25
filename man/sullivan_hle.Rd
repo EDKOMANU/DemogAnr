@@ -18,7 +18,7 @@ sullivan_hle(data, age, nLx, lx, prevalence, graph = TRUE)
 (a proportion between 0 and 1).}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of healthy vs. total life
-expectancy by age is attached and shown on printing.}
+expectancy by age is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_sullivan}: a list with \code{HLE0} (health

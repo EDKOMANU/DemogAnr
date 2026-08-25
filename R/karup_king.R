@@ -33,18 +33,17 @@
 #'   the input age groups (overflow ages) are removed.
 #'
 #' @examples
-#' # The bundled grouped age distribution. (It is named `data`, so it is bound
-#' # to another name here to avoid masking base R's `data()` function.)
-#' grouped <- DemogAnr::data
-#' head(grouped)
+#' # The bundled grouped age distribution
+#' data(grouped_pop)
+#' head(grouped_pop)
 #'
 #' # Split the 5-year age groups into single years for the 2021 population,
 #' # using the packaged Karup-King coefficients:
-#' single <- karup_king(df = grouped, age_col = "age_col", pops = "2021")
+#' single <- karup_king(df = grouped_pop, age_col = "age_col", pops = "2021")
 #' head(single)
 #'
 #' # Population totals are (approximately) preserved:
-#' sum(grouped[["2021"]])
+#' sum(grouped_pop[["2021"]])
 #' sum(single[["2021"]])
 #'
 #' @references
@@ -84,6 +83,24 @@ karup_king <- function(df, age_col = "age_group", pops = "population",
     tidyr::separate(col = {{age_col}}, into = c("start_age", "end_age"),
                     sep = "-", convert = TRUE) |>
     dplyr::arrange(start_age)
+
+  # The Karup-King multipliers are defined for contiguous five-year groups.
+  # Anything else silently yields a distribution with gaps (each group still
+  # emits exactly five single years), so check the shape up front.
+  widths <- df$end_age - df$start_age + 1
+  if (any(widths != 5)) {
+    stop("Karup-King interpolation requires five-year age groups, but ",
+         "width(s) of ", paste(sort(unique(widths[widths != 5])), collapse = ", "),
+         " year(s) were given (e.g. '", df$start_age[which(widths != 5)[1]], "-",
+         df$end_age[which(widths != 5)[1]], "').")
+  }
+  gap <- which(diff(df$start_age) != 5)
+  if (length(gap) > 0) {
+    stop("Age groups must be contiguous (each starting five years after the ",
+         "previous one), but there is a gap or overlap between the groups ",
+         "starting at ", df$start_age[gap[1]], " and ",
+         df$start_age[gap[1] + 1], ".")
+  }
 
   single_ages <- list()
 

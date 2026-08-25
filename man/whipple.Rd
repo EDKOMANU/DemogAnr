@@ -17,7 +17,8 @@ whipple(data, age_col, pop_col, lower = 23, upper = 62, graph = TRUE)
 and 62, the UN standard).}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} bar chart of the
-distribution by terminal digit is attached to the result and shown on print.}
+distribution by terminal digit is attached to the result as \verb{$plot};
+retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_whipple}: a list with the index value, its

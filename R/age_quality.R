@@ -19,7 +19,8 @@
 #' @param lower,upper Age range over which to evaluate the index (defaults 23
 #'   and 62, the UN standard).
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} bar chart of the
-#'   distribution by terminal digit is attached to the result and shown on print.
+#'   distribution by terminal digit is attached to the result as `$plot`;
+#'   retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_whipple`: a list with the index value, its
 #'   quality band, the numerator/denominator used, and a `table` giving the
@@ -103,7 +104,6 @@ print.dem_whipple <- function(x, ...) {
               format(round(x$expected), big.mark = ",", trim = TRUE, scientific = FALSE)))
   cat(sprintf("  Whipple's index:                         %.1f (%s)\n",
               x$index, x$quality))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -160,6 +160,24 @@ myers <- function(data, age_col, pop_col, lower = 10, upper = 89, graph = TRUE) 
   pop <- as.numeric(data[[pop_col]])
   ord <- order(age); age <- age[ord]; pop <- pop[ord]
 
+  # The blend only cancels the age trend if every single year from 'lower' to
+  # 'upper + 9' is present, which is what gives each terminal digit the same
+  # total weight. Missing years leave the weights unbalanced and bias the
+  # index, so say so rather than return a quietly wrong number.
+  wanted <- seq(lower, upper + 9)
+  absent <- setdiff(wanted, age)
+  if (length(absent) > 0) {
+    warning("Myers' blend needs every single year of age from ", lower, " to ",
+            upper + 9, ", but ", length(absent), " of them are absent (",
+            paste(absent[seq_len(min(5L, length(absent)))], collapse = ", "),
+            if (length(absent) > 5) ", ..." else "", "). ",
+            "The blending weights are unbalanced and the index is biased; ",
+            if (max(age, na.rm = TRUE) - 9 >= lower)
+              paste0("try upper = ", max(age, na.rm = TRUE) - 9, ".")
+            else "supply single years of age covering the full range.",
+            call. = FALSE)
+  }
+
   # Myers blending weights (Rodriguez 2015):
   # ramp 1..9 over [lower, lower+8], 10 over [lower+9, upper], 9..1 over
   # [upper+1, upper+9], and 0 elsewhere.
@@ -206,7 +224,6 @@ print.dem_myers <- function(x, ...) {
   print(tb, row.names = FALSE)
   cat(sprintf("\n  Myers' index (half the sum of |deviations|): %.2f\n", x$index))
   cat("  (0 = no digit preference, 90 = all ages at one digit)\n")
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -306,7 +323,8 @@ age_ratio <- function(data, age_col, pop_col, open_ended = TRUE) {
 #' @param open_ended Logical; if `TRUE` (default), the last age group is treated
 #'   as open-ended.
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} plot of the male
-#'   and female age ratios by age is attached to the result and shown on print.
+#'   and female age ratios by age is attached to the result as `$plot`;
+#'   retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_unasa`: a list with the joint index, its
 #'   components (`SRS`, `ARSM`, `ARSF`), the quality band, and a full `table`
@@ -413,6 +431,5 @@ print.dem_unasa <- function(x, ...) {
   cat(sprintf("  Age ratio score, females (ARSF): %.2f\n", x$ARSF))
   cat(sprintf("  Joint index (3*SRS + ARSM + ARSF): %.2f (%s)\n",
               x$index, x$quality))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }

@@ -39,12 +39,13 @@ fraction of births that are female; see \code{\link[=reproduction]{reproduction(
 procedure.}
 
 \item{graph}{Logical; if \code{TRUE} (default) a plot of the stable age
-distribution is attached and shown on printing.}
+distribution is attached as \verb{$plot}; retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_stable}: a list with the intrinsic rate \code{r},
 birth rate \code{b}, death rate \code{d}, net reproduction rate \code{NRR}, \code{mean_age} of
-the stable population, number of \code{iterations}, and a \code{table} of the stable
+the stable population, number of \code{iterations}, whether the solution
+\code{converged}, and a \code{table} of the stable
 age distribution \code{cx}.
 }
 \description{

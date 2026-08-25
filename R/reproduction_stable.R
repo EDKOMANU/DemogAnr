@@ -32,7 +32,7 @@
 #' @param n Age-interval width(s); a scalar or per-row vector. Defaults to the
 #'   spacing of `age`.
 #' @param graph Logical; if `TRUE` (default) a plot of the net maternity
-#'   function is attached and shown on printing.
+#'   function is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_reproduction`: a list with `TFR`, `GRR`,
 #'   `NRR`, `mean_age` (mean age of childbearing in the net schedule),
@@ -131,11 +131,12 @@ reproduction <- function(data, age, asfr = NULL, births = NULL, women = NULL,
 #' @param tol,max_iter Convergence tolerance and iteration cap for the Coale
 #'   procedure.
 #' @param graph Logical; if `TRUE` (default) a plot of the stable age
-#'   distribution is attached and shown on printing.
+#'   distribution is attached as `$plot`; retrieve it with `plot()`.
 #'
 #' @return An object of class `dem_stable`: a list with the intrinsic rate `r`,
 #'   birth rate `b`, death rate `d`, net reproduction rate `NRR`, `mean_age` of
-#'   the stable population, number of `iterations`, and a `table` of the stable
+#'   the stable population, number of `iterations`, whether the solution
+#'   `converged`, and a `table` of the stable
 #'   age distribution `cx`.
 #'
 #' @examples
@@ -177,11 +178,21 @@ stable_population <- function(data, age, asfr, nLx, radix = 1e5,
   # Coale's iterative solution of Lotka's equation y(r) = 1.
   r <- log(NRR) / A
   it <- 0L
+  converged <- FALSE
   repeat {
     it <- it + 1L
     y  <- sum(exp(-r * mid) * Lx * matf)
-    if (abs(y - 1) < tol || it >= max_iter) break
+    if (abs(y - 1) < tol) { converged <- TRUE; break }
+    if (it >= max_iter) break
     r <- r + (y - 1) / A
+  }
+  if (!converged) {
+    warning(sprintf(
+      paste0("Lotka's equation did not converge in %d iteration(s): ",
+             "|y(r) - 1| = %.3g, still above tol = %.3g. The returned 'r' ",
+             "(and the b, d and c(x) derived from it) are provisional; ",
+             "raise 'max_iter' or relax 'tol'."),
+      max_iter, abs(y - 1), tol), call. = FALSE)
   }
 
   denom <- sum(exp(-r * mid) * Lx)         # over ALL ages present
@@ -193,7 +204,7 @@ stable_population <- function(data, age, asfr, nLx, radix = 1e5,
   tbl <- data.frame(age = ages, n = n, nLx = as.numeric(data[[nLx]]),
                     asfr = as.numeric(data[[asfr]]), cx = cx)
   out <- list(r = r, b = b, d = d, NRR = NRR, mean_age = mean_age,
-              iterations = it, radix = radix, table = tbl)
+              iterations = it, converged = converged, radix = radix, table = tbl)
   class(out) <- "dem_stable"
   if (graph) {
     out$plot <- .plot_series(tbl$age, tbl$cx, ylab = "Proportion c(x)",
@@ -219,7 +230,6 @@ print.dem_reproduction <- function(x, ...) {
   if (!is.na(x$NRR))
     cat(sprintf("Mean age of childbearing = %.2f   approx. intrinsic r = %.5f\n",
                 x$mean_age, x$r_approx))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 
@@ -233,7 +243,6 @@ print.dem_stable <- function(x, ...) {
               x$r, x$b, x$d))
   cat(sprintf("NRR = %.3f   mean age = %.2f   (%d iterations)\n",
               x$NRR, x$mean_age, x$iterations))
-  if (!is.null(x$plot)) print(x$plot)
   invisible(x)
 }
 

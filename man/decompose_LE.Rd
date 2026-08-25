@@ -23,8 +23,8 @@ groups and radix.}
 \item{age_col, lx_col, Lx_col, Tx_col}{Column names in \code{lt1}/\code{lt2}.}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} bar chart of the
-age-specific contributions is attached to the result as \verb{$plot} and shown
-when the object is printed.}
+age-specific contributions is attached to the result as \verb{$plot};
+retrieve it with \code{plot()}.}
 }
 \value{
 An object of class \code{dem_le_decomp}: a list with the \code{total}
