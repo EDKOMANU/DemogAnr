@@ -40,6 +40,24 @@
   common path a single call. Its result is now an object of class
   `dem_brass_fit` recording `alpha`, `beta` and the `standard` used.
 
+### Indirect adult mortality
+
+* `orphanhood()` estimates adult female survivorship from the proportion of
+  respondents whose mother is still alive, by the Brass method of *Manual X*
+  Chapter IV. It is the adult counterpart of `chm_brass()`: that estimates
+  child mortality from a mother's report on her children, this estimates the
+  mother's own mortality from her children's report on her. It returns the
+  conditional survivorship l(25+n)/l(25) for each age group of respondent,
+  together with the number of years before the survey each estimate refers
+  to, so that a single survey traces a mortality trend backwards.
+
+  The weighting factors of *Manual X* table 86 and the standard function of
+  table 88 are carried in the package. The whole chain reproduces the
+  published Bolivia 1975 worked example exactly: all seven weighting factors
+  to four decimal places (tables 91), all seven survivorship ratios to the
+  three decimals published, and all six time references to the tenth of a
+  year published (table 92). That example is a test.
+
 ### Completeness of death registration
 
 * `ggb()`, `seg()` and `ggb_seg()` estimate how completely deaths are

@@ -238,3 +238,21 @@ pyramid <- function(data, age_col, sex_col, count_col,
                             age_range[1], age_range[2], 100 * completeness)) +
     .dem_theme()
 }
+
+
+# Orphanhood: survivorship against the date each estimate refers to, which is
+# the point of the method -- the series traces a mortality trend backwards.
+.plot_orphanhood <- function(tbl, survey_year) {
+  has_date <- !is.null(tbl$ref_date)
+  d <- data.frame(x = if (has_date) tbl$ref_date else tbl$t,
+                  y = tbl$lx_ratio, age = tbl$age)
+  ggplot(d, aes(x = x, y = y)) +
+    geom_line(colour = "grey70") +
+    geom_point(colour = .dem_male, size = 2) +
+    labs(x = if (has_date) "Year the estimate refers to"
+         else "Years before the survey",
+         y = "l(25+n) / l(25)",
+         title = "Adult female survivorship from maternal orphanhood",
+         subtitle = "each point is one age group of respondents") +
+    .dem_theme()
+}
