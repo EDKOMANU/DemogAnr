@@ -11,6 +11,7 @@ model_lifetable(
   q1 = NULL,
   q5 = NULL,
   radix = 1e+05,
+  calibrate_open = TRUE,
   graph = TRUE
 )
 }
@@ -30,6 +31,11 @@ or by exact age 5, in which case the level whose model table matches it is
 found. Supply exactly one of \code{e0}, \code{q1} and \code{q5}.}
 
 \item{radix}{Numeric: survivors at exact age 0 (default 100,000).}
+
+\item{calibrate_open}{Logical. If \code{TRUE} (default), the open interval is
+set so that the table reproduces its own level exactly; see Details.
+\code{FALSE} closes it on the tabulated age-80 rate, which overstates survival
+above 80.}
 
 \item{graph}{Logical. If \code{TRUE} (default), a \pkg{ggplot2} survival curve is
 attached as \verb{$plot}; retrieve it with \code{plot()}.}
@@ -59,18 +65,24 @@ The packaged rates are tabulated at half-year steps of \eqn{e_0} from 54 to
 76. A value between two steps is linearly interpolated on
 \eqn{\log {}_nM_x}, which keeps the rates positive and the age pattern
 smooth; a value outside the range is an error rather than an extrapolation.
-The life table itself is then built by \code{\link[=lifetable]{lifetable()}}, so the treatment of
-\eqn{{}_na_x} and of the open interval is exactly the same as for a table
-computed from observed deaths.
+The life table itself is then built by \code{\link[=lifetable]{lifetable()}}, so \eqn{{}_na_x} is
+handled exactly as for a table computed from observed deaths.
 
-The realised \eqn{e_0} of the returned table runs a little above the \code{e0}
-requested, because the tabulated rates stop at an open interval of 80 and
-up, which \code{\link[=lifetable]{lifetable()}} closes as \eqn{l_x/{}_nM_x}. The gap grows with the
-level, since more of the cohort survives into that interval: about +0.1
-years at \eqn{e_0 = 54}, +0.2 at 60, +0.5 at 70 and +1.2 at 76. Both
-figures are returned, as \code{e0_requested} and \code{e0_realised}, and it is
-\code{e0_requested} that identifies the published table. Where the level itself
-must be exact, match on \code{q1} or \code{q5} instead, which is reproduced exactly.
+The tabulated rates stop at age 80, and the rate given there behaves like a
+five-year group rate rather than an aggregate rate for the whole open
+interval. Closing the table on it, as \eqn{l_x/{}_nM_x}, therefore lets too
+much of the cohort survive above 80: it implies a remaining life expectancy
+at 80 of up to 9.5 years at the highest levels, and an \eqn{e_0} overshooting
+the level's own label by as much as 1.2 years.
+
+Since the label is itself published information, it pins the open interval
+down exactly: \eqn{T(80)} must be whatever makes \eqn{e_0} equal the label.
+That is what \code{calibrate_open = TRUE} (the default) does, and it yields an
+\eqn{e(80)} of 5.4 to 6.9 years across the tabulated range, which is the
+order real life tables show. The returned table then reproduces its level
+exactly, so \code{e0_realised} equals \code{e0_requested}. Set
+\code{calibrate_open = FALSE} to close the table on the tabulated rate instead
+and see the raw figure.
 }
 \examples{
 # A Coale-Demeny West table for males at level e0 = 60

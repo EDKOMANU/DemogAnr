@@ -21,18 +21,24 @@
 #' 76. A value between two steps is linearly interpolated on
 #' \eqn{\log {}_nM_x}, which keeps the rates positive and the age pattern
 #' smooth; a value outside the range is an error rather than an extrapolation.
-#' The life table itself is then built by [lifetable()], so the treatment of
-#' \eqn{{}_na_x} and of the open interval is exactly the same as for a table
-#' computed from observed deaths.
+#' The life table itself is then built by [lifetable()], so \eqn{{}_na_x} is
+#' handled exactly as for a table computed from observed deaths.
 #'
-#' The realised \eqn{e_0} of the returned table runs a little above the `e0`
-#' requested, because the tabulated rates stop at an open interval of 80 and
-#' up, which [lifetable()] closes as \eqn{l_x/{}_nM_x}. The gap grows with the
-#' level, since more of the cohort survives into that interval: about +0.1
-#' years at \eqn{e_0 = 54}, +0.2 at 60, +0.5 at 70 and +1.2 at 76. Both
-#' figures are returned, as `e0_requested` and `e0_realised`, and it is
-#' `e0_requested` that identifies the published table. Where the level itself
-#' must be exact, match on `q1` or `q5` instead, which is reproduced exactly.
+#' The tabulated rates stop at age 80, and the rate given there behaves like a
+#' five-year group rate rather than an aggregate rate for the whole open
+#' interval. Closing the table on it, as \eqn{l_x/{}_nM_x}, therefore lets too
+#' much of the cohort survive above 80: it implies a remaining life expectancy
+#' at 80 of up to 9.5 years at the highest levels, and an \eqn{e_0} overshooting
+#' the level's own label by as much as 1.2 years.
+#'
+#' Since the label is itself published information, it pins the open interval
+#' down exactly: \eqn{T(80)} must be whatever makes \eqn{e_0} equal the label.
+#' That is what `calibrate_open = TRUE` (the default) does, and it yields an
+#' \eqn{e(80)} of 5.4 to 6.9 years across the tabulated range, which is the
+#' order real life tables show. The returned table then reproduces its level
+#' exactly, so `e0_realised` equals `e0_requested`. Set
+#' `calibrate_open = FALSE` to close the table on the tabulated rate instead
+#' and see the raw figure.
 #'
 #' @param family Model life table family: one of `"CD_West"` (default),
 #'   `"CD_North"`, `"CD_South"`, `"CD_East"`, `"UN_General"`,
@@ -45,6 +51,10 @@
 #'   or by exact age 5, in which case the level whose model table matches it is
 #'   found. Supply exactly one of `e0`, `q1` and `q5`.
 #' @param radix Numeric: survivors at exact age 0 (default 100,000).
+#' @param calibrate_open Logical. If `TRUE` (default), the open interval is
+#'   set so that the table reproduces its own level exactly; see Details.
+#'   `FALSE` closes it on the tabulated age-80 rate, which overstates survival
+#'   above 80.
 #' @param graph Logical. If `TRUE` (default), a \pkg{ggplot2} survival curve is
 #'   attached as `$plot`; retrieve it with `plot()`.
 #'
@@ -93,7 +103,8 @@
 model_lifetable <- function(family = "CD_West",
                             sex = c("male", "female"),
                             e0 = NULL, q1 = NULL, q5 = NULL,
-                            radix = 1e5, graph = TRUE) {
+                            radix = 1e5, calibrate_open = TRUE,
+                            graph = TRUE) {
   sex <- match.arg(sex)
   family <- .mlt_family(family)
 
@@ -117,7 +128,7 @@ model_lifetable <- function(family = "CD_West",
     at_age <- if (!is.null(q1)) 1 else 5
     # q(x) falls as the level rises, so the relation is monotone
     qs <- vapply(levels_e0, function(L) {
-      lt <- .mlt_build(tab, L, levels_e0, sex, radix)
+      lt <- .mlt_build(tab, L, levels_e0, sex, radix, calibrate_open)
       1 - lt$lx[lt$Age == at_age] / radix
     }, numeric(1))
     if (target > max(qs) || target < min(qs)) {
@@ -132,7 +143,7 @@ model_lifetable <- function(family = "CD_West",
     # that reproduces the target exactly can be solved for.
     start <- stats::approx(qs, levels_e0, xout = target)$y
     f <- function(L) {
-      lt <- .mlt_build(tab, L, levels_e0, sex, radix)
+      lt <- .mlt_build(tab, L, levels_e0, sex, radix, calibrate_open)
       (1 - lt$lx[lt$Age == at_age] / radix) - target
     }
     lo <- max(min(levels_e0), start - 1)
@@ -152,7 +163,7 @@ model_lifetable <- function(family = "CD_West",
                  e0, min(levels_e0), max(levels_e0)))
   }
 
-  lt <- .mlt_build(tab, e0, levels_e0, sex, radix)
+  lt <- .mlt_build(tab, e0, levels_e0, sex, radix, calibrate_open)
 
   out <- list(
     metrics = list(TotalDeaths = sum(lt$dx),
@@ -184,7 +195,19 @@ model_lifetable <- function(family = "CD_West",
 
 # Rates at an arbitrary level, interpolated on log(nMx) between the two
 # tabulated levels either side, then turned into a life table by lifetable().
-.mlt_build <- function(tab, e0, levels_e0, sex, radix) {
+#
+# The tabulated rates stop at age 80, and the rate given there behaves like a
+# five-year group rate rather than an aggregate rate for the whole open
+# interval: closing the table as l(80)/M(80) implies an e(80) of up to 9.5
+# years at the highest levels, well above what any real life table shows, and
+# the resulting e0 overshoots the level's own label by as much as 1.2 years.
+#
+# The label is itself published information, so it pins the open interval
+# down exactly: T(80) must be whatever makes e0 come out at the label. That
+# is what calibrate does, and it yields an e(80) of 5.4 to 6.9 years across
+# the tabulated range, which is the right order. Set calibrate = FALSE to
+# close the table on the tabulated rate instead.
+.mlt_build <- function(tab, e0, levels_e0, sex, radix, calibrate = TRUE) {
   ages <- sort(unique(tab$age))
   rate_at <- function(L) tab$nMx[tab$e0 == L][order(tab$age[tab$e0 == L])]
 
@@ -196,8 +219,23 @@ model_lifetable <- function(family = "CD_West",
     w <- (e0 - lo) / (hi - lo)
     mx <- exp((1 - w) * log(rate_at(lo)) + w * log(rate_at(hi)))
   }
-  lifetable(data.frame(Age = ages, nMx = mx), age = "Age", nMx = "nMx",
-            sex = sex, radix = radix, graph = FALSE)$lifetable
+  lt <- lifetable(data.frame(Age = ages, nMx = mx), age = "Age", nMx = "nMx",
+                  sex = sex, radix = radix, graph = FALSE)$lifetable
+  if (!isTRUE(calibrate)) return(lt)
+
+  k <- nrow(lt)
+  open_L <- e0 * radix - sum(lt$Lx[-k])
+  open_e <- open_L / lt$lx[k]
+  # Refuse a calibration that implies an impossible open interval rather than
+  # returning a table with a negative or absurd tail.
+  if (!is.finite(open_e) || open_e <= 0 || open_e > 30) return(lt)
+
+  lt$Lx[k]  <- open_L
+  lt$nax[k] <- open_e
+  lt$nMx[k] <- lt$lx[k] / open_L
+  lt$Tx <- rev(cumsum(rev(lt$Lx)))
+  lt$ex <- lt$Tx / lt$lx
+  lt
 }
 
 #' @export

@@ -7,15 +7,34 @@ test_that("the packaged rates cover all nine families", {
   expect_equal(range(model_lt$e0), c(54, 76))
 })
 
-test_that("a requested level returns a table close to it", {
-  for (L in c(54, 60, 70, 76)) {
+test_that("a requested level is reproduced exactly", {
+  for (L in c(54, 60, 66, 70, 73, 76)) {
     m <- model_lifetable("CD_West", "male", e0 = L, graph = FALSE)
     expect_equal(m$model$e0_requested, L)
-    # the tables close at 80+, which lifts the realised e0 slightly; the
-    # documented drift is under 1.5 years across the whole range
-    expect_gt(m$metrics$LifeExpectancyAtBirth, L)
-    expect_lt(m$metrics$LifeExpectancyAtBirth - L, 1.5)
+    expect_equal(m$metrics$LifeExpectancyAtBirth, L, tolerance = 1e-9)
+    expect_equal(m$model$e0_realised, L, tolerance = 1e-9)
   }
+})
+
+test_that("calibrating the open interval gives a plausible e(80)", {
+  for (L in c(54, 65, 76)) {
+    m <- model_lifetable("CD_West", "male", e0 = L, graph = FALSE)
+    lt <- m$lifetable; k <- nrow(lt)
+    e80 <- lt$ex[k]
+    expect_gt(e80, 4)      # real life tables sit between about 4 and 9
+    expect_lt(e80, 9)
+    # and the table stays internally consistent after the adjustment
+    expect_equal(lt$Tx, rev(cumsum(rev(lt$Lx))))
+    expect_equal(lt$ex, lt$Tx / lt$lx)
+    expect_equal(lt$nMx[k], lt$lx[k] / lt$Lx[k])
+  }
+
+  # closing on the tabulated rate instead overshoots the label, more so at
+  # the higher levels, which is why it is not the default
+  raw <- model_lifetable("CD_West", "male", e0 = 76, calibrate_open = FALSE,
+                         graph = FALSE)
+  expect_gt(raw$metrics$LifeExpectancyAtBirth, 77)
+  expect_gt(raw$lifetable$ex[nrow(raw$lifetable)], 9)
 })
 
 test_that("interpolation between tabulated levels is smooth and monotone", {
@@ -29,7 +48,17 @@ test_that("interpolation between tabulated levels is smooth and monotone", {
   data(model_lt, envir = environment())
   want <- model_lt$nMx[model_lt$family == "CD_West" & model_lt$sex == "male" &
                        model_lt$e0 == 60.5]
-  expect_equal(exact$lifetable$nMx, want)
+  k <- length(want)
+  # the closed intervals are the tabulated rates untouched
+  expect_equal(exact$lifetable$nMx[-k], want[-k])
+  # the open interval is deliberately not the tabulated rate: it is the
+  # aggregate rate the level's own label implies
+  expect_false(isTRUE(all.equal(exact$lifetable$nMx[k], want[k])))
+  expect_gt(exact$lifetable$nMx[k], want[k])
+
+  raw <- model_lifetable("CD_West", "male", e0 = 60.5, calibrate_open = FALSE,
+                         graph = FALSE)
+  expect_equal(raw$lifetable$nMx, want)
 })
 
 test_that("matching on q1 or q5 reproduces the target exactly", {

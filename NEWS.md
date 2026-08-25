@@ -9,7 +9,18 @@
   indexed either by level (`e0`) or, more usefully, by an observed child
   mortality (`q1` or `q5`). The tabulated rates ship as `model_lt`: nine
   families by two sexes by 45 levels of `e0` from 54 to 76, in half-year
-  steps.
+  steps, generated with the MortCast package from the United Nations
+  Population Division's published tables.
+
+  The rates stop at age 80, and the value given there behaves like a
+  five-year group rate rather than an aggregate rate for the open interval.
+  Closing the table on it would let too much of the cohort survive above 80,
+  overshooting the level's own label by up to 1.2 years. The label is itself
+  published information, so it pins the open interval down exactly, and
+  `calibrate_open = TRUE` (the default) uses it: the returned table
+  reproduces its level exactly and implies a remaining life expectancy at 80
+  of 5.4 to 6.9 years, which is the order real life tables show. Pass
+  `calibrate_open = FALSE` for the uncalibrated figure.
 
   This closes a loop the package could not previously close. `chm_brass()`
   estimates q(x) for a named Coale-Demeny family but stops there; passing its

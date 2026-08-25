@@ -227,10 +227,19 @@
 #' For a level outside that range, [brass_lifetable()] fits a relational model
 #' that is not restricted to a tabulated grid.
 #'
-#' @source Coale, A. J., & Demeny, P. (1983). \emph{Regional Model Life Tables
-#'   and Stable Populations} (2nd ed.). New York: Academic Press; and United
-#'   Nations (1982), \emph{Model Life Tables for Developing Countries},
-#'   Population Studies No. 77. New York: United Nations.
+#' The rates stop at age 80. The value given there behaves like a five-year
+#' group rate rather than an aggregate rate for the open interval, so
+#' [model_lifetable()] does not close the table on it by default; see that
+#' function's Details.
+#'
+#' @source Generated with the \pkg{MortCast} package from the model life
+#'   tables published by the United Nations Population Division
+#'   (\url{https://www.un.org/development/desa/pd/data/model-life-tables}).
+#'   The underlying systems are Coale, A. J., & Demeny, P. (1983),
+#'   \emph{Regional Model Life Tables and Stable Populations} (2nd ed.), New
+#'   York: Academic Press; and United Nations (1982), \emph{Model Life Tables
+#'   for Developing Countries}, Population Studies No. 77, New York: United
+#'   Nations.
 #'
 #' @seealso [model_lifetable()]
 "model_lt"
