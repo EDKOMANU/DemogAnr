@@ -236,6 +236,12 @@
 
 ## Bug fixes
 
+* `model_lifetable()` and its family-name helper referenced the `model_lt`
+  dataset without qualifying it, which `R CMD check` reports on recent R as
+  "no visible binding for global variable". Both now reference it through the
+  namespace as `DemogAnr::model_lt`, which removes the note by making the
+  reference explicit rather than by suppressing the check.
+
 * `project_population()` now returns an object of class `dem_projection`
   whether or not `graph = TRUE`. Previously `graph = FALSE` returned a bare
   data frame, so `plot()` fell through to `plot.data.frame()` and drew a

@@ -113,7 +113,10 @@ model_lifetable <- function(family = "CD_West",
     stop("Supply exactly one of 'e0', 'q1' and 'q5'; ", given, " were given.")
   }
 
-  tab <- model_lt[model_lt$family == family & model_lt$sex == sex, ]
+  # Referenced through the namespace: a lazy-loaded dataset is not visible to
+  # the code-usage check, which otherwise reports it as an undefined global.
+  mlt <- DemogAnr::model_lt
+  tab <- mlt[mlt$family == family & mlt$sex == sex, ]
   if (nrow(tab) == 0) stop("No packaged table for family '", family, "'.")
   levels_e0 <- sort(unique(tab$e0))
 
@@ -186,7 +189,7 @@ model_lifetable <- function(family = "CD_West",
   short <- c(west = "CD_West", north = "CD_North",
              south = "CD_South", east = "CD_East")
   if (tolower(family) %in% names(short)) return(unname(short[tolower(family)]))
-  known <- levels(model_lt$family)
+  known <- levels(DemogAnr::model_lt$family)
   hit <- known[tolower(known) == tolower(family)]
   if (length(hit) == 1) return(hit)
   stop("Unknown family '", family, "'. Choose one of: ",
