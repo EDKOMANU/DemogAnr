@@ -87,6 +87,69 @@ pf <- pf_ratio(bd, age = "age", women = "women", ceb = "ceb",
                births = "births", graph = FALSE)
 c(K = pf$K, TFR = pf$TFR, TFR_adjusted = pf$TFR_adjusted)
 
+## ----chm--------------------------------------------------------------------------------
+panama <- data.frame(
+  women = c(2695, 2095, 1828, 1605, 1362, 1128, 930),
+  ceb   = c(557, 2633, 4757, 6085, 6722, 6367, 5276),
+  cd    = c(40, 130, 312, 435, 636, 686, 689)
+)
+est <- chm_brass(panama, women_col = "women", ceb_col = "ceb",
+                 cd_col = "cd", model = "west", survey_year = 1976.7)
+est$qx[est$x == 5]
+
+## ----mlt--------------------------------------------------------------------------------
+fitted <- model_lifetable("west", sex = "male", q5 = est$qx[est$x == 5],
+                          graph = FALSE)
+fitted$metrics$LifeExpectancyAtBirth
+
+## ----mlt-families-----------------------------------------------------------------------
+sapply(c("CD_West", "CD_North", "CD_South", "CD_East"), function(f)
+  model_lifetable(f, sex = "male", q5 = est$qx[est$x == 5],
+                  graph = FALSE)$metrics$LifeExpectancyAtBirth)
+
+## ----brass------------------------------------------------------------------------------
+fit <- brass_logit(data.frame(age = est$x, qx = est$qx),
+                   qx_col = "qx", age_col = "age", standard = "African",
+                   complete = TRUE)
+round(fit$coefficients, 4)
+fit$lifetable$metrics$LifeExpectancyAtBirth
+
+## ----brass-target-----------------------------------------------------------------------
+brass_lifetable(target_e0 = 60, standard = "African",
+                graph = FALSE)$brass$alpha
+
+## ----orphanhood-------------------------------------------------------------------------
+bolivia <- data.frame(
+  age   = seq(15, 50, 5),
+  alive = c(5540, 3995, 2886, 1910, 1272, 855, 541, 234),
+  dead  = c(448, 541, 769, 852, 945, 1059, 985, 788),
+  s10   = c(NA, 0.9060, 0.8401, 0.7474, 0.6313, 0.5175, 0.3996, NA)
+)
+orph <- orphanhood(bolivia, age = "age", alive = "alive", dead = "dead",
+                   prop10 = "s10", M = 28.8, survey_year = 1975.5,
+                   graph = FALSE)
+orph$table[, c("age", "W", "lx_ratio", "t", "ref_date")]
+
+## ----ddm--------------------------------------------------------------------------------
+d <- data.frame(
+  age = c(0, seq(5, 85, 5)),
+  n1  = c(41255, 36289, 31948, 28121, 24743, 21758, 19116, 16770, 14677,
+          12798, 11094, 9527, 8060, 6659, 5298, 3970, 2706, 2614),
+  n2  = c(52973, 46596, 41022, 36108, 31770, 27938, 24545, 21533, 18846,
+          16433, 14245, 12233, 10349, 8550, 6802, 5098, 3475, 3356),
+  dth = c(516, 134, 126, 123, 126, 136, 154, 184, 229, 294, 385, 508,
+          668, 865, 1084, 1282, 1380, 2833)
+)
+g <- ggb(d, age = "age", pop1 = "n1", pop2 = "n2", deaths = "dth",
+         t1 = 2000, t2 = 2010, graph = FALSE)
+c(completeness = g$completeness, coverage_ratio = g$coverage_ratio)
+
+## ----ddm-compare------------------------------------------------------------------------
+c(GGB = g$completeness,
+  SEG = seg(d, "age", "n1", "n2", "dth", 2000, 2010, graph = FALSE)$completeness,
+  combined = ggb_seg(d, "age", "n1", "n2", "dth", 2000, 2010,
+                     graph = FALSE)$completeness)
+
 ## ----std--------------------------------------------------------------------------------
 male   <- subset(ghmort2021, Sex == "Male")
 female <- subset(ghmort2021, Sex == "Female")

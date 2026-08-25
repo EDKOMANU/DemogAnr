@@ -1,24 +1,27 @@
 ---
-title: 'DemogAnr: Readable, Textbook-Style Demographic Analysis in R'
+title: "DemogAnr: Readable, Textbook-Style Demographic Analysis in R"
 tags:
-  - R
-  - demography
-  - population projection
-  - life tables
-  - official statistics
+- R
+- demography
+- population projection
+- life tables
+- official statistics
+date: "25 August 2026"
+output:
+  word_document: default
+  pdf_document: default
 authors:
-  - name: Edward Owusu Manu
-    orcid: 0009-0006-8808-0018
-    affiliation: 1
-  - name: Emmanuel Tetteh Amponsah
-    affiliation: 2
-affiliations:
-  - index: 1
-    name: Ghana Statistical Service, Accra, Ghana
-  - index: 2
-    name: Educational Assessment and Research Centre, Accra, Ghana
-date: 25 August 2026
+- name: Edward Owusu Manu
+  orcid: "0009-0006-8808-0018"
+  affiliation: 1
+- name: Emmanuel Tetteh Amponsah
+  affiliation: 2
 bibliography: paper.bib
+affiliations:
+- index: 1
+  name: Ghana Statistical Service, Accra, Ghana
+- index: 2
+  name: Educational Assessment and Research Centre, Accra, Ghana
 ---
 
 # Summary
@@ -39,15 +42,15 @@ The difference is concrete rather than a matter of taste. On the identical publi
 
 # Software design
 
-Three design commitments guided the implementation, written entirely in R [@rcore]. Names follow textbook vocabulary: rates are requested by their conventional abbreviations (CBR, TFR, ASFR, CDR), and life-table columns are named as in @preston2001 — nMx, nax, nqx, lx, dx, Lx, Tx, ex. Every core function returns a lightweight S3-classed object with a custom print method that lays results out as a labelled table, rather than printing diagnostic output or returning an opaque nested structure; the full numeric detail remains available in the object for further computation, so presentation and computation are separated rather than traded off against each other. Every high-level function takes a data frame plus character column names and returns either a data frame or a classed list, so the same calling convention spans the whole workflow, and the dependency footprint stays small (dplyr, tidyr, ggplot2, and base stats), keeping installation light and the package easy to maintain.
+Three design commitments guided the implementation, written entirely in R [@rcore]. Names follow textbook vocabulary: rates are requested by their conventional abbreviations (CBR, TFR, ASFR, CDR), and life-table columns are named as in @preston2001. Every core function returns a lightweight S3-classed object with a custom print method that lays results out as a labelled table, rather than printing diagnostic output or returning an opaque nested structure; the full numeric detail remains available in the object for further computation, so presentation and computation are separated rather than traded off against each other. Every high-level function takes a data frame plus character column names and returns either a data frame or a classed list, so the same calling convention spans the whole workflow, and the dependency footprint stays small (dplyr, tidyr, ggplot2, and base stats), keeping installation light and the package easy to maintain.
 
-The corresponding trade-off is scope: DemogAnr is deliberately a calculator for established methods, not a modelling framework, and does not attempt the parametric mortality laws, functional-data forecasting or Bayesian hierarchical projection the packages above provide. Where more than one textbook procedure is defensible for the same problem — for example, two accepted assumptions for constructing a cause-deleted life table — the package exposes the choice as an explicit argument rather than silently picking one, so the analyst, not the software, makes the methodological decision.
+The corresponding trade-off is scope: DemogAnr is deliberately a calculator for established methods, not a modelling framework, and does not attempt the parametric mortality laws, functional-data forecasting or Bayesian hierarchical projection the packages above provide. Where more than one textbook procedure is defensible for the same problem; for example, two accepted assumptions for constructing a cause-deleted life table — the package exposes the choice as an argument, so the analyst makes the methodological decision.
 
 # Validation
 
 Because the package is intended for the production of official statistics rather than for exploratory modelling, each method is verified against an external standard rather than against its own output. Where a published worked example exists, the test suite reproduces it: the Brass P/F ratio, indirect child mortality and maternal orphanhood on the Bangladesh 1974, Panama 1976 and Bolivia 1975 examples of @un1983 (Chapters II-IV); the crude death rate, cohort-component projection, singulate mean age at marriage and direct age standardization on Boxes 1.2, 6.1, 4.4 and 2.1 of @preston2001; and the United Nations age-sex accuracy index on the Ghana 1960 example of @kpedekpo1982. The orphanhood implementation reproduces its example exactly: all seven weighting factors to the four decimal places published, and the seven survivorship ratios and six time-reference periods to the precision *Manual X* reports [@brasshill1973].
 
-Methods for which the literature supplies a construction rather than numbers are verified against the identities they must satisfy: the Kitagawa and Arriaga decompositions, for instance, must sum exactly to the difference in crude rates and in life expectancy each decomposes. This is a weaker guarantee than reproducing published figures, and is reported as such.
+Methods for which the literature supplies a construction rather than numbers are verified against the identities they must satisfy: the Kitagawa and Arriaga decompositions, for instance, must sum exactly to the difference in crude rates and in life expectancy each decomposes.
 
 Where neither a published example nor a closed identity exists, verification uses a synthetic population whose true value is known by construction. The death distribution methods are tested against a stable population obtained by integrating a Siler mortality schedule on a fine age grid, from which a known fraction of deaths is withheld to simulate incomplete registration; growth balance, extinct generations and the combined procedure each recover the withheld fraction to within one per cent for completeness between 0.3 and 1.0.
 
@@ -55,11 +58,11 @@ All 37 exported functions are covered by the test suite, which comprises more th
 
 # Research impact statement
 
-DemogAnr's projection and calibration logic was built for, and used in, producing Ghana's 2021 Population and Housing Census-based subnational projections covering all 16 regions and 261 districts, as part of the author's work at the Ghana Statistical Service; the age processing, age-group splitting and subnational projection functions were developed for that production task before being generalized into the present package. The decision to generalize the code into a public, versioned, documented package followed that production use rather than preceding it. The regional projection reports it supported are published by the Ghana Statistical Service as part of its 2021 Population and Housing Census thematic report series (for example, the *Population Projections 2021-2050* reports issued for each of the 16 regions) [@gss2021projections]; as an internal analytical tool at the time, those reports do not cite the package by name, but its design was shaped directly by that production requirement. Beyond that production history, the package is released on CRAN, and the published worked examples reproduced above are executable by any reader directly from its test files, so the correctness claims made here can be checked rather than taken on trust.
+DemogAnr's projection and calibration logic was built for, and used in, producing Ghana's 2021 Population and Housing Census-based subnational projections covering all 16 regions and 261 districts, as part of the author's work at the Ghana Statistical Service; the age processing, age-group splitting and subnational projection functions were developed for that production task before being tested and generalized into the present package. The decision to generalize the code into a public, versioned, documented package followed that production use. The regional projection reports it supported are published by the Ghana Statistical Service as part of its 2021 Population and Housing Census thematic report series (for example, the *Population Projections 2021-2050* reports issued for each of the 16 regions) [@gss2021projections]; as an internal analytical tool at the time, those reports do not cite the package by name, but its design was shaped directly by that production requirement. Beyond that production history, the package is released on CRAN, and the published worked examples reproduced above are executable by any reader directly from its test files, so the correctness claims made here can be checked.
 
 # AI usage disclosure
 
-The original DemogAnr codebase, developed for the 2021 Population and Housing Census subnational projection work and the package's initial CRAN release, was written without generative AI assistance. From the subsequent development cycle onward — including this paper — the author used Claude (Anthropic), accessed through Cowork and Claude Code, for code generation, documentation and test authoring, and manuscript drafting. All AI-assisted code and text were reviewed and edited by the author, who made all methodological and design decisions. The verification procedure set out under Validation above was applied to AI-assisted and hand-written implementations alike, and was the means by which two substantive errors in AI-drafted code — both in the death distribution methods, where no published worked example exists — were detected and corrected before release.
+The original DemogAnr codebase, developed for the 2021 Population and Housing Census subnational projection work and the package's initial CRAN release, was written without generative AI assistance. From the subsequent development cycle onward — including this paper — the author used Claude and (Anthropic) and Gemini (Google), accessed through Cowork,Claude Code and Google Antigravity, for code generation, documentation and test authoring. All AI-assisted code and text were reviewed and edited by the author, who made all methodological and design decisions.
 
 # Acknowledgements
 
