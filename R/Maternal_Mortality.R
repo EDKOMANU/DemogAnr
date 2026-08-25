@@ -10,10 +10,24 @@
 #' @param pop_women The column containing the number of women of reproductive age.
 #' @param verbose Logical. If TRUE, prints progress messages during execution.
 #'
-#' @return An object of class `dem_mmr`: a list with `results` (the maternal
-#'   mortality rate `MMR` per 100,000 women, and the maternal mortality ratio
-#'   `MMR_Ratio` per 100,000 live births) and `modified_data` (the input data
-#'   with per-row `mm_rate` and `mm_ratio` columns).
+#' @section Naming:
+#' Almost everywhere in demography and public health, "MMR" means the maternal
+#' mortality **ratio**: maternal deaths per 100,000 live births. In this
+#' function's `results` list, however, the element `MMR` has always held the
+#' maternal mortality **rate** (per 100,000 women of reproductive age), and
+#' `MMR_Ratio` the ratio.
+#'
+#' Rather than change what `MMR` returns and silently alter existing results,
+#' two unambiguous elements were added in version 0.3.0: `MMRate` for the rate
+#' and `MMRatio` for the ratio. Prefer those. `MMR` and `MMR_Ratio` keep their
+#' original values and will be removed in a future release.
+#'
+#' @return An object of class `dem_mmr`: a list with `results` -- `MMRate`
+#'   (maternal deaths per 100,000 women of reproductive age), `MMRatio`
+#'   (maternal deaths per 100,000 live births), and the deprecated aliases
+#'   `MMR` (equal to `MMRate`) and `MMR_Ratio` (equal to `MMRatio`) -- and
+#'   `modified_data`, the input with per-row `mm_rate` and `mm_ratio` columns.
+#'
 #' @examples
 #' # Women of reproductive age in Ghana, 2021, by five-year age group, with an
 #' # illustrative distribution of births and maternal deaths across those ages.
@@ -58,7 +72,12 @@ dem.mmr <- function(data, deaths_col, births_col, pop_women, verbose = FALSE) {
   mm_ratio <- sum(data[[deaths_col]]) / sum(data[[births_col]]) * 100000
   if (verbose) message("dem.mmr: Overall MMR Ratio per 100,000 live births: ", round(mm_ratio, 4))
 
-  results <- list(MMR = mm_rate, MMR_Ratio = mm_ratio)
+  # MMRate / MMRatio are the unambiguous names. MMR and MMR_Ratio are kept at
+  # their original values for code written against earlier versions: note that
+  # `MMR` here is the *rate*, which is the opposite of the usual convention,
+  # which is why the clearer pair was added. See the Details section.
+  results <- list(MMRate = mm_rate, MMRatio = mm_ratio,
+                  MMR = mm_rate, MMR_Ratio = mm_ratio)
 
   out <- list(results = results, modified_data = data)
   class(out) <- "dem_mmr"
@@ -67,12 +86,16 @@ dem.mmr <- function(data, deaths_col, births_col, pop_women, verbose = FALSE) {
 
 #' @export
 print.dem_mmr <- function(x, ...) {
-  cat("Maternal Mortality Rate (MMR)  per 100,000 women:\n")
-  print(x$results$MMR)
-  cat("\nMaternal Mortality Ratio (MMR)  per 100,000 live births:\n")
-  print(x$results$MMR_Ratio)
-  cat("\nModified Data:\n")
-  print(x$modified_data)
+  cat(sprintf("Maternal mortality rate  (MMRate):  %.2f per 100,000 women\n",
+              x$results$MMRate))
+  cat(sprintf("Maternal mortality ratio (MMRatio): %.2f per 100,000 live births\n",
+              x$results$MMRatio))
+  n_show <- min(10L, nrow(x$modified_data))
+  cat("\nBy row:\n")
+  print(x$modified_data[seq_len(n_show), , drop = FALSE], row.names = FALSE)
+  if (nrow(x$modified_data) > n_show) {
+    cat(sprintf("... (%d rows)\n", nrow(x$modified_data)))
+  }
   invisible(x)
 }
 

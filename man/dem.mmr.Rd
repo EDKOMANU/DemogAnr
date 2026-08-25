@@ -18,16 +18,31 @@ dem.mmr(data, deaths_col, births_col, pop_women, verbose = FALSE)
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
-An object of class \code{dem_mmr}: a list with \code{results} (the maternal
-mortality rate \code{MMR} per 100,000 women, and the maternal mortality ratio
-\code{MMR_Ratio} per 100,000 live births) and \code{modified_data} (the input data
-with per-row \code{mm_rate} and \code{mm_ratio} columns).
+An object of class \code{dem_mmr}: a list with \code{results} -- \code{MMRate}
+(maternal deaths per 100,000 women of reproductive age), \code{MMRatio}
+(maternal deaths per 100,000 live births), and the deprecated aliases
+\code{MMR} (equal to \code{MMRate}) and \code{MMR_Ratio} (equal to \code{MMRatio}) -- and
+\code{modified_data}, the input with per-row \code{mm_rate} and \code{mm_ratio} columns.
 }
 \description{
 This function calculates the maternal mortality rate (maternal deaths per
 100,000 women of reproductive age) and the maternal mortality ratio
 (maternal deaths per 100,000 live births).
 }
+\section{Naming}{
+
+Almost everywhere in demography and public health, "MMR" means the maternal
+mortality \strong{ratio}: maternal deaths per 100,000 live births. In this
+function's \code{results} list, however, the element \code{MMR} has always held the
+maternal mortality \strong{rate} (per 100,000 women of reproductive age), and
+\code{MMR_Ratio} the ratio.
+
+Rather than change what \code{MMR} returns and silently alter existing results,
+two unambiguous elements were added in version 0.3.0: \code{MMRate} for the rate
+and \code{MMRatio} for the ratio. Prefer those. \code{MMR} and \code{MMR_Ratio} keep their
+original values and will be removed in a future release.
+}
+
 \examples{
 # Women of reproductive age in Ghana, 2021, by five-year age group, with an
 # illustrative distribution of births and maternal deaths across those ages.

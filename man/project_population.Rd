@@ -24,6 +24,7 @@ project_population(
   cv = 0.1,
   target_cv = NULL,
   annual_noise_sd = 0,
+  migration_sd = NULL,
   num_samples = 2000,
   probs = c(0.1, 0.9),
   random_seed = 42,
@@ -66,12 +67,13 @@ each year, used for positive rates).}
 
 \item{birth_dist, death_dist, migration_dist}{Optional samplers. Each is a
 \verb{function(mean, n)} returning \code{n} random draws of the rate for a region
-whose central value is \code{mean}. When \code{NULL} (default), a lognormal
-(\code{birth_dist}, \code{death_dist}) or normal (\code{migration_dist}) sampler with
-coefficient of variation \code{cv} is used.}
+whose central value is \code{mean}. When \code{NULL} (default), births and deaths
+use a mean-preserving lognormal with coefficient of variation \code{cv}, and
+net migration a normal whose standard deviation is set by \code{migration_sd}.}
 
-\item{cv}{Numeric. Coefficient of variation of the default samplers
-(default 0.10). Ignored for any component given an explicit sampler.}
+\item{cv}{Numeric. Coefficient of variation of the default birth and death
+samplers (default 0.10). Ignored for any component given an explicit
+sampler; see \code{migration_sd} for net migration.}
 
 \item{target_cv}{Coefficient of variation applied to the target rates.
 Defaults to \code{cv}; it is usually set larger, because the rate two decades
@@ -79,6 +81,15 @@ out is less well known than the rate today.}
 
 \item{annual_noise_sd}{Numeric. Standard deviation of an optional Normal
 innovation added to the growth rate each year (default 0, i.e. none).}
+
+\item{migration_sd}{Numeric. Absolute standard deviation of the net
+migration rate. Net migration is signed, so \code{cv} is degenerate for it: a
+region whose inflows and outflows balance would draw \code{cv * 0 = 0} and
+carry no migration uncertainty. When \code{migration_sd} is \code{NULL} (the
+default) the spread is \verb{cv * |nmr|}, except where \code{nmr} is exactly zero,
+in which case the scale of that region's birth and death rates is used
+and a warning names the regions concerned. Ignored if \code{migration_dist}
+is given.}
 
 \item{num_samples}{Integer. Number of simulated trajectories (default 2000).}
 
@@ -98,11 +109,12 @@ is attached to the result and shown when it is printed.}
 \item{verbose}{Logical. If \code{TRUE}, prints status messages during projection.}
 }
 \value{
-A data frame with one row per region, subregion, and year, carrying
+An object of class \code{dem_projection}, a data frame with one row per
+region, subregion, and year, carrying
 the summary of the simulated trajectories: \code{lower} (the \code{probs[1]}
-quantile), \code{median}, \code{mean}, and \code{upper} (the \code{probs[2]} quantile). When
-\code{graph = TRUE} the result also carries an attached plot and prints through
-its \code{print} method (\code{print.dem_projection}).
+quantile), \code{median}, \code{mean}, and \code{upper} (the \code{probs[2]} quantile). It
+behaves as an ordinary data frame throughout; \code{graph = TRUE} additionally
+attaches the figure, which \code{\link[=plot]{plot()}} returns.
 }
 \description{
 Projects population trajectories for several administrative

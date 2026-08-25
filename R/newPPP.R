@@ -50,13 +50,22 @@
 #'   out is less well known than the rate today.
 #' @param birth_dist,death_dist,migration_dist Optional samplers. Each is a
 #'   `function(mean, n)` returning `n` random draws of the rate for a region
-#'   whose central value is `mean`. When `NULL` (default), a lognormal
-#'   (`birth_dist`, `death_dist`) or normal (`migration_dist`) sampler with
-#'   coefficient of variation `cv` is used.
-#' @param cv Numeric. Coefficient of variation of the default samplers
-#'   (default 0.10). Ignored for any component given an explicit sampler.
+#'   whose central value is `mean`. When `NULL` (default), births and deaths
+#'   use a mean-preserving lognormal with coefficient of variation `cv`, and
+#'   net migration a normal whose standard deviation is set by `migration_sd`.
+#' @param cv Numeric. Coefficient of variation of the default birth and death
+#'   samplers (default 0.10). Ignored for any component given an explicit
+#'   sampler; see `migration_sd` for net migration.
 #' @param annual_noise_sd Numeric. Standard deviation of an optional Normal
 #'   innovation added to the growth rate each year (default 0, i.e. none).
+#' @param migration_sd Numeric. Absolute standard deviation of the net
+#'   migration rate. Net migration is signed, so `cv` is degenerate for it: a
+#'   region whose inflows and outflows balance would draw `cv * 0 = 0` and
+#'   carry no migration uncertainty. When `migration_sd` is `NULL` (the
+#'   default) the spread is `cv * |nmr|`, except where `nmr` is exactly zero,
+#'   in which case the scale of that region's birth and death rates is used
+#'   and a warning names the regions concerned. Ignored if `migration_dist`
+#'   is given.
 #' @param num_samples Integer. Number of simulated trajectories (default 2000).
 #' @param probs Numeric length-2. Lower and upper quantiles summarising the
 #'   trajectories (default `c(0.1, 0.9)`, the 10th to 90th percentile band).
@@ -70,11 +79,12 @@
 #'   is attached to the result and shown when it is printed.
 #' @param verbose Logical. If `TRUE`, prints status messages during projection.
 #'
-#' @return A data frame with one row per region, subregion, and year, carrying
+#' @return An object of class `dem_projection`, a data frame with one row per
+#'   region, subregion, and year, carrying
 #'   the summary of the simulated trajectories: `lower` (the `probs[1]`
-#'   quantile), `median`, `mean`, and `upper` (the `probs[2]` quantile). When
-#'   `graph = TRUE` the result also carries an attached plot and prints through
-#'   its `print` method (`print.dem_projection`).
+#'   quantile), `median`, `mean`, and `upper` (the `probs[2]` quantile). It
+#'   behaves as an ordinary data frame throughout; `graph = TRUE` additionally
+#'   attaches the figure, which [plot()] returns.
 #'
 #' @examples
 #' data(region2000)
@@ -139,7 +149,7 @@ project_population <- function(
     birth_target = NULL, death_target = NULL, migration_target = NULL,
     path = c("linear", "exponential"),
     birth_dist = NULL, death_dist = NULL, migration_dist = NULL,
-    cv = 0.10, target_cv = NULL, annual_noise_sd = 0,
+    cv = 0.10, target_cv = NULL, annual_noise_sd = 0, migration_sd = NULL,
     num_samples = 2000, probs = c(0.1, 0.9),
     random_seed = 42, graph = TRUE, verbose = FALSE
 ) {
@@ -168,7 +178,9 @@ project_population <- function(
   # net migration), with spread controlled by 'cv'.
   birth_sampler <- .rate_sampler(birth_dist, "lognormal", cv)
   death_sampler <- .rate_sampler(death_dist, "lognormal", cv)
-  mig_sampler   <- .rate_sampler(migration_dist, "normal", cv)
+  # The migration sampler is built per region, because its spread is absolute
+  # and may have to be borrowed from the region's own vital rates.
+  used_rate_scale <- logical(nrow(data))
 
   if (verbose) {
     message(sprintf("Projecting %d region(s), %d to %d, %d trajectories.",
@@ -195,6 +207,10 @@ project_population <- function(
     # Parameter uncertainty: draw each component ONCE per trajectory and hold
     # it across the horizon, so structural uncertainty persists (and the fan
     # widens with time) rather than washing out into year-to-year noise.
+    mig_sampler <- .migration_sampler(migration_dist, cv, migration_sd,
+                                      b_mean, d_mean, m_mean)
+    used_rate_scale[i] <- isTRUE(attr(mig_sampler, "borrowed_scale"))
+
     b <- birth_sampler(b_mean, num_samples)
     d <- death_sampler(d_mean, num_samples)
     m <- mig_sampler(m_mean, num_samples)
@@ -242,10 +258,17 @@ project_population <- function(
   results_df <- do.call(rbind, results_list)
   rownames(results_df) <- NULL
 
-  if (graph) {
-    attr(results_df, "plot") <- .plot_projection(results_df)
-    class(results_df) <- c("dem_projection", "data.frame")
+  if (any(used_rate_scale)) {
+    warning("Net migration is exactly zero for ", sum(used_rate_scale),
+            " region(s), where a coefficient of variation gives no spread at ",
+            "all. The scale of the birth and death rates was used instead; ",
+            "set 'migration_sd' to control it directly.", call. = FALSE)
   }
+
+  # The class does not depend on 'graph': only the attached figure does, so
+  # print() and plot() dispatch the same way either way.
+  if (graph) attr(results_df, "plot") <- .plot_projection(results_df, probs)
+  class(results_df) <- c("dem_projection", "data.frame")
   results_df
 }
 
@@ -285,11 +308,43 @@ project_population <- function(
   }
 }
 
-# Build a component sampler. If 'dist' is a function it is returned unchanged
-# (user-defined distribution). Otherwise a default centred on 'mean' with
-# coefficient of variation 'cv' is returned: a non-negative lognormal for rates
-# ("lognormal"), or a normal for a quantity that may be negative ("normal").
-.rate_sampler <- function(dist, family = c("lognormal", "normal"), cv) {
+# Build the net migration sampler for one region.
+#
+# Net migration is a signed quantity, so a coefficient of variation is
+# degenerate at zero: cv * |0| = 0 would leave a region whose inflows and
+# outflows balance with no migration uncertainty at all, which is not what a
+# user asking for a stochastic projection means. The spread is therefore an
+# absolute standard deviation: 'migration_sd' when supplied, otherwise
+# cv * |nmr|, falling back to the scale of the birth and death rates driving
+# the same balancing equation when nmr is exactly zero. A sampler that had to
+# borrow that scale is marked so the caller can say so once.
+.migration_sampler <- function(dist, cv, migration_sd, b_mean, d_mean, m_mean) {
+  if (is.function(dist)) return(dist)
+  borrowed <- FALSE
+  sd <- if (!is.null(migration_sd)) {
+    as.numeric(migration_sd)[1]
+  } else if (cv > 0 && isTRUE(all.equal(as.numeric(m_mean), 0))) {
+    borrowed <- TRUE
+    cv * (abs(b_mean) + abs(d_mean)) / 2
+  } else {
+    cv * abs(m_mean)
+  }
+  f <- function(mean, n) {
+    mean <- mean[1]
+    if (is.na(mean)) return(rep(NA_real_, n))
+    if (!is.finite(sd) || sd <= 0) return(rep(mean, n))
+    stats::rnorm(n, mean = mean, sd = sd)
+  }
+  attr(f, "borrowed_scale") <- borrowed
+  f
+}
+
+# Build a sampler for a strictly positive rate (births, deaths, a regional
+# share). If 'dist' is a function it is returned unchanged (user-defined
+# distribution). Otherwise the default is a mean-preserving lognormal centred
+# on 'mean' with coefficient of variation 'cv', which cannot go negative.
+# Net migration is signed and so cannot use a cv; see .migration_sampler().
+.rate_sampler <- function(dist, family = c("lognormal"), cv) {
   family <- match.arg(family)
   if (is.function(dist)) return(dist)
   if (!is.numeric(cv) || length(cv) != 1 || cv < 0) stop("'cv' must be a single non-negative number.")
@@ -297,13 +352,9 @@ project_population <- function(
     mean <- mean[1]
     if (is.na(mean)) return(rep(NA_real_, n))
     if (cv == 0) return(rep(mean, n))
-    if (family == "lognormal") {
-      if (mean <= 0) return(rep(mean, n))
-      sdlog <- sqrt(log(1 + cv^2))               # preserves E[X] = mean
-      stats::rlnorm(n, meanlog = log(mean) - 0.5 * sdlog^2, sdlog = sdlog)
-    } else {
-      stats::rnorm(n, mean = mean, sd = abs(mean) * cv)
-    }
+    if (mean <= 0) return(rep(mean, n))
+    sdlog <- sqrt(log(1 + cv^2))                 # preserves E[X] = mean
+    stats::rlnorm(n, meanlog = log(mean) - 0.5 * sdlog^2, sdlog = sdlog)
   }
 }
 

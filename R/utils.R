@@ -33,3 +33,17 @@
   }
   invisible(NULL)
 }
+
+# --- Deprecation -------------------------------------------------------------
+# Warn the first time a deprecated name is used in a session, and then keep
+# quiet: a warning on every call of a function used in a loop is noise, but
+# saying nothing at all leaves the rename undiscovered.
+.dep_warned <- new.env(parent = emptyenv())
+
+.deprecate_once <- function(id, message) {
+  if (is.null(.dep_warned[[id]])) {
+    assign(id, TRUE, envir = .dep_warned)
+    warning(message, call. = FALSE)
+  }
+  invisible(NULL)
+}

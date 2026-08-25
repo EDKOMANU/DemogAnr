@@ -30,19 +30,19 @@
 #' males <- subset(ghmort2021, Sex == "Male")
 #'
 #' # Infant mortality (deaths under age 1)
-#' dm.chm(males, age_col = "Age", live_births = "Population",
-#'        deaths_col = "Deaths", type = "infant")
+#' dem.chm(males, age_col = "Age", live_births = "Population",
+#'         deaths_col = "Deaths", type = "infant")
 #'
 #' # Under-five mortality
-#' dm.chm(males, age_col = "Age", live_births = "Population",
-#'        deaths_col = "Deaths", type = "under5")
+#' dem.chm(males, age_col = "Age", live_births = "Population",
+#'         deaths_col = "Deaths", type = "under5")
 #' @references
 #' Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Sydney: Pergamon Press.
 #'
 #' Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapters 1-2: rates versus probabilities of dying.)
 #'
 #' @export
-dm.chm <- function(data, age_col, live_births, deaths_col,
+dem.chm <- function(data, age_col, live_births, deaths_col,
                                              type = c("neonatal", "infant", "child", "under5"),
                                              age_in_months = NULL, verbose = FALSE) {
   # Validate inputs
@@ -56,7 +56,7 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   type <- match.arg(type)
 
   if (verbose) {
-    message("dm.chm: Starting child mortality calculations for type: '", type, "'")
+    message("dem.chm: Starting child mortality calculations for type: '", type, "'")
   }
 
   # Additional validation for neonatal mortality
@@ -70,19 +70,19 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   # Filter data based on mortality type
   if (type == "neonatal") {
     # Neonatal: deaths within the first month of life (age in months < 1)
-    if (verbose) message("dm.chm: Filtering for neonatal age (age_in_months < 1)...")
+    if (verbose) message("dem.chm: Filtering for neonatal age (age_in_months < 1)...")
     data_filtered <- data[data[[age_in_months]] < 1, ]
   } else if (type == "infant") {
     # Infant: Age in years should be < 1
-    if (verbose) message("dm.chm: Filtering for infant age (age < 1)...")
+    if (verbose) message("dem.chm: Filtering for infant age (age < 1)...")
     data_filtered <- data[data[[age_col]] < 1, ]
   } else if (type == "child") {
     # Child: Age in years should be between 1 and 4
-    if (verbose) message("dm.chm: Filtering for child age (1 <= age < 5)...")
+    if (verbose) message("dem.chm: Filtering for child age (1 <= age < 5)...")
     data_filtered <- data[data[[age_col]] >= 1 & data[[age_col]] < 5, ]
   } else if (type == "under5") {
     # Under-5: Age in years should be < 5
-    if (verbose) message("dm.chm: Filtering for under-5 age (age < 5)...")
+    if (verbose) message("dem.chm: Filtering for under-5 age (age < 5)...")
     data_filtered <- data[data[[age_col]] < 5, ]
   }
 
@@ -92,7 +92,7 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   }
 
   if (verbose) {
-    message("dm.chm: Found ", nrow(data_filtered), " matching records in filtered data.")
+    message("dem.chm: Found ", nrow(data_filtered), " matching records in filtered data.")
   }
 
   # Calculate the mortality rate
@@ -100,8 +100,8 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   total_population <- sum(data_filtered[[live_births]])
 
   if (verbose) {
-    message("dm.chm: Total deaths in filtered data: ", total_deaths)
-    message("dm.chm: Total population/births in filtered data: ", total_population)
+    message("dem.chm: Total deaths in filtered data: ", total_deaths)
+    message("dem.chm: Total population/births in filtered data: ", total_population)
   }
 
   if (total_population == 0) {
@@ -111,7 +111,7 @@ dm.chm <- function(data, age_col, live_births, deaths_col,
   mortality_rate <- (total_deaths / total_population) * 1000
 
   if (verbose) {
-    message("dm.chm: Calculated mortality rate per 1,000: ", round(mortality_rate, 4))
+    message("dem.chm: Calculated mortality rate per 1,000: ", round(mortality_rate, 4))
   }
 
   class(mortality_rate) <- c("dem_chm", "numeric")
@@ -124,4 +124,25 @@ print.dem_chm <- function(x, ...) {
   type <- attr(x, "type")
   cat(sprintf("The %s mortality rate is: %.2f per 1,000\n", type, as.numeric(x)))
   invisible(x)
+}
+
+#' Calculate Child Mortality Metrics by Age (deprecated name)
+#'
+#' `dm.chm()` is the former name of [dem.chm()]. Every other function in this
+#' family is prefixed `dem.`, so the odd one out was renamed. It still works
+#' and returns exactly the same value, but warns once per session and will be
+#' removed in a future release.
+#'
+#' @inheritParams dem.chm
+#' @return As [dem.chm()].
+#' @seealso [dem.chm()], which replaces this.
+#' @keywords internal
+#' @export
+dm.chm <- function(data, age_col, live_births, deaths_col,
+                   type = c("neonatal", "infant", "child", "under5"),
+                   age_in_months = NULL, verbose = FALSE) {
+  .deprecate_once("dm.chm", "dm.chm() is deprecated; use dem.chm() instead.")
+  dem.chm(data = data, age_col = age_col, live_births = live_births,
+          deaths_col = deaths_col, type = match.arg(type),
+          age_in_months = age_in_months, verbose = verbose)
 }

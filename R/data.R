@@ -3,6 +3,10 @@
 #' Example population counts in 5-year age groups (0-4 to 75-79) for the years
 #' 2021 to 2035, used to demonstrate [karup_king()].
 #'
+#' This dataset was called `data` before version 0.3.0. That name shadowed
+#' base R's [utils::data()] function whenever it was loaded, so it was renamed;
+#' see [data] for the deprecated original.
+#'
 #' @format A data frame with 16 rows (age groups) and 16 variables:
 #' \describe{
 #'   \item{2021}{Numeric. Population in the age group in 2021.}
@@ -24,6 +28,20 @@
 #' }
 #' @source Simulated data based on population structures from the Ghana
 #'   Statistical Service.
+"grouped_pop"
+
+#' Grouped population data by 5-year age groups (deprecated name)
+#'
+#' `data` is the former name of [grouped_pop], kept so that code written
+#' against earlier versions keeps working. The name shadowed base R's
+#' [utils::data()] function once loaded, which made `data(...)` calls in the
+#' same script fail in confusing ways. Use [grouped_pop] instead; `data` will
+#' be removed in a future release.
+#'
+#' @format Identical to [grouped_pop]: a data frame with 16 rows (age groups)
+#'   and 16 variables.
+#' @seealso [grouped_pop], which this duplicates.
+#' @keywords internal
 "data"
 
 #' Karup-King coefficients for the first age group

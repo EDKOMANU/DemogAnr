@@ -2,7 +2,7 @@
 % Please edit documentation in R/child_mortality.R
 \name{dm.chm}
 \alias{dm.chm}
-\title{Calculate Child Mortality Metrics by Age}
+\title{Calculate Child Mortality Metrics by Age (deprecated name)}
 \usage{
 dm.chm(
   data,
@@ -32,39 +32,15 @@ dm.chm(
 \item{verbose}{Logical. If TRUE, prints progress messages during execution.}
 }
 \value{
-A numeric value representing the mortality rate per 1,000 live births.
+As \code{\link[=dem.chm]{dem.chm()}}.
 }
 \description{
-This function calculates child mortality metrics (neonatal, infant, child, under-5)
-based on single-age data. It requires columns for age, denominator (live
-births or population), and deaths.
+\code{dm.chm()} is the former name of \code{\link[=dem.chm]{dem.chm()}}. Every other function in this
+family is prefixed \code{dem.}, so the odd one out was renamed. It still works
+and returns exactly the same value, but warns once per session and will be
+removed in a future release.
 }
-\details{
-The result is expressed per 1,000 of the supplied denominator. If the
-denominator is live births (as is conventional for neonatal and infant
-mortality), the result is a rate per 1,000 live births. If a mid-year
-population is supplied instead (often the only option for the child and
-under-5 groups from census data), the result is a death \emph{rate} per 1,000
-population, which is not identical to the cohort probability of dying
-(e.g. 5q0) reported by survey programmes such as the DHS.
+\seealso{
+\code{\link[=dem.chm]{dem.chm()}}, which replaces this.
 }
-\examples{
-# Ghana, 2021: deaths and population of children by age and sex.
-# Where births are not registered, the population under age 1 is commonly
-# used in place of live births as the denominator, as it is here.
-data(ghmort2021)
-males <- subset(ghmort2021, Sex == "Male")
-
-# Infant mortality (deaths under age 1)
-dm.chm(males, age_col = "Age", live_births = "Population",
-       deaths_col = "Deaths", type = "infant")
-
-# Under-five mortality
-dm.chm(males, age_col = "Age", live_births = "Population",
-       deaths_col = "Deaths", type = "under5")
-}
-\references{
-Pollard, A. H., Yusuf, F., & Pollard, G. N. (1990). \emph{Demographic Techniques} (3rd ed.). Sydney: Pergamon Press.
-
-Preston, S. H., Heuveline, P., & Guillot, M. (2001). \emph{Demography: Measuring and Modeling Population Processes}. Oxford: Blackwell Publishers. ISBN 978-0631226161. (Chapters 1-2: rates versus probabilities of dying.)
-}
+\keyword{internal}

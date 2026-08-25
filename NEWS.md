@@ -1,51 +1,30 @@
-# DemogAnr 0.3.1
-
-## Bug fixes
-
-* `print()` methods no longer draw the attached figure. Printing a result in a
-  non-interactive session opened a graphics device and wrote an `Rplots.pdf`
-  into the working directory. Figures are unchanged and still reached with
-  `plot()`, or as the `$plot` element.
-
-* `project_population()` and `calibrate_regions()` now restore the caller's
-  random stream when they return. Previously they called `set.seed()`
-  unconditionally, so any simulation running around them silently changed
-  its draws. Results for a given `random_seed` are unchanged; passing
-  `random_seed = NULL` now skips seeding altogether.
-
-* `decompose_LE()` now checks that the two life tables share a radix. Given
-  tables built on different radices it returned a difference dominated by the
-  radix ratio -- two tables with identical mortality reported a gap of 99
-  years -- rather than the intended decomposition.
-
-* `myers()` now warns when the data do not cover every single year of age from
-  `lower` to `upper + 9`. Without the full span the blending weights are
-  unbalanced and the index is biased; the warning names an `upper` the data
-  can support.
-
-* `karup_king()` now rejects age groups that are not contiguous five-year
-  groups. Ten-year groups previously produced a distribution with half the age
-  range missing while the column totals still matched the input.
-
-* `stable_population()` now warns when the iterative solution of Lotka's
-  equation stops at `max_iter` without converging, and reports `converged` in
-  the returned object. The provisional `r` was previously returned in silence.
-
-* `pf_ratio()` now raises an error when `k_ages` matches no age group (which
-  produced a silent `NaN` for `K` and `TFR_adjusted`) and warns about
-  individual `k_ages` values that are not age-group lower bounds.
-
 # DemogAnr 0.3.0
 
-This release extends the package from the everyday measures into the classical
-models of formal demography: reproduction and the stable population, multiple
-decrement and cause-deleted life tables, indirect fertility estimation,
-cohort-component projection, and the regional disaggregation of a national
-projection. Wherever possible each new function reproduces the published worked
-example from the standard texts, so that a reader can follow the calculation in
-the book alongside the code.
-
 ## New features
+
+* A `README`, and a GitHub Actions `R-CMD-check` workflow covering macOS,
+  Windows, and Linux on R-devel, release, oldrel and the declared minimum
+  R 4.1.
+
+## Renamed, with the old names kept working
+
+* The bundled dataset `data` is now `grouped_pop`. Its former name shadowed
+  base R's `data()` function as soon as it was loaded, which made `data(...)`
+  calls later in the same script fail confusingly. `data` is still shipped and
+  identical, and will be removed in a future release.
+
+* `dm.chm()` is now `dem.chm()`, matching `dem.cdr()`, `dem.fert()` and
+  `dem.mmr()`. `dm.chm()` still works, returns exactly the same value, and
+  warns once per session.
+
+* `dem.mmr()` gained `results$MMRate` (deaths per 100,000 women) and
+  `results$MMRatio` (deaths per 100,000 live births). Note that the existing
+  `results$MMR` holds the *rate*, which is the opposite of the near-universal
+  convention that "MMR" means the ratio. Rather than change what `MMR` returns
+  and silently alter existing results, the unambiguous pair was added
+  alongside it; `MMR` and `MMR_Ratio` keep their original values and will be
+  removed in a future release. `print()` now shows both, and no longer dumps
+  the whole input data frame.
 
 * `calibrate_regions()` is a new function for the disaggregation step that
   follows a national projection. Where `project_population()` projects each
@@ -175,6 +154,66 @@ the book alongside the code.
   where the analyst states where the rates are going.
 * The bundled `region2000` data set gains illustrative `cbr`, `cdr`, and `nmr`
   per-capita rate columns for the new `project_population()` interface.
+
+## Bug fixes
+
+* `project_population()` now returns an object of class `dem_projection`
+  whether or not `graph = TRUE`. Previously `graph = FALSE` returned a bare
+  data frame, so `plot()` fell through to `plot.data.frame()` and drew a
+  scatterplot matrix instead of raising an error.
+
+* `project_population()` no longer collapses migration uncertainty to zero
+  where the net migration rate is zero. A coefficient of variation is
+  degenerate for a signed quantity (`cv * |0| = 0`), so a region with balanced
+  migration carried no migration uncertainty at all. The spread is now an
+  absolute standard deviation, settable with the new `migration_sd` argument
+  and otherwise borrowed from the region's own birth and death rates, with a
+  warning naming the regions concerned.
+
+* The projection figure's title now names the interval it actually drew (for
+  example "80% interval" for the default `probs = c(0.1, 0.9)`), instead of
+  always claiming an interquartile band.
+
+* `print()` methods no longer draw the attached figure. Printing a result in a
+  non-interactive session opened a graphics device and wrote an `Rplots.pdf`
+  into the working directory. Figures are unchanged and still reached with
+  `plot()`, or as the `$plot` element.
+
+* `project_population()` and `calibrate_regions()` now restore the caller's
+  random stream when they return. Previously they called `set.seed()`
+  unconditionally, so any simulation running around them silently changed
+  its draws. Results for a given `random_seed` are unchanged; passing
+  `random_seed = NULL` now skips seeding altogether.
+
+* `decompose_LE()` now checks that the two life tables share a radix. Given
+  tables built on different radices it returned a difference dominated by the
+  radix ratio -- two tables with identical mortality reported a gap of 99
+  years -- rather than the intended decomposition.
+
+* `myers()` now warns when the data do not cover every single year of age from
+  `lower` to `upper + 9`. Without the full span the blending weights are
+  unbalanced and the index is biased; the warning names an `upper` the data
+  can support.
+
+* `karup_king()` now rejects age groups that are not contiguous five-year
+  groups. Ten-year groups previously produced a distribution with half the age
+  range missing while the column totals still matched the input.
+
+* `stable_population()` now warns when the iterative solution of Lotka's
+  equation stops at `max_iter` without converging, and reports `converged` in
+  the returned object. The provisional `r` was previously returned in silence.
+
+* `pf_ratio()` now raises an error when `k_ages` matches no age group (which
+  produced a silent `NaN` for `K` and `TFR_adjusted`) and warns about
+  individual `k_ages` values that are not age-group lower bounds.
+
+This release extends the package from the everyday measures into the classical
+models of formal demography: reproduction and the stable population, multiple
+decrement and cause-deleted life tables, indirect fertility estimation,
+cohort-component projection, and the regional disaggregation of a national
+projection. Wherever possible each new function reproduces the published worked
+example from the standard texts, so that a reader can follow the calculation in
+the book alongside the code.
 
 # DemogAnr 0.2.0
 

@@ -52,7 +52,7 @@
     labs(x = "Age", y = "Survivors l(x)", title = title) + .dem_theme()
 }
 
-.plot_projection <- function(df) {
+.plot_projection <- function(df, probs = c(0.1, 0.9)) {
   d <- data.frame(year = df$year, subregion = as.character(df$subregion),
                   lo = df$lower, hi = df$upper, med = df$median)
   ggplot(d, aes(x = year)) +
@@ -61,7 +61,8 @@
     facet_wrap(~ subregion, scales = "free_y") +
     .y_from_zero() +
     labs(x = "Year", y = "Population",
-         title = "Projected population (median and interquartile band)") +
+         title = sprintf("Projected population (median and %g%% interval)",
+                         100 * (probs[2] - probs[1]))) +
     .dem_theme()
 }
 
