@@ -8,11 +8,14 @@
 # columns reversed. Karup-King works the same way with panels three groups
 # wide, and one group at each end.
 #
-# The tables are the four-decimal multipliers printed in Siegel and Swanson
-# (2004, Appendix C) and used by the U.S. Census Bureau's PAS workbooks. They
-# are checked in the test suite against the identities that define them: every
-# row sums to 1/5, and, for all but Beers' modified formula, the single ages of
-# a group add back to exactly that group.
+# The tables are the standard four-decimal multipliers (Siegel and Swanson
+# 2004, Appendix C; the Beers ordinary end panels are those of the U.S. Census
+# Bureau's PAS workbooks). The Beers tables were transcribed from the DemoTools
+# package (Riffe et al.), the Sprague table independently, and all of them are
+# checked in the test suite against the identities that define them: every
+# row sums to 1/5, each group's population is handed out exactly once, and,
+# for all but Beers' modified formula, the single ages of a group add back to
+# exactly that group.
 
 .grad_panels <- list(
   sprague = list(
