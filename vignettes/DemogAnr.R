@@ -6,6 +6,7 @@ knitr::opts_chunk$set(
 options(width = 90)
 library(DemogAnr)
 
+
 ## ----fert-------------------------------------------------------------------------------
 bangladesh <- data.frame(
   age         = c("15-19","20-24","25-29","30-34","35-39","40-44","45-49"),
@@ -18,16 +19,19 @@ fert <- dem.fert(bangladesh, type = "all", age_col = "age",
                  births_col = "live_births", graph = FALSE)
 fert$results$TFR
 
+
 ## ----cdr--------------------------------------------------------------------------------
 sweden88 <- data.frame(population = 8438477, deaths = 96756)
 dem.cdr(sweden88, type = "CDR", population_col = "population",
         deaths_col = "deaths", graph = FALSE)$results$CDR
+
 
 ## ----lt---------------------------------------------------------------------------------
 lt <- lifetable(gphc2010, age = "Age", pop = "Pop", Dx = "Deaths",
                 graph = FALSE)
 head(lt$lifetable)
 lt$metrics$LifeExpectancyAtBirth
+
 
 ## ----mdlt-------------------------------------------------------------------------------
 us91 <- data.frame(
@@ -50,10 +54,12 @@ md <- multiple_decrement(us91, age = "Age", causes = c("Dneo", "Dother"),
                          deaths = "Dall", lx = "lx", nqx = "nqx", graph = FALSE)
 round(md$cause_distribution, 3)
 
+
 ## ----cdlt-------------------------------------------------------------------------------
 cd <- cause_deleted_lt(us91, age = "Age", cause = "Dneo", deaths = "Dall",
                        lx = "lx", nqx = "nqx", nax_all = "nax", graph = FALSE)
 c(e0 = cd$e0, without_neoplasms = cd$e0_deleted, gain = cd$gain)
+
 
 ## ----repro------------------------------------------------------------------------------
 us1991 <- data.frame(
@@ -66,6 +72,7 @@ r <- reproduction(us1991, age = "age", births = "fbir", women = "women",
                   nLx = "nLx", radix = 1e5, fraction_female = 1, graph = FALSE)
 c(GRR = r$GRR, NRR = r$NRR)
 
+
 ## ----stable-----------------------------------------------------------------------------
 egypt <- data.frame(
   age = seq(15, 45, 5),
@@ -75,6 +82,7 @@ egypt <- data.frame(
 sp <- stable_population(egypt, age = "age", asfr = "ma", nLx = "Lx",
                         radix = 1, fraction_female = 1, graph = FALSE)
 c(r = sp$r, b = sp$b, d = sp$d, NRR = sp$NRR)
+
 
 ## ----pf---------------------------------------------------------------------------------
 bd <- data.frame(
@@ -87,6 +95,7 @@ pf <- pf_ratio(bd, age = "age", women = "women", ceb = "ceb",
                births = "births", graph = FALSE)
 c(K = pf$K, TFR = pf$TFR, TFR_adjusted = pf$TFR_adjusted)
 
+
 ## ----chm--------------------------------------------------------------------------------
 panama <- data.frame(
   women = c(2695, 2095, 1828, 1605, 1362, 1128, 930),
@@ -97,15 +106,18 @@ est <- chm_brass(panama, women_col = "women", ceb_col = "ceb",
                  cd_col = "cd", model = "west", survey_year = 1976.7)
 est$qx[est$x == 5]
 
+
 ## ----mlt--------------------------------------------------------------------------------
 fitted <- model_lifetable("west", sex = "male", q5 = est$qx[est$x == 5],
                           graph = FALSE)
 fitted$metrics$LifeExpectancyAtBirth
 
+
 ## ----mlt-families-----------------------------------------------------------------------
 sapply(c("CD_West", "CD_North", "CD_South", "CD_East"), function(f)
   model_lifetable(f, sex = "male", q5 = est$qx[est$x == 5],
                   graph = FALSE)$metrics$LifeExpectancyAtBirth)
+
 
 ## ----brass------------------------------------------------------------------------------
 fit <- brass_logit(data.frame(age = est$x, qx = est$qx),
@@ -114,9 +126,11 @@ fit <- brass_logit(data.frame(age = est$x, qx = est$qx),
 round(fit$coefficients, 4)
 fit$lifetable$metrics$LifeExpectancyAtBirth
 
+
 ## ----brass-target-----------------------------------------------------------------------
 brass_lifetable(target_e0 = 60, standard = "African",
                 graph = FALSE)$brass$alpha
+
 
 ## ----orphanhood-------------------------------------------------------------------------
 bolivia <- data.frame(
@@ -129,6 +143,7 @@ orph <- orphanhood(bolivia, age = "age", alive = "alive", dead = "dead",
                    prop10 = "s10", M = 28.8, survey_year = 1975.5,
                    graph = FALSE)
 orph$table[, c("age", "W", "lx_ratio", "t", "ref_date")]
+
 
 ## ----ddm--------------------------------------------------------------------------------
 d <- data.frame(
@@ -144,11 +159,13 @@ g <- ggb(d, age = "age", pop1 = "n1", pop2 = "n2", deaths = "dth",
          t1 = 2000, t2 = 2010, graph = FALSE)
 c(completeness = g$completeness, coverage_ratio = g$coverage_ratio)
 
+
 ## ----ddm-compare------------------------------------------------------------------------
 c(GGB = g$completeness,
   SEG = seg(d, "age", "n1", "n2", "dth", 2000, 2010, graph = FALSE)$completeness,
   combined = ggb_seg(d, "age", "n1", "n2", "dth", 2000, 2010,
                      graph = FALSE)$completeness)
+
 
 ## ----std--------------------------------------------------------------------------------
 male   <- subset(ghmort2021, Sex == "Male")
@@ -163,6 +180,7 @@ comp <- data.frame(
 standardize(comp, "age", rate1_col = "m_m", rate2_col = "m_f",
             pop1_col = "n_m", pop2_col = "n_f",
             labels = c("Males", "Females"))
+
 
 ## ----ccm--------------------------------------------------------------------------------
 sweden <- data.frame(
@@ -180,6 +198,7 @@ cc <- cohort_component(sweden, age = "Age", population = "N93", nLx = "Lx",
                        asfr = "Fx", steps = 2, graph = FALSE)
 round(cc$totals)
 
+
 ## ----pproj------------------------------------------------------------------------------
 pp <- project_population(region2000[1:4, ],
         base_year = 2000, future_year = 2010,
@@ -188,6 +207,7 @@ pp <- project_population(region2000[1:4, ],
         death_rate_var = "cdr", net_migration_var = "nmr",
         num_samples = 500, graph = FALSE)
 subset(pp, year == 2010)
+
 
 ## ----pproj-trend------------------------------------------------------------------------
 pp_trend <- project_population(region2000[1:4, ],
@@ -199,6 +219,7 @@ pp_trend <- project_population(region2000[1:4, ],
         cv = 0.05, target_cv = 0.20,
         num_samples = 500, graph = FALSE)
 subset(pp_trend, year == 2030)
+
 
 ## ----calreg-----------------------------------------------------------------------------
 base_total <- sum(region2000$base_pop)
@@ -212,10 +233,47 @@ cal <- calibrate_regions(region2000,
         deviation = 0.08, num_samples = 500, graph = FALSE)
 cal$check
 
+
 ## ----quality----------------------------------------------------------------------------
 males <- subset(ghpop2021, Sex == "Male")
 w <- whipple(males, age_col = "Age", pop_col = "Population", graph = FALSE)
 w$index
+
+
+## ----smooth-----------------------------------------------------------------------------
+ghana1960 <- data.frame(
+  age = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
+          "40-44","45-49","50-54","55-59","60-64","65+"),
+  females = c(654258, 503070, 323460, 265534, 322576, 306329, 245883,
+              179182, 145572, 95590, 81715, 48412, 54572, 100392)
+)
+methods <- c("carrier_farrag", "kkn", "arriaga", "united_nations", "strong")
+scores <- sapply(methods, function(m) {
+  smooth_ages(ghana1960, "age", "females", method = m,
+              graph = FALSE)$score_smoothed
+})
+reported <- smooth_ages(ghana1960, "age", "females",
+                        graph = FALSE)$score_reported
+round(c(reported = reported, scores), 2)
+
+
+## ----smooth-strong----------------------------------------------------------------------
+s <- smooth_ages(ghana1960, "age", "females", method = "strong")
+s
+plot(s)
+
+
+## ----graduate---------------------------------------------------------------------------
+g <- graduate(s$table, "age", "smoothed", graph = FALSE)
+head(g$table)
+max(abs(g$groups$difference))
+
+
+## ----smooth-single----------------------------------------------------------------------
+s1 <- smooth_single_ages(males, "Age", "Population", graph = FALSE)
+c(Whipple_reported = s1$whipple_reported,
+  Whipple_smoothed = s1$whipple_smoothed)
+
 
 ## ----smam-------------------------------------------------------------------------------
 turkey <- data.frame(
@@ -225,6 +283,7 @@ turkey <- data.frame(
   single = c(3030203, 1853222, 629077, 180767, 77134, 43412, 28627, 22527)
 )
 smam(turkey, age = "age", single = "single", total = "men")$SMAM
+
 
 ## ----pyramid, fig.height = 5------------------------------------------------------------
 g <- within(ghpop2021, grp <- ifelse(Age >= 80, "80+",

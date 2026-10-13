@@ -51,6 +51,9 @@
 #'
 #' Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. Washington, DC: US Bureau of the Census. (Appendix C: Interpolation and graduation.)
 #'
+#' @seealso [graduate()], which also offers the Sprague and Beers
+#'   multipliers, returns the Karup-King split without rounding, and carries
+#'   an open-ended age group through.
 #' @export
 karup_king <- function(df, age_col = "age_group", pops = "population",
                        first_coef = NULL, middle_coef = NULL, last_coef = NULL,

@@ -29,7 +29,12 @@ test_that("every print() method leaves the graphics device alone", {
     dem.fert(data.frame(age = c("15-19", "20-24"), pop = c(1, 1),
                         w = c(5000, 6000), b = c(200, 400)),
              type = "ASFR", age_col = "age", population_col = "pop",
-             women_col = "w", births_col = "b")
+             women_col = "w", births_col = "b"),
+    smooth_single_ages(male, "Age", "Population"),
+    smooth_ages(data.frame(a = seq(0, 45, 5), p = seq(1000, 550, -50)),
+                "a", "p", open_ended = FALSE),
+    graduate(data.frame(a = seq(0, 45, 5), p = seq(1000, 550, -50)),
+             "a", "p", open_ended = FALSE)
   )
   before <- length(grDevices::dev.list())
   for (o in objs) invisible(capture.output(print(o)))

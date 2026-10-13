@@ -16,10 +16,14 @@
 }
 
 # Anchor a non-negative value axis at 0 (no padding below), with a little
-# headroom above.
-.y_from_zero <- function() {
-  scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05)))
+# headroom above. Pass labels = .comma for counts, which ggplot2 would
+# otherwise label in scientific notation.
+.y_from_zero <- function(labels = ggplot2::waiver()) {
+  scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05)),
+                     labels = labels)
 }
+
+.comma <- function(x) format(x, big.mark = ",", scientific = FALSE, trim = TRUE)
 
 # Order an age vector for plotting: numeric ages by value, "0-4"-style labels
 # by their leading number.
@@ -254,5 +258,61 @@ pyramid <- function(data, age_col, sex_col, count_col,
          y = "l(25+n) / l(25)",
          title = "Adult female survivorship from maternal orphanhood",
          subtitle = "each point is one age group of respondents") +
+    .dem_theme()
+}
+
+
+# Age smoothing: the reported and smoothed distributions by age group, as in
+# the PAS figures. The open-ended group is left out: it is not smoothed, and
+# its size would flatten the closed groups.
+.plot_age_smooth <- function(tbl, name) {
+  lv <- tbl$interval
+  d <- rbind(
+    data.frame(age = factor(lv, levels = lv), value = tbl$reported,
+               series = "Reported"),
+    data.frame(age = factor(lv, levels = lv), value = tbl$smoothed,
+               series = "Smoothed"))
+  ggplot(d, aes(x = age, y = value, colour = series, group = series)) +
+    geom_line() +
+    geom_point(size = 1.8) +
+    scale_colour_manual(values = c(Reported = "grey55", Smoothed = .dem_male)) +
+    .y_from_zero(labels = .comma) +
+    labs(x = "Age group", y = "Population", colour = NULL,
+         title = "Reported and smoothed age distribution",
+         subtitle = paste(name, "method")) +
+    .dem_theme() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+.plot_age_smooth_single <- function(tbl) {
+  d <- rbind(
+    data.frame(age = tbl$age, value = tbl$reported, series = "Reported"),
+    data.frame(age = tbl$age, value = tbl$smoothed, series = "Smoothed"))
+  ggplot(d, aes(x = age, y = value, colour = series)) +
+    geom_line() +
+    scale_colour_manual(values = c(Reported = "grey60", Smoothed = .dem_male)) +
+    .y_from_zero(labels = .comma) +
+    labs(x = "Age", y = "Population", colour = NULL,
+         title = "Reported and smoothed population by single year of age") +
+    .dem_theme()
+}
+
+# Graduation: the single years against the reported group average. A single
+# year of age a covers [a, a + 1), so it is drawn at its midpoint, and each
+# group's average as a step across its five years.
+.plot_graduation <- function(tbl, groups, name) {
+  steps <- data.frame(x = groups$age, xend = groups$age + 5,
+                      y = groups$reported / 5)
+  pts <- data.frame(x = tbl$age + 0.5, y = tbl$population)
+  ggplot() +
+    ggplot2::geom_segment(data = steps,
+                          aes(x = x, xend = xend, y = y, yend = y),
+                          colour = "grey60", linewidth = 0.8) +
+    geom_line(data = pts, aes(x = x, y = y), colour = .dem_male) +
+    geom_point(data = pts, aes(x = x, y = y), colour = .dem_male, size = 1) +
+    .y_from_zero(labels = .comma) +
+    labs(x = "Age", y = "Population per single year of age",
+         title = paste("Graduation into single years:", name, "multipliers"),
+         subtitle = "line: single years; grey steps: reported group divided by 5") +
     .dem_theme()
 }

@@ -76,6 +76,40 @@
   Windows, and Linux on R-devel, release, oldrel and the declared minimum
   R 4.1.
 
+### Smoothing and graduation of age distributions
+
+* `smooth_ages()` corrects a five-year age distribution for age misreporting
+  with the five formulas of the U.S. Census Bureau's AGESMTH workbook:
+  Carrier-Farrag, Karup-King-Newton, Arriaga, Arriaga's strong smoothing, and
+  the United Nations formula. `offset = 5` pairs the groups as 5-14, 15-24,
+  ..., as the ARRSM5 workbook does, which keeps both sides of an age ending in
+  0 in the same ten-year group; `lower` and `upper` confine smoothing to the
+  ages that need it. The result reports the age ratios before and after, and
+  the age ratio score that summarises them.
+* `smooth_single_ages()` removes digit preference from single years of age
+  with the weighted moving average of the POP1SM workbook, narrowing the
+  window at the ends of the age range by the same rules as POP1SM's trimmed
+  weights. On the bundled Ghana 2021 males it brings Whipple's index from 115
+  to 100.
+* `graduate()` splits five-year groups into single years with the Sprague,
+  Beers ordinary, Beers modified or Karup-King multipliers, carrying an
+  open-ended group through, and reports how closely the single years add back
+  to each group.
+
+  These methods have no published numerical worked example to reproduce, so
+  they are validated by what each formula provably does. Every multiplier
+  table satisfies the identities that define it (each row sums to one fifth,
+  and the population is handed out exactly once), which a single wrong digit
+  would break. Sprague and Beers ordinary reproduce any cubic exactly, Beers
+  modified any quadratic, and Karup-King a straight line. Each smoothing
+  formula leaves its own family of distributions unchanged: Carrier-Farrag a
+  geometric decline, Karup-King-Newton a quadratic, Arriaga a straight line,
+  the United Nations formula a cubic. Given a population with known
+  misreporting, Carrier-Farrag recovers it exactly, and pairing from age 5
+  recovers misreporting across ages ending in 0 to within 1 per cent where the
+  usual pairing leaves 4 per cent. The POP1SM default and alternative weight
+  tables are reproduced to the published digits.
+
 ### Documentation
 
 * The vignette now covers the indirect estimation pipeline end to end: child
@@ -83,7 +117,9 @@
   `model_lifetable()`, the Brass relational alternative through
   `brass_logit(complete = TRUE)` and `brass_lifetable()`, adult mortality from
   `orphanhood()`, and a section on assessing the completeness of death
-  registration with `ggb()`, `seg()` and `ggb_seg()`.
+  registration with `ggb()`, `seg()` and `ggb_seg()`. Its data-quality
+  section now takes an age distribution from diagnosis through smoothing to
+  single years of age.
 
 ## Renamed, with the old names kept working
 
