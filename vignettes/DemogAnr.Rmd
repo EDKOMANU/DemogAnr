@@ -437,7 +437,7 @@ confirms the regional sum reproduces the control total in every year. With no
 `deviation` the function reduces to the ordinary constant-share allocation and
 every raking factor is 1.
 
-## 9. Data quality
+## 9. Data quality, smoothing and graduation
 
 Reported ages should be screened before analysis. `whipple()` and `myers()`
 measure digit preference, and `un_age_sex_accuracy()` combines age and sex
@@ -447,6 +447,69 @@ ratios into the United Nations joint index.
 males <- subset(ghpop2021, Sex == "Male")
 w <- whipple(males, age_col = "Age", pop_col = "Population", graph = FALSE)
 w$index
+```
+
+Where screening shows misreporting, the age distribution can be smoothed. The
+decision is not automatic. Smoothing assumes that people were reported at the
+wrong age rather than missed, so the deficit in an under-enumerated age group
+is spread to its neighbours; and genuine irregularities in the age structure
+are erased together with the errors.
+
+The 1960 census of Ghana, the example Kpedekpo (1982) uses for the United
+Nations index, shows the saw-tooth pattern of age misreporting. The female age
+ratios fall to 84 and 82 at 10-14 and 15-19 and rise to 113 and 108 at 20-24
+and 25-29: an excess of women at 20-29 at the expense of 10-19.
+`smooth_ages()` applies the five formulas of the Census Bureau's
+AGESMTH workbook. Carrier-Farrag, Karup-King-Newton and Arriaga only
+redistribute people between the two halves of each ten-year group, so they
+cannot repair a transfer between ten-year groups; the United Nations formula
+and Arriaga's strong smoothing reach across them. The age ratio score, the
+mean absolute deviation of the age ratios from 100, falls accordingly:
+
+```{r smooth}
+ghana1960 <- data.frame(
+  age = c("0-4","5-9","10-14","15-19","20-24","25-29","30-34","35-39",
+          "40-44","45-49","50-54","55-59","60-64","65+"),
+  females = c(654258, 503070, 323460, 265534, 322576, 306329, 245883,
+              179182, 145572, 95590, 81715, 48412, 54572, 100392)
+)
+methods <- c("carrier_farrag", "kkn", "arriaga", "united_nations", "strong")
+scores <- sapply(methods, function(m) {
+  smooth_ages(ghana1960, "age", "females", method = m,
+              graph = FALSE)$score_smoothed
+})
+reported <- smooth_ages(ghana1960, "age", "females",
+                        graph = FALSE)$score_reported
+round(c(reported = reported, scores), 2)
+```
+
+The strong result keeps the census total and leaves the youngest and oldest
+ten-year groups as reported:
+
+```{r smooth-strong}
+s <- smooth_ages(ghana1960, "age", "females", method = "strong")
+s
+plot(s)
+```
+
+`graduate()` then splits the smoothed groups into single years of age. With
+Sprague's multipliers, the default, the single years of each group add back to
+that group exactly:
+
+```{r graduate}
+g <- graduate(s$table, "age", "smoothed", graph = FALSE)
+head(g$table)
+max(abs(g$groups$difference))
+```
+
+Single years can also be smoothed directly. `smooth_single_ages()` applies the
+weighted moving average of the Census Bureau's POP1SM workbook, which removes
+the heaping on ages ending in 0 and 5 from the Ghana 2021 males:
+
+```{r smooth-single}
+s1 <- smooth_single_ages(males, "Age", "Population", graph = FALSE)
+c(Whipple_reported = s1$whipple_reported,
+  Whipple_smoothed = s1$whipple_smoothed)
 ```
 
 `smam()` computes the singulate mean age at marriage from proportions single by
@@ -480,14 +543,28 @@ pyramid(pyr, age_col = "grp", sex_col = "Sex", count_col = "Population",
 Coale, A. J., & Trussell, T. J. (1974). Model fertility schedules.
 *Population Index*, 40(2), 185–258.
 
+Arriaga, E. E., Johnson, P. D., & Jamison, E. (1994). *Population Analysis
+with Microcomputers, Volume I: Presentation of Techniques*. Washington, DC: U.S.
+Bureau of the Census.
+
+Carrier, N. H., & Farrag, A. M. (1959). The reduction of errors in census
+populations for statistically underdeveloped countries. *Population Studies*,
+12(3), 240–285.
+
 Hajnal, J. (1953). Age at marriage and proportions marrying.
 *Population Studies*, 7(2), 111–136.
+
+Kpedekpo, G. M. K. (1982). *Essentials of Demographic Analysis for Africa*.
+London: Heinemann.
 
 Preston, S. H., Heuveline, P., & Guillot, M. (2001). *Demography: Measuring and
 Modeling Population Processes*. Oxford: Blackwell.
 
 Siegel, J. S., & Swanson, D. A. (Eds.) (2004). *The Methods and Materials of
 Demography* (2nd ed.). San Diego: Elsevier.
+
+Sprague, T. B. (1880). Explanation of a new formula for interpolation.
+*Journal of the Institute of Actuaries*, 22(4), 270–285.
 
 United Nations (1983). *Manual X: Indirect Techniques for Demographic
 Estimation*. New York: United Nations.

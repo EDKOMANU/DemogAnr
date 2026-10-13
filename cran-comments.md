@@ -26,8 +26,11 @@ It also adds the Coale-Demeny and United Nations model life table systems
 (`model_lifetable()`, with the rates shipped as the `model_lt` dataset), a
 life table generated from Brass relational logit parameters
 (`brass_lifetable()`), and the three death distribution methods for estimating
-the completeness of death registration (`ggb()`, `seg()`, `ggb_seg()`), and
-indirect adult mortality from maternal orphanhood (`orphanhood()`).
+the completeness of death registration (`ggb()`, `seg()`, `ggb_seg()`),
+indirect adult mortality from maternal orphanhood (`orphanhood()`), and the
+smoothing of age distributions affected by misreporting (`smooth_ages()`,
+`smooth_single_ages()`) and their graduation into single years of age
+(`graduate()`).
 Where a method has a published worked example the test suite reproduces it,
 including from United Nations *Manual X*, Preston, Heuveline and Guillot
 (2001), and Kpedekpo (1982).

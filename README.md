@@ -68,6 +68,7 @@ dem.fert(bangladesh, type = "all", age_col = "age",
 | Registration completeness | `ggb()`, `seg()`, `ggb_seg()` |
 | Reproduction | `reproduction()`, `stable_population()` |
 | Data quality | `whipple()`, `myers()`, `age_ratio()`, `sex_ratio()`, `un_age_sex_accuracy()` |
+| Smoothing and graduation | `smooth_ages()` (Carrier-Farrag, Karup-King-Newton, Arriaga light and strong, UN), `smooth_single_ages()`, `graduate()` (Sprague, Beers, Karup-King) |
 | Interpolation | `karup_king()`, `interpolation()` |
 | Standardization | `standardize()`, `decompose_rates()` (Kitagawa), `decompose_LE()` (Arriaga) |
 | Projection | `cohort_component()`, `project_population()`, `math_project()`, `calibrate_regions()` |

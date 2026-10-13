@@ -76,3 +76,8 @@ Siegel, J. S., & Swanson, D. A. (Eds.). (2004). \emph{The Methods and Materials 
 
 Shryock, H. S., Siegel, J. S., & Larmon, E. A. (1973). \emph{The Methods and Materials of Demography}. Washington, DC: US Bureau of the Census. (Appendix C: Interpolation and graduation.)
 }
+\seealso{
+\code{\link[=graduate]{graduate()}}, which also offers the Sprague and Beers
+multipliers, returns the Karup-King split without rounding, and carries
+an open-ended age group through.
+}
